@@ -625,7 +625,7 @@
       "install": "Instalasi",
       "installValue": "<a href=\"{href.dmg}\">Unduh DMG</a> atau {brew}",
       "tested": "Diuji dengan",
-      "testedValue": "Fosi Audio ZD3 (PCM hingga 768 kHz, DSD256 melalui DoP), FiiO K11 (PCM hingga 384 kHz, DSD128 melalui DoP, mode integer), AirPods Max melalui USB-C dan Bluetooth, speaker MacBook Pro",
+      "testedValue": "Fosi Audio ZD3 (PCM hingga 768 kHz, DSD256 melalui DoP), FiiO K11 (PCM hingga 384 kHz, DSD128 melalui DoP, mode integer), FiiO KA15 (DSD256 melalui DoP), AirPods Max melalui USB-C dan Bluetooth, speaker MacBook Pro",
       "links": "Tautan",
       "website": "Situs web",
       "source": "Kode sumber",

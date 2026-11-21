@@ -625,7 +625,7 @@
       "install": "Εγκατάσταση",
       "installValue": "<a href=\"{href.dmg}\">Κατεβάστε το DMG</a> ή {brew}",
       "tested": "Δοκιμασμένο με",
-      "testedValue": "Fosi Audio ZD3 (PCM έως 768 kHz, DSD256 μέσω DoP), FiiO K11 (PCM έως 384 kHz, DSD128 μέσω DoP, Λειτουργία ακεραίων), AirPods Max μέσω USB-C και Bluetooth, ηχεία MacBook Pro",
+      "testedValue": "Fosi Audio ZD3 (PCM έως 768 kHz, DSD256 μέσω DoP), FiiO K11 (PCM έως 384 kHz, DSD128 μέσω DoP, Λειτουργία ακεραίων), FiiO KA15 (DSD256 μέσω DoP), AirPods Max μέσω USB-C και Bluetooth, ηχεία MacBook Pro",
       "links": "Σύνδεσμοι",
       "website": "Ιστότοπος",
       "source": "Πηγαίος κώδικας",

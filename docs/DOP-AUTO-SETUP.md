@@ -39,6 +39,8 @@ For a USB or Thunderbolt DAC that isn't on the list, offers the 176.4 kHz DoP ca
 5. checks the engine really planned DoP (if it planned PCM, nothing is saved: a PCM tone answered "music" must never turn DoP on);
 6. asks **music or hiss?** and saves the answer per device UID in the same two lists the DoP switch uses (`dopDeviceUIDs` for music, `dopOffDeviceUIDs` for hiss), so it behaves exactly like flipping the switch.
 
+A saved choice, from the switch or the test, belongs to the DAC, not to the USB port. A DAC without a USB serial number (a FiiO KA15, for one) gets its USB location as the third field of its Core Audio UID, so its UID changes with every port and hub. A choice saved under one UID is applied to the same vendor, model and interface under any other (`DoPDeviceIdentity.isSameOutput`); a choice saved for this exact UID still comes first, and a new choice replaces the older ones for that DAC in every port (`DoPChoices.set`).
+
 How loud a DAC that doesn't decode DoP can be: DoP frames put an 8-bit marker above the 16 DSD bits, so read as 24-bit PCM the stream is an inaudible 88.2 kHz square wave plus noise in the low 16 bits. A test renders the clip, reads it that way, filters to the audible band (20 kHz) and checks the level stays under `DoPTestConstants.maxMisreadAudibleDBFS` (measured: about -62 dBFS RMS, bound -45). The DAC's own amplifier gain is not something the app can know, which is why the hardware-volume cap exists too, and why a DAC with no volume control relies on the clip's low level alone.
 
 Every number and word of the test is in `DoPTestConstants.swift`. The words are localized in `App/Resources/Localizable.xcstrings`.

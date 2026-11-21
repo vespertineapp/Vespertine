@@ -625,7 +625,7 @@
       "install": "Instalace",
       "installValue": "<a href=\"{href.dmg}\">Stáhněte si DMG</a> nebo {brew}",
       "tested": "Otestováno s",
-      "testedValue": "Fosi Audio ZD3 (PCM do 768 kHz, DSD256 přes DoP), FiiO K11 (PCM do 384 kHz, DSD128 přes DoP, celočíselný režim), AirPods Max přes USB-C a Bluetooth, reproduktory MacBooku Pro",
+      "testedValue": "Fosi Audio ZD3 (PCM do 768 kHz, DSD256 přes DoP), FiiO K11 (PCM do 384 kHz, DSD128 přes DoP, celočíselný režim), FiiO KA15 (DSD256 přes DoP), AirPods Max přes USB-C a Bluetooth, reproduktory MacBooku Pro",
       "links": "Odkazy",
       "website": "Web",
       "source": "Zdrojový kód",

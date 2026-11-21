@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "revision": 2,
+  "revision": 3,
   "comment": "DACs confirmed to decode DoP, and makers known for DSD DACs. Every entry needs an https source saying where the claim comes from. Matching never uses the unit serial. See docs/DOP-AUTO-SETUP.md.",
   "dacs": [
     {
@@ -12,6 +12,17 @@
       "source": "https://github.com/szeremeta1/Vespertine/blob/main/docs/DEVICES.md (DSD to DSD128 played over DoP on a K11; the old allow list entry); FiiO's own spec page https://www.fiio.com/k11_parameters lists DSD256 over USB",
       "note": "Was in DoPDefaults.knownDoPPrefixes before this list existed. noDoPCarriers: on 2026-11-18 a K11 played DoP at the 176.4 and 352.8 kHz carriers and stayed silent at 192 and 384 kHz (DSD at 3.072 and 6.144 MHz, the 48 kHz family), heard by a microphone at its speakers, one pass (docs/DEVICES.md).",
       "noDoPCarriers": [192000, 384000]
+    },
+    {
+      "id": "fiio-ka15",
+      "name": "FiiO KA15",
+      "uidVendor": "FIIO",
+      "uidProduct": "FIIO KA15",
+      "usbVendorID": "2972",
+      "usbProductID": "0104",
+      "evidence": "hardware",
+      "source": "https://github.com/szeremeta1/Vespertine/blob/main/docs/DEVICES.md (the developer's KA15 passed Vespertine's DoP test and played DSD natively over DoP up to DSD256, several times, by 2026-11-21; Core Audio UID AppleUSBAudioEngine:FIIO:FIIO KA15:<USB location>:2 and USB ID 2972:0104 read on that Mac)",
+      "note": "Has no USB serial number, so its Core Audio UID changes with the USB port; matching by name and USB ID never looks at that field. Only the 44.1 kHz-family carriers have been heard; the 192 and 384 kHz carriers are untested."
     },
     {
       "id": "fosi-audio-zd3",

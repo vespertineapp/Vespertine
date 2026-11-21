@@ -28,11 +28,16 @@ public enum DoPDefaults {
     }
 
     public static func isEnabled(_ identity: DoPDeviceIdentity, on: Set<String>, off: Set<String>, list: DoPDACList? = nil) -> Bool {
+        // This UID's own choice first; then one saved for the same DAC in another USB port (its UID differs per port
+        // when it has no serial number), off winning; then the known list.
         if off.contains(identity.uid) { return false }
-        return on.contains(identity.uid) || isKnownDoP(identity, list: list)
+        if on.contains(identity.uid) { return true }
+        if DoPChoices.holds(identity, in: off) { return false }
+        return DoPChoices.holds(identity, in: on) || isKnownDoP(identity, list: list)
     }
 
-    /// The set the engine and device list use: explicit ons, plus connected known DACs the user hasn't turned off.
+    /// The set the engine and device list use: explicit ons, plus connected DACs that are on (known, or chosen on in any
+    /// USB port) and not turned off.
     public static func resolve(on: Set<String>, off: Set<String>, connected: Set<String>) -> Set<String> {
         resolve(on: on, off: off, connectedDevices: connected.map { USBIdentity.identity(forUID: $0) })
     }

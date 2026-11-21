@@ -625,7 +625,7 @@
       "install": "Shigarwa",
       "installValue": "<a href=\"{href.dmg}\">Sauke DMG ɗin</a> ko {brew}",
       "tested": "An gwada da",
-      "testedValue": "Fosi Audio ZD3 (PCM har zuwa 768 kHz, DSD256 ta DoP), FiiO K11 (PCM har zuwa 384 kHz, DSD128 ta DoP, Yanayin integer), AirPods Max ta USB-C da Bluetooth, lasifikokin MacBook Pro",
+      "testedValue": "Fosi Audio ZD3 (PCM har zuwa 768 kHz, DSD256 ta DoP), FiiO K11 (PCM har zuwa 384 kHz, DSD128 ta DoP, Yanayin integer), FiiO KA15 (DSD256 ta DoP), AirPods Max ta USB-C da Bluetooth, lasifikokin MacBook Pro",
       "links": "Hanyoyin haɗi",
       "website": "Shafin yanar gizo",
       "source": "Lambar tushe",

@@ -625,7 +625,7 @@
       "install": "التثبيت",
       "installValue": "<a href=\"{href.dmg}\">نزّل ملف DMG</a> أو {brew}",
       "tested": "اختُبر مع",
-      "testedValue": "Fosi Audio ZD3 (PCM حتى 768 kHz، وDSD256 عبر DoP)، وFiiO K11 (PCM حتى 384 kHz، وDSD128 عبر DoP، ووضع الأعداد الصحيحة)، وAirPods Max عبر USB-C وBluetooth، وسماعات MacBook Pro",
+      "testedValue": "Fosi Audio ZD3 (PCM حتى 768 kHz، وDSD256 عبر DoP)، وFiiO K11 (PCM حتى 384 kHz، وDSD128 عبر DoP، ووضع الأعداد الصحيحة)، وFiiO KA15 (DSD256 عبر DoP)، وAirPods Max عبر USB-C وBluetooth، وسماعات MacBook Pro",
       "links": "الروابط",
       "website": "الموقع الإلكتروني",
       "source": "الشيفرة المصدرية",

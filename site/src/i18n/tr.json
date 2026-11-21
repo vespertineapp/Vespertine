@@ -625,7 +625,7 @@
       "install": "Kurulum",
       "installValue": "<a href=\"{href.dmg}\">DMG’yi indirin</a> veya {brew}",
       "tested": "Test edildiği cihazlar",
-      "testedValue": "Fosi Audio ZD3 (768 kHz’e kadar PCM, DoP üzerinden DSD256), FiiO K11 (384 kHz’e kadar PCM, DoP üzerinden DSD128, tam sayı modu), USB-C ve Bluetooth üzerinden AirPods Max, MacBook Pro hoparlörleri",
+      "testedValue": "Fosi Audio ZD3 (768 kHz’e kadar PCM, DoP üzerinden DSD256), FiiO K11 (384 kHz’e kadar PCM, DoP üzerinden DSD128, tam sayı modu), FiiO KA15 (DoP üzerinden DSD256), USB-C ve Bluetooth üzerinden AirPods Max, MacBook Pro hoparlörleri",
       "links": "Bağlantılar",
       "website": "Web sitesi",
       "source": "Kaynak kod",

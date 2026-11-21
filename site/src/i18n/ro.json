@@ -625,7 +625,7 @@
       "install": "Instalare",
       "installValue": "<a href=\"{href.dmg}\">Descărcați DMG-ul</a> sau {brew}",
       "tested": "Testat cu",
-      "testedValue": "Fosi Audio ZD3 (PCM până la 768 kHz, DSD256 prin DoP), FiiO K11 (PCM până la 384 kHz, DSD128 prin DoP, mod întreg), AirPods Max prin USB-C și Bluetooth, difuzoarele unui MacBook Pro",
+      "testedValue": "Fosi Audio ZD3 (PCM până la 768 kHz, DSD256 prin DoP), FiiO K11 (PCM până la 384 kHz, DSD128 prin DoP, mod întreg), FiiO KA15 (DSD256 prin DoP), AirPods Max prin USB-C și Bluetooth, difuzoarele unui MacBook Pro",
       "links": "Linkuri",
       "website": "Site web",
       "source": "Cod sursă",

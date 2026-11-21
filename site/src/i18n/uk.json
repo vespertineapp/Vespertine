@@ -625,7 +625,7 @@
       "install": "Встановлення",
       "installValue": "<a href=\"{href.dmg}\">Завантажте DMG</a> або {brew}",
       "tested": "Перевірено з",
-      "testedValue": "Fosi Audio ZD3 (PCM до 768 kHz, DSD256 через DoP), FiiO K11 (PCM до 384 kHz, DSD128 через DoP, цілочисловий режим), AirPods Max через USB-C і Bluetooth, динаміки MacBook Pro",
+      "testedValue": "Fosi Audio ZD3 (PCM до 768 kHz, DSD256 через DoP), FiiO K11 (PCM до 384 kHz, DSD128 через DoP, цілочисловий режим), FiiO KA15 (DSD256 через DoP), AirPods Max через USB-C і Bluetooth, динаміки MacBook Pro",
       "links": "Посилання",
       "website": "Вебсайт",
       "source": "Вихідний код",

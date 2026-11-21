@@ -22,7 +22,7 @@ public enum DoPSetupHint: Equatable, Sendable {
     public static func decide(identity: DoPDeviceIdentity, transport: Transport, capabilities: DeviceCapabilities,
                               on: Set<String>, off: Set<String>, list: DoPDACList) -> DoPSetupHint {
         guard transport == .usb || transport == .thunderbolt else { return .none }
-        guard !capabilities.supportsDoP, !on.contains(identity.uid), !off.contains(identity.uid) else { return .none }
+        guard !capabilities.supportsDoP, !DoPChoices.holds(identity, in: on), !DoPChoices.holds(identity, in: off) else { return .none }
         guard list.knownDAC(for: identity) == nil else { return .none }
         guard let top = capabilities.sampleRates.max(), top >= minimumCarrierRate - 0.5 else { return .none }
         if let maker = list.maker(for: identity) { return .suggestTest(maker: maker.name) }
@@ -46,9 +46,20 @@ public struct DoPChoices: Equatable, Sendable {
     public init(on: Set<String>, off: Set<String>) { self.on = on; self.off = off }
 
     public mutating func record(_ outcome: DoPTestOutcome, for uid: String) {
-        switch outcome {
-        case .music: on.insert(uid); off.remove(uid)
-        case .hiss: on.remove(uid); off.insert(uid)
-        }
+        set(outcome == .music, for: uid)
+    }
+
+    /// An explicit choice for `uid` (the DoP switch, or the test's answer). Any older choice for the same DAC under
+    /// another USB port's UID is replaced, so one DAC never sits in both sets and the newest choice is the one that counts.
+    public mutating func set(_ enabled: Bool, for uid: String) {
+        let identity = DoPDeviceIdentity(uid: uid)
+        on = on.filter { !identity.isSameOutput(as: $0) }
+        off = off.filter { !identity.isSameOutput(as: $0) }
+        if enabled { on.insert(uid) } else { off.insert(uid) }
+    }
+
+    /// Whether `choices` holds a choice for this output: its own UID, or the same USB DAC saved from another port.
+    public static func holds(_ identity: DoPDeviceIdentity, in choices: Set<String>) -> Bool {
+        choices.contains(identity.uid) || choices.contains { identity.isSameOutput(as: $0) }
     }
 }

@@ -625,7 +625,7 @@
       "install": "انسٹال",
       "installValue": "<a href=\"{href.dmg}\">DMG ڈاؤن لوڈ کریں</a> یا {brew}",
       "tested": "جن کے ساتھ جانچا گیا",
-      "testedValue": "Fosi Audio ZD3 (768 kHz تک PCM، DoP پر DSD256)، FiiO K11 (384 kHz تک PCM، DoP پر DSD128، انٹیجر موڈ)، USB-C اور بلوٹوتھ پر AirPods Max، MacBook Pro کے اسپیکرز",
+      "testedValue": "Fosi Audio ZD3 (768 kHz تک PCM، DoP پر DSD256)، FiiO K11 (384 kHz تک PCM، DoP پر DSD128، انٹیجر موڈ)، FiiO KA15 (DoP پر DSD256)، USB-C اور بلوٹوتھ پر AirPods Max، MacBook Pro کے اسپیکرز",
       "links": "لنکس",
       "website": "ویب سائٹ",
       "source": "سورس کوڈ",
