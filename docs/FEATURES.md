@@ -139,7 +139,7 @@ A short setup assistant opens the first time Vespertine starts. It finds or adds
 | Dolby AC-4, MPEG-H 3D Audio | `.ac4` `.mhas`, `ac-4` / `mha1` / `mhm1` in `.mp4` `.m4a` | Listed under their name, with a badge that they can't be decoded here (neither macOS nor the bundled FFmpeg has a decoder). They refuse to play with a plain reason instead of a vague failure |
 | Opus, Vorbis, Musepack, MP3, AAC | `.opus` `.ogg` `.mpc` `.mp3` `.m4a` | Decoded and marked lossy |
 
-TrueHD decoder fixtures are compared sample for sample with their source; DTS output is compared with FFmpeg's decoder on a real disc rip. Tested playback hardware is a Fosi Audio ZD3, a FiiO K11, AirPods Max over USB-C and Bluetooth, MacBook Pro speakers and a Sony TV over HDMI ([details](DEVICES.md)). The Intel build has run under Rosetta, not on an Intel Mac. No streaming services or DRM-protected Apple Music downloads. [Verification and its limits](VERIFICATION.md).
+TrueHD decoder fixtures are compared sample for sample with their source; DTS output is compared with FFmpeg's decoder on a real disc rip. Tested playback hardware is a Fosi Audio ZD3, a FiiO K11, a FiiO KA15 (DSD to DSD256 over DoP), AirPods Max over USB-C and Bluetooth, MacBook Pro speakers and a Sony TV over HDMI ([details](DEVICES.md)). The Intel build has run under Rosetta, not on an Intel Mac. No streaming services or DRM-protected Apple Music downloads. [Verification and its limits](VERIFICATION.md).
 
 ## Speaker Groups (beta)
 

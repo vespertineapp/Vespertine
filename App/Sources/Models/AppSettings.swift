@@ -90,7 +90,10 @@ final class AppSettings {
     func isDoPOn(_ uid: String) -> Bool { DoPDefaults.isEnabled(uid: uid, on: dopDeviceUIDs, off: dopOffDeviceUIDs) }
     /// The output's "DSD over PCM (DoP)" switch: an explicit choice either way, remembered over `DoPDefaults`.
     func setDoP(_ on: Bool, for uid: String) {
-        if on { dopDeviceUIDs.insert(uid); dopOffDeviceUIDs.remove(uid) } else { dopDeviceUIDs.remove(uid); dopOffDeviceUIDs.insert(uid) }
+        var choices = DoPChoices(on: dopDeviceUIDs, off: dopOffDeviceUIDs)
+        choices.set(on, for: uid)
+        if dopDeviceUIDs != choices.on { dopDeviceUIDs = choices.on }
+        if dopOffDeviceUIDs != choices.off { dopOffDeviceUIDs = choices.off }
     }
     /// Outputs with an AV receiver: Dolby and DTS are sent to them untouched.
     var bitstreamDeviceUIDs: Set<String> { didSet { defaults.set(Array(bitstreamDeviceUIDs), forKey: "bitstreamDeviceUIDs") } }

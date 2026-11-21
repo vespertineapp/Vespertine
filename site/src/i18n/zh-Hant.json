@@ -625,7 +625,7 @@
       "install": "安裝",
       "installValue": "<a href=\"{href.dmg}\">下載 DMG</a> 或 {brew}",
       "tested": "測試裝置",
-      "testedValue": "Fosi Audio ZD3（PCM 最高至 768 kHz、透過 DoP 播放 DSD256）、FiiO K11（PCM 最高至 384 kHz、透過 DoP 播放 DSD128、整數模式）、透過 USB-C 與藍牙連接的 AirPods Max、MacBook Pro 揚聲器",
+      "testedValue": "Fosi Audio ZD3（PCM 最高至 768 kHz、透過 DoP 播放 DSD256）、FiiO K11（PCM 最高至 384 kHz、透過 DoP 播放 DSD128、整數模式）、FiiO KA15（透過 DoP 播放 DSD256）、透過 USB-C 與藍牙連接的 AirPods Max、MacBook Pro 揚聲器",
       "links": "連結",
       "website": "網站",
       "source": "原始碼",

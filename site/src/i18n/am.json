@@ -625,7 +625,7 @@
       "install": "መጫን",
       "installValue": "<a href=\"{href.dmg}\">DMG ፋይሉን ያውርዱ</a> ወይም {brew}",
       "tested": "የተሞከረባቸው",
-      "testedValue": "Fosi Audio ZD3 (PCM እስከ 768 kHz፣ DSD256 በDoP)፣ FiiO K11 (PCM እስከ 384 kHz፣ DSD128 በDoP፣ የኢንቲጀር ሁነታ)፣ AirPods Max በUSB-C እና በBluetooth፣ የMacBook Pro ድምፅ ማጉያዎች",
+      "testedValue": "Fosi Audio ZD3 (PCM እስከ 768 kHz፣ DSD256 በDoP)፣ FiiO K11 (PCM እስከ 384 kHz፣ DSD128 በDoP፣ የኢንቲጀር ሁነታ)፣ FiiO KA15 (DSD256 በDoP)፣ AirPods Max በUSB-C እና በBluetooth፣ የMacBook Pro ድምፅ ማጉያዎች",
       "links": "አገናኞች",
       "website": "ድረ-ገጽ",
       "source": "ምንጭ ኮድ",

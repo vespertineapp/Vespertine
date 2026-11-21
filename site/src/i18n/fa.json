@@ -625,7 +625,7 @@
       "install": "نصب",
       "installValue": "<a href=\"{href.dmg}\">DMG را دانلود کنید</a> یا {brew}",
       "tested": "آزموده‌شده با",
-      "testedValue": "Fosi Audio ZD3 (PCM تا ۷۶۸ kHz، DSD256 از طریق DoP)، FiiO K11 (PCM تا ۳۸۴ kHz، DSD128 از طریق DoP، حالت عدد صحیح)، AirPods Max از طریق USB-C و بلوتوث، بلندگوهای MacBook Pro",
+      "testedValue": "Fosi Audio ZD3 (PCM تا ۷۶۸ kHz، DSD256 از طریق DoP)، FiiO K11 (PCM تا ۳۸۴ kHz، DSD128 از طریق DoP، حالت عدد صحیح)، FiiO KA15 (DSD256 از طریق DoP)، AirPods Max از طریق USB-C و بلوتوث، بلندگوهای MacBook Pro",
       "links": "پیوندها",
       "website": "وب‌سایت",
       "source": "کد منبع",

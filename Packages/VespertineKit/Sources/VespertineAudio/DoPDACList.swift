@@ -32,6 +32,22 @@ public struct DoPDeviceIdentity: Sendable, Hashable {
     public var uidVendor: String? { uidParts.map { String($0[1]) } }
     /// The product name in the UID.
     public var uidProduct: String? { uidParts.map { String($0[2]) } }
+
+    /// The UID without its third field, so the same DAC matches itself in any USB port. That field is the unit's serial
+    /// number when the DAC reports one, and otherwise its USB location, which changes with every port and hub: a FiiO
+    /// KA15 shows up as `AppleUSBAudioEngine:FIIO:FIIO KA15:1100000:2` in one port and `…:2100000:2` in the next. Nil for a
+    /// UID that isn't a USB audio engine's (those are stable and compared whole).
+    public var portIndependentKey: String? {
+        uidParts.map { "\($0[0]):\($0[1]):\($0[2])::\($0[4])".lowercased() }
+    }
+
+    /// Whether `other` is the UID of this same output: the identical string, or the same USB DAC (vendor, product and
+    /// interface) under another serial field.
+    public func isSameOutput(as other: String) -> Bool {
+        if other == uid { return true }
+        guard let key = portIndependentKey else { return false }
+        return DoPDeviceIdentity(uid: other).portIndependentKey == key
+    }
 }
 
 /// A DAC confirmed to decode DoP.

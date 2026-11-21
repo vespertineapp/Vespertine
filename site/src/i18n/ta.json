@@ -625,7 +625,7 @@
       "install": "நிறுவல்",
       "installValue": "<a href=\"{href.dmg}\">DMG-ஐப் பதிவிறக்கவும்</a> அல்லது {brew}",
       "tested": "சோதிக்கப்பட்ட சாதனங்கள்",
-      "testedValue": "Fosi Audio ZD3 (768 kHz வரை PCM, DoP வழியாக DSD256), FiiO K11 (384 kHz வரை PCM, DoP வழியாக DSD128, முழு எண் பயன்முறை), USB-C மற்றும் Bluetooth வழியாக AirPods Max, MacBook Pro ஸ்பீக்கர்கள்",
+      "testedValue": "Fosi Audio ZD3 (768 kHz வரை PCM, DoP வழியாக DSD256), FiiO K11 (384 kHz வரை PCM, DoP வழியாக DSD128, முழு எண் பயன்முறை), FiiO KA15 (DoP வழியாக DSD256), USB-C மற்றும் Bluetooth வழியாக AirPods Max, MacBook Pro ஸ்பீக்கர்கள்",
       "links": "இணைப்புகள்",
       "website": "இணையதளம்",
       "source": "மூலக் குறியீடு",

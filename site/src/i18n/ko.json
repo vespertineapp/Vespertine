@@ -625,7 +625,7 @@
       "install": "설치",
       "installValue": "<a href=\"{href.dmg}\">DMG 다운로드</a> 또는 {brew}",
       "tested": "테스트 환경",
-      "testedValue": "Fosi Audio ZD3(PCM 768 kHz까지, DoP로 DSD256), FiiO K11(PCM 384 kHz까지, DoP로 DSD128, 정수 모드), USB-C 및 Bluetooth로 연결한 AirPods Max, MacBook Pro 스피커",
+      "testedValue": "Fosi Audio ZD3(PCM 768 kHz까지, DoP로 DSD256), FiiO K11(PCM 384 kHz까지, DoP로 DSD128, 정수 모드), FiiO KA15(DoP로 DSD256), USB-C 및 Bluetooth로 연결한 AirPods Max, MacBook Pro 스피커",
       "links": "링크",
       "website": "웹사이트",
       "source": "소스 코드",

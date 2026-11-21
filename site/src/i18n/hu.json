@@ -625,7 +625,7 @@
       "install": "Telepítés",
       "installValue": "<a href=\"{href.dmg}\">Töltse le a DMG-t</a>, vagy: {brew}",
       "tested": "Tesztelt eszközök",
-      "testedValue": "Fosi Audio ZD3 (PCM 768 kHz-ig, DSD256 DoP-n keresztül), FiiO K11 (PCM 384 kHz-ig, DSD128 DoP-n keresztül, egész számos mód), AirPods Max USB-C-n és Bluetoothon keresztül, a MacBook Pro hangszórói",
+      "testedValue": "Fosi Audio ZD3 (PCM 768 kHz-ig, DSD256 DoP-n keresztül), FiiO K11 (PCM 384 kHz-ig, DSD128 DoP-n keresztül, egész számos mód), FiiO KA15 (DSD256 DoP-n keresztül), AirPods Max USB-C-n és Bluetoothon keresztül, a MacBook Pro hangszórói",
       "links": "Linkek",
       "website": "Weboldal",
       "source": "Forráskód",

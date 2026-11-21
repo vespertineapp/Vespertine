@@ -625,7 +625,7 @@
       "install": "I-install",
       "installValue": "<a href=\"{href.dmg}\">I-download ang DMG</a> o {brew}",
       "tested": "Nasubukan sa",
-      "testedValue": "Fosi Audio ZD3 (PCM hanggang 768 kHz, DSD256 sa DoP), FiiO K11 (PCM hanggang 384 kHz, DSD128 sa DoP, integer mode), AirPods Max sa USB-C at Bluetooth, mga speaker ng MacBook Pro",
+      "testedValue": "Fosi Audio ZD3 (PCM hanggang 768 kHz, DSD256 sa DoP), FiiO K11 (PCM hanggang 384 kHz, DSD128 sa DoP, integer mode), FiiO KA15 (DSD256 sa DoP), AirPods Max sa USB-C at Bluetooth, mga speaker ng MacBook Pro",
       "links": "Mga link",
       "website": "Website",
       "source": "Pinagmulang code",

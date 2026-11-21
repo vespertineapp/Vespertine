@@ -625,7 +625,7 @@
       "install": "Asennus",
       "installValue": "<a href=\"{href.dmg}\">Lataa DMG</a> tai {brew}",
       "tested": "Testattu laitteilla",
-      "testedValue": "Fosi Audio ZD3 (PCM 768 kHz:iin asti, DSD256 DoP:n kautta), FiiO K11 (PCM 384 kHz:iin asti, DSD128 DoP:n kautta, kokonaislukutila), AirPods Max USB-C:n ja Bluetoothin kautta, MacBook Pron kaiuttimet",
+      "testedValue": "Fosi Audio ZD3 (PCM 768 kHz:iin asti, DSD256 DoP:n kautta), FiiO K11 (PCM 384 kHz:iin asti, DSD128 DoP:n kautta, kokonaislukutila), FiiO KA15 (DSD256 DoP:n kautta), AirPods Max USB-C:n ja Bluetoothin kautta, MacBook Pron kaiuttimet",
       "links": "Linkit",
       "website": "Verkkosivusto",
       "source": "Lähdekoodi",

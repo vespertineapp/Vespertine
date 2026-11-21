@@ -625,7 +625,7 @@
       "install": "Instalacja",
       "installValue": "<a href=\"{href.dmg}\">Pobierz DMG</a> lub {brew}",
       "tested": "Przetestowano z",
-      "testedValue": "Fosi Audio ZD3 (PCM do 768 kHz, DSD256 przez DoP), FiiO K11 (PCM do 384 kHz, DSD128 przez DoP, tryb całkowitoliczbowy), AirPods Max przez USB-C i Bluetooth, głośniki MacBooka Pro",
+      "testedValue": "Fosi Audio ZD3 (PCM do 768 kHz, DSD256 przez DoP), FiiO K11 (PCM do 384 kHz, DSD128 przez DoP, tryb całkowitoliczbowy), FiiO KA15 (DSD256 przez DoP), AirPods Max przez USB-C i Bluetooth, głośniki MacBooka Pro",
       "links": "Linki",
       "website": "Strona internetowa",
       "source": "Kod źródłowy",
