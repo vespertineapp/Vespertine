@@ -165092,6 +165092,274 @@
         }
       }
     },
+    "Copies the signal path as text, for a bug report or a forum post": {
+      "localizations": {
+        "am": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "የምልክት መንገዱን እንደ ጽሑፍ ይቀዳል፣ ለስህተት ሪፖርት ወይም ለፎረም ልጥፍ"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ينسخ مسار الإشارة كنص، لتقرير خطأ أو منشور في منتدى"
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "সিগন্যাল পাথ টেক্সট হিসেবে কপি করে, বাগ রিপোর্ট বা ফোরাম পোস্টের জন্য"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zkopíruje cestu signálu jako text, pro hlášení chyby nebo příspěvek na fóru"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kopierer signalvejen som tekst til en fejlrapport eller et forumindlæg"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kopiert den Signalweg als Text, für einen Fehlerbericht oder einen Forenbeitrag"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Αντιγράφει τη διαδρομή σήματος ως κείμενο, για αναφορά σφάλματος ή ανάρτηση σε φόρουμ"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copia la ruta de la señal como texto, para un informe de errores o una publicación en un foro"
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "مسیر سیگنال را به‌صورت متن کپی می‌کند، برای گزارش اشکال یا پست در انجمن"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kopioi signaalitien tekstinä vikailmoitusta tai foorumiviestiä varten"
+          }
+        },
+        "fil": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kinokopya ang signal path bilang text, para sa bug report o post sa forum"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copie le chemin du signal sous forme de texte, pour un rapport de bug ou un message sur un forum"
+          }
+        },
+        "gu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "સિગ્નલ પાથને ટેક્સ્ટ તરીકે કૉપિ કરે છે, બગ રિપોર્ટ અથવા ફોરમ પોસ્ટ માટે"
+          }
+        },
+        "ha": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yana kwafi hanyar sigina a matsayin rubutu, don rahoton kuskure ko rubutu a dandalin tattaunawa"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "מעתיק את נתיב האות כטקסט, לדיווח על באג או לפוסט בפורום"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "सिग्नल पाथ को टेक्स्ट के रूप में कॉपी करता है, बग रिपोर्ट या फ़ोरम पोस्ट के लिए"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Szövegként másolja a jelutat hibajelentéshez vagy fórumbejegyzéshez"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Menyalin jalur sinyal sebagai teks, untuk laporan bug atau postingan forum"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copia il percorso del segnale come testo, per una segnalazione di bug o un post su un forum"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "信号経路をテキストとしてコピーします。バグ報告やフォーラムへの投稿に使えます"
+          }
+        },
+        "kn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ಸಿಗ್ನಲ್ ಪಾತ್ ಅನ್ನು ಪಠ್ಯವಾಗಿ ನಕಲಿಸುತ್ತದೆ, ಬಗ್ ವರದಿ ಅಥವಾ ಫೋರಮ್ ಪೋಸ್ಟ್‌ಗಾಗಿ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "신호 경로를 텍스트로 복사합니다. 버그 보고나 포럼 게시물에 사용하세요"
+          }
+        },
+        "ml": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "സിഗ്നൽ പാത്ത് ടെക്സ്റ്റായി പകർത്തുന്നു, ബഗ് റിപ്പോർട്ടിനോ ഫോറം പോസ്റ്റിനോ"
+          }
+        },
+        "mr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "सिग्नल पाथ मजकूर म्हणून कॉपी करते, बग रिपोर्ट किंवा फोरम पोस्टसाठी"
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Menyalin laluan isyarat sebagai teks, untuk laporan pepijat atau hantaran forum"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kopierer signalveien som tekst, til en feilrapport eller et foruminnlegg"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kopieert het signaalpad als tekst, voor een bugmelding of een forumbericht"
+          }
+        },
+        "pa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ਸਿਗਨਲ ਪਾਥ ਨੂੰ ਟੈਕਸਟ ਵਜੋਂ ਕਾਪੀ ਕਰਦਾ ਹੈ, ਬੱਗ ਰਿਪੋਰਟ ਜਾਂ ਫੋਰਮ ਪੋਸਟ ਲਈ"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kopiuje ścieżkę sygnału jako tekst, do zgłoszenia błędu lub wpisu na forum"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copia o caminho do sinal como texto, para um relatório de bug ou uma postagem em fórum"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copia o percurso do sinal como texto, para um relatório de erro ou uma publicação num fórum"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copiază calea semnalului ca text, pentru un raport de eroare sau o postare pe forum"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kopierar signalvägen som text, till en felrapport eller ett foruminlägg"
+          }
+        },
+        "sw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inanakili njia ya mawimbi kama maandishi, kwa ripoti ya hitilafu au chapisho la jukwaa"
+          }
+        },
+        "ta": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "சிக்னல் பாதையை உரையாக நகலெடுக்கிறது, பிழை அறிக்கை அல்லது மன்ற இடுகைக்காக"
+          }
+        },
+        "te": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "సిగ్నల్ పాత్‌ను టెక్స్ట్‌గా కాపీ చేస్తుంది, బగ్ రిపోర్ట్ లేదా ఫోరమ్ పోస్ట్ కోసం"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "คัดลอกเส้นทางสัญญาณเป็นข้อความ สำหรับรายงานข้อบกพร่องหรือโพสต์ในฟอรัม"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sinyal yolunu metin olarak kopyalar; hata raporu veya forum gönderisi için"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Копіює шлях сигналу як текст для звіту про помилку або допису на форумі"
+          }
+        },
+        "ur": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "سگنل پاتھ کو متن کے طور پر کاپی کرتا ہے، بگ رپورٹ یا فورم پوسٹ کے لیے"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sao chép đường tín hiệu dưới dạng văn bản, để báo lỗi hoặc đăng lên diễn đàn"
+          }
+        },
+        "zh-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "將訊號路徑複製為文字，用於錯誤報告或論壇帖子"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "将信号路径拷贝为文本，用于错误报告或论坛帖子"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "將訊號路徑拷貝為文字，用於錯誤回報或論壇貼文"
+          }
+        }
+      }
+    },
     "Copies the selected files into %@ as Artist / Album / Track. On the same drive the copies are APFS clones and take no extra space. Your originals are never changed.": {
       "localizations": {
         "am": {
@@ -166704,6 +166972,274 @@
           "stringUnit": {
             "state": "translated",
             "value": "拷貝報告"
+          }
+        }
+      }
+    },
+    "Copy Signal Path": {
+      "localizations": {
+        "am": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "የምልክት መንገዱን ቅዳ"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "نسخ مسار الإشارة"
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "সিগন্যাল পাথ কপি করুন"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kopírovat cestu signálu"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kopier signalvej"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Signalweg kopieren"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Αντιγραφή διαδρομής σήματος"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copiar ruta de la señal"
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "کپی مسیر سیگنال"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kopioi signaalitie"
+          }
+        },
+        "fil": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kopyahin ang Signal Path"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copier le chemin du signal"
+          }
+        },
+        "gu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "સિગ્નલ પાથ કૉપિ કરો"
+          }
+        },
+        "ha": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kwafi Hanyar Sigina"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "העתק את נתיב האות"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "सिग्नल पाथ कॉपी करें"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jelút másolása"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Salin Jalur Sinyal"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copia percorso del segnale"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "信号経路をコピー"
+          }
+        },
+        "kn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ಸಿಗ್ನಲ್ ಪಾತ್ ನಕಲಿಸಿ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "신호 경로 복사"
+          }
+        },
+        "ml": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "സിഗ്നൽ പാത്ത് പകർത്തുക"
+          }
+        },
+        "mr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "सिग्नल पाथ कॉपी करा"
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Salin Laluan Isyarat"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kopier signalvei"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Signaalpad kopiëren"
+          }
+        },
+        "pa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ਸਿਗਨਲ ਪਾਥ ਕਾਪੀ ਕਰੋ"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kopiuj ścieżkę sygnału"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copiar caminho do sinal"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copiar percurso do sinal"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copiază calea semnalului"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kopiera signalväg"
+          }
+        },
+        "sw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nakili Njia ya Mawimbi"
+          }
+        },
+        "ta": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "சிக்னல் பாதையை நகலெடு"
+          }
+        },
+        "te": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "సిగ్నల్ పాత్‌ను కాపీ చేయండి"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "คัดลอกเส้นทางสัญญาณ"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sinyal Yolunu Kopyala"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скопіювати шлях сигналу"
+          }
+        },
+        "ur": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "سگنل پاتھ کاپی کریں"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sao chép đường tín hiệu"
+          }
+        },
+        "zh-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "複製訊號路徑"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "拷贝信号路径"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "拷貝訊號路徑"
           }
         }
       }

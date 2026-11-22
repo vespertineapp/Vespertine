@@ -359,12 +359,34 @@ struct SignalPathView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            SignalSteps(steps: steps)
-            if let note = path.deviceProfile.note, path.isResampling || !path.deviceProfile.canBeBitPerfect {
+            SignalSteps(steps: steps, copyText: { text })
+            if let note {
                 Text(note).font(Typeface.ui(11.5)).foregroundStyle(Palette.text2).fixedSize(horizontal: false, vertical: true)
                     .padding(.top, 4)
             }
         }
+    }
+
+    private var note: String? {
+        guard let note = path.deviceProfile.note, path.isResampling || !path.deviceProfile.canBeBitPerfect else { return nil }
+        return note
+    }
+
+    /// What "Copy Signal Path" copies: the versions, the badges as they read above the path, every step, and the device's stream.
+    var text: String {
+        let a = path.applied
+        var badges = [path.statusLine] + (path.renderer?.transport == .airPlay ? path.renderer?.stepBadges ?? [] : path.conversionBadges)
+        if let renderer = path.renderer {
+            badges.append(renderer.protocolName.localizedUppercase)
+        } else {
+            badges.append(a.exclusive ? String(localized: "EXCLUSIVE") : String(localized: "SHARED", comment: "Badge: the output device is shared with other apps"))
+            badges.append("\(a.physicalBitDepth) / \(SampleRate.format(a.sampleRate))")
+        }
+        let output = path.renderer == nil
+            ? SignalPathText.outputLine(streamChannels: a.virtualChannels, sent: a.channelNames, speakers: a.speakerNames,
+                                        streams: a.streamCount, bufferFrames: a.bufferFrames)
+            : nil
+        return SignalPathText.make(header: [SignalPathText.versions, badges.joined(separator: " · ")], steps: steps, output: output, note: note)
     }
 
     private func channelName(_ n: Int) -> String {
@@ -406,10 +428,17 @@ struct DoPOffer: View {
 /// The steps of a signal path, top to bottom, joined by a line.
 struct SignalSteps: View {
     let steps: [SignalPathView.Step]
+    /// The path as text ("Copy Signal Path"): a copy button beside the heading and the same in the right-click menu. nil: neither.
+    var copyText: (() -> String)? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            SectionLabel(text: String(localized: "Signal Path")).padding(.bottom, 10)
+            HStack(spacing: 6) {
+                SectionLabel(text: String(localized: "Signal Path"))
+                Spacer(minLength: 6)
+                if let copyText { CopySignalPathButton(text: copyText) }
+            }
+            .padding(.bottom, 10)
             ForEach(Array(steps.enumerated()), id: \.element.id) { index, step in
                 HStack(alignment: .top, spacing: 10) {
                     ZStack(alignment: .top) {
@@ -436,6 +465,11 @@ struct SignalSteps: View {
                 .accessibilityLabel(step.title)
                 .accessibilityValue(Self.spoken(step))
                 .padding(.bottom, 9)
+            }
+        }
+        .contextMenu {
+            if let copyText {
+                Button(String(localized: "Copy Signal Path")) { SignalPathText.copy(copyText()) }
             }
         }
     }
@@ -494,27 +528,38 @@ struct SystemRenderingView: View {
                 }
             }
             Hairline().padding(.top, 18)
-            SignalSteps(steps: [
-                .init(title: String(localized: "Source", comment: "First step of the signal path: the file being played"), detail: String(localized: "Dolby Digital Plus with Atmos objects (JOC) · lossy"),
-                      value: rendering.objectLayout.map { String(localized: "up to \($0)", comment: "Up to a speaker layout, e.g. up to 9.1.6") }
-                          ?? String(localized: "objects", comment: "Dolby Atmos audio objects")),
-                .init(title: String(localized: "Dolby Atmos renderer"), detail: String(localized: "macOS renders the objects for this output (the same renderer Apple Music uses)"),
-                      value: String(localized: "objects → speakers"), tone: .good),
-                callMode.map { mode in
-                    SignalPathView.Step(title: String(localized: "Bluetooth link"), detail: mode.explanation,
-                          value: String(localized: "call mode", comment: "A Bluetooth headset is in its hands-free call mode"), tone: .changed)
-                } ?? SignalPathView.Step(title: spatial ? String(localized: "Spatial Audio") : String(localized: "Output"),
-                      detail: spatial ? String(localized: "Head tracking and personalized profile as set in Control Center")
-                          : String(localized: "The output's own speaker layout"),
-                      value: spatial ? String(localized: "on", comment: "A signal path step (equalizer, Spatial Audio) is switched on")
-                          : String(localized: "channels", comment: "Audio goes out as the output's channels"),
-                      tone: spatial ? .changed : .plain),
-                .init(title: device ?? String(localized: "Output"), detail: String(localized: "Frames go to macOS untouched; the meters and the Visualizer read a separate decode of the bed"),
-                      value: String(localized: "system", comment: "The macOS system renderer handles this step")),
-            ] + (bypassedEqualizer.map { [.init(title: String(localized: "Equalizer"), detail: "\($0) · \(EqualizerStatus.Bypass.systemRendered.explanation)",
-                                               value: String(localized: "bypassed", comment: "A signal path step (equalizer) is chosen but not applied to this stream"))] } ?? []))
+            SignalSteps(steps: steps, copyText: { text })
             .padding(.top, 14)
         }
+    }
+
+    private var steps: [SignalPathView.Step] {
+        [
+            .init(title: String(localized: "Source", comment: "First step of the signal path: the file being played"), detail: String(localized: "Dolby Digital Plus with Atmos objects (JOC) · lossy"),
+                  value: rendering.objectLayout.map { String(localized: "up to \($0)", comment: "Up to a speaker layout, e.g. up to 9.1.6") }
+                      ?? String(localized: "objects", comment: "Dolby Atmos audio objects")),
+            .init(title: String(localized: "Dolby Atmos renderer"), detail: String(localized: "macOS renders the objects for this output (the same renderer Apple Music uses)"),
+                  value: String(localized: "objects → speakers"), tone: .good),
+            callMode.map { mode in
+                SignalPathView.Step(title: String(localized: "Bluetooth link"), detail: mode.explanation,
+                      value: String(localized: "call mode", comment: "A Bluetooth headset is in its hands-free call mode"), tone: .changed)
+            } ?? SignalPathView.Step(title: spatial ? String(localized: "Spatial Audio") : String(localized: "Output"),
+                  detail: spatial ? String(localized: "Head tracking and personalized profile as set in Control Center")
+                      : String(localized: "The output's own speaker layout"),
+                  value: spatial ? String(localized: "on", comment: "A signal path step (equalizer, Spatial Audio) is switched on")
+                      : String(localized: "channels", comment: "Audio goes out as the output's channels"),
+                  tone: spatial ? .changed : .plain),
+            .init(title: device ?? String(localized: "Output"), detail: String(localized: "Frames go to macOS untouched; the meters and the Visualizer read a separate decode of the bed"),
+                  value: String(localized: "system", comment: "The macOS system renderer handles this step")),
+        ] + (bypassedEqualizer.map { [.init(title: String(localized: "Equalizer"), detail: "\($0) · \(EqualizerStatus.Bypass.systemRendered.explanation)",
+                                           value: String(localized: "bypassed", comment: "A signal path step (equalizer) is chosen but not applied to this stream"))] } ?? [])
+    }
+
+    /// What "Copy Signal Path" copies.
+    private var text: String {
+        var badges = [String(localized: "OBJECTS RENDERED BY MACOS")]
+        if callMode != nil { badges.append(String(localized: "BLUETOOTH · CALL MODE")) } else if spatial { badges.append(String(localized: "SPATIAL", comment: "Badge: Spatial Audio is on")) }
+        return SignalPathText.make(header: [SignalPathText.versions, badges.joined(separator: " · ")], steps: steps, output: nil, note: nil)
     }
 }
 
