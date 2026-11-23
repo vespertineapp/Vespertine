@@ -45,7 +45,7 @@ public final class NetworkRender: @unchecked Sendable {
     /// The chain itself adds TPDF dither at the target's word length (gain, equalizer or room correction change the samples).
     public let chainDithers: Bool
     /// `next` adds TPDF dither itself: a stream shorter than 24 bits whose samples the chain didn't dither and that aren't
-    /// already whole values at that length (a deeper source, a resampled, folded or DSD one, a lossy one).
+    /// already whole values at that length (a deeper source, a resampled, folded or DSD one, a lossy one, ReplayGain applied).
     let quantiserDithers: Bool
     private var dither = TPDFDither(seed: UInt64.random(in: 1...UInt64.max))
     private let probed: ProbedSource
@@ -123,7 +123,11 @@ public final class NetworkRender: @unchecked Sendable {
         RoomCorrectionPlayback.installFilters(room?.impulseTaps(sampleRate: rate, channelCount: plan.channels), on: context)
         chainDithers = db != 0 || !sections.isEmpty || room != nil
         // Only a renderer's own stream is quantised here (AirPlay's frames do their own); a 24-bit one never needs it.
+        // ReplayGain is applied by the decoding (`Decoding.convertChunk`, before the chain), so the chain doesn't dither for
+        // it: a gain that changes the samples counts as re-quantising them, as a deeper source or a resampler does.
+        let replayGainApplied = (item.replayGainDB ?? 0) != 0 && plan.mode == .pcm
         let requantised = source.encoding != .pcm || (source.bitDepth ?? 32) > bits || plan.resamples || plan.channels < source.channels
+            || replayGainApplied
         quantiserDithers = !isAirPlay && bits < 24 && !chainDithers && requantised
     }
 

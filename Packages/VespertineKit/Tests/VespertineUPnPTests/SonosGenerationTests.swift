@@ -139,6 +139,27 @@ struct SonosGenerationTests {
         #expect(out == source)
     }
 
+    @Test("ReplayGain applied to a 16-bit song made into a 16-bit stream changes its samples, so they are dithered")
+    func sixteenBitReplayGainDithers() throws {
+        let wav = try makeWAV16(seconds: 0.25)
+        defer { try? FileManager.default.removeItem(at: wav) }
+        let db = -3.0
+        let render = try NetworkRender(item: PlayableItem(url: wav, replayGainDB: db), url: wav, equalizer: nil, roomCorrection: nil, digitalVolumeDB: nil,
+                                       target: .fixed(sampleRate: 44_100, channels: 2, bitDepth: 16))
+        let out = renderAll(render)
+        let data = try Data(contentsOf: wav).dropFirst(44)
+        var source: [Double] = []
+        var i = data.startIndex
+        while i + 1 < data.endIndex { source.append(Double(Int16(bitPattern: UInt16(data[i]) | UInt16(data[i + 1]) << 8))); i += 2 }
+        #expect(out.count == source.count)
+        let gain = pow(10, db / 20)
+        // The gain was applied: every sample within dither of the source times the gain.
+        let worst = zip(out, source).map { abs(Double($0) - $1 * gain) }.max() ?? 99
+        #expect(worst <= 2)
+        // Dithered, not simply rounded (rounding alone leaves distortion that follows the music).
+        #expect(zip(out, source).contains { Double($0) != ($1 * gain).rounded() }, "the gain's result was rounded to 16 bits without dither")
+    }
+
     @Test("A 24-bit / 48 kHz FLAC goes to an S1 room as a whole 16-bit FLAC, and the path says why; a 16-bit WAV goes as it is")
     func s1Playback() async throws {
         let fake = try await FakeRenderer(kind: .av(setNext: true), udn: "uuid:RINCON_ONE01400_MR")
