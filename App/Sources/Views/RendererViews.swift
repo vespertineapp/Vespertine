@@ -79,7 +79,7 @@ enum RendererText {
     static func sonosNotes(_ renderer: RendererDevice) -> [String] {
         var notes = [
             takes16Bit(renderer)
-                ? String(localized: "Sonos plays two-channel music up to 16-bit / 48 kHz from a computer. FLAC and Apple Lossless within that go as the file itself; anything above is resampled to 48 or 44.1 kHz with the mastering-quality converter and sent as 16-bit FLAC, and the signal path says so.", comment: "A Sonos S1 room (or one that doesn't say whether it runs S1 or S2): what it takes from Vespertine.")
+                ? String(localized: "Sonos plays two-channel music up to 16-bit / 48 kHz from a computer. FLAC and Apple Lossless within that go as the file itself; a 24-bit song up to 48 kHz is only reduced to 16-bit, not resampled; one above 48 kHz is also resampled to 48 or 44.1 kHz with the mastering-quality converter. Both are sent as 16-bit FLAC, and the signal path says so.", comment: "A Sonos S1 room (or one that doesn't say whether it runs S1 or S2): what it takes from Vespertine.")
                 : String(localized: "Sonos plays two-channel music up to 24-bit / 48 kHz from a computer. FLAC and Apple Lossless within that go as the file itself; anything above is resampled to 48 or 44.1 kHz with the mastering-quality converter and sent as 24-bit FLAC, and the signal path says so."),
             String(localized: "No surround and no Dolby Atmos this way: Sonos takes those only from a TV or from a streaming service in its own app. Surround songs are folded to stereo."),
         ]

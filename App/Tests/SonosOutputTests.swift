@@ -36,6 +36,8 @@ struct SonosOutputTests {
             #expect(RendererText.highestFormat(s1) == "16-bit / 48 kHz, 2 channels (Sonos's own limit)")
             #expect(RendererText.sonosNotes(s1).first?.hasPrefix("Sonos plays two-channel music up to 16-bit / 48 kHz") == true)
             #expect(RendererText.sonosNotes(s1).first?.contains("16-bit FLAC") == true)
+            // A 24/48 song is only reduced to 16-bit; only one above 48 kHz is resampled.
+            #expect(RendererText.sonosNotes(s1).first?.contains("a 24-bit song up to 48 kHz is only reduced to 16-bit, not resampled") == true)
         }
         let s2 = room(nil)
         #expect(RendererText.highestFormat(s2) == "24-bit / 48 kHz, 2 channels (Sonos's own limit)")

@@ -670242,271 +670242,271 @@
         }
       }
     },
-    "Sonos plays two-channel music up to 16-bit / 48 kHz from a computer. FLAC and Apple Lossless within that go as the file itself; anything above is resampled to 48 or 44.1 kHz with the mastering-quality converter and sent as 16-bit FLAC, and the signal path says so.": {
+    "Sonos plays two-channel music up to 16-bit / 48 kHz from a computer. FLAC and Apple Lossless within that go as the file itself; a 24-bit song up to 48 kHz is only reduced to 16-bit, not resampled; one above 48 kHz is also resampled to 48 or 44.1 kHz with the mastering-quality converter. Both are sent as 16-bit FLAC, and the signal path says so.": {
       "comment": "A Sonos S1 room (or one that doesn't say whether it runs S1 or S2): what it takes from Vespertine.",
       "localizations": {
         "am": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sonos ከኮምፒውተር እስከ 16-bit / 48 kHz የሆነ ባለሁለት ቻናል ሙዚቃ ያጫውታል። በዚያ ውስጥ ያሉ FLAC እና Apple Lossless ፋይሉ ራሱ ሆነው ይሄዳሉ፤ ከዚያ በላይ ያለው ሁሉ በማስተሪንግ ጥራት መቀየሪያ ወደ 48 ወይም 44.1 kHz እንደገና ናሙና ተደርጎ እንደ 16-bit FLAC ይላካል፣ የምልክት መንገዱም ይህንኑ ይናገራል።"
+            "value": "Sonos ከኮምፒውተር እስከ 16-bit / 48 kHz የሆነ ባለሁለት ቻናል ሙዚቃ ያጫውታል። በዚያ ውስጥ ያሉ FLAC እና Apple Lossless ፋይሉ ራሱ ሆነው ይሄዳሉ፤ 24-bit የሆነ እስከ 48 kHz ያለ ዘፈን ወደ 16-bit ብቻ ይቀነሳል እንጂ እንደገና ናሙና አይደረግም፤ ከ48 kHz በላይ ያለው ደግሞ በማስተሪንግ ጥራት መቀየሪያ ወደ 48 ወይም 44.1 kHz እንደገና ናሙና ይደረጋል። ሁለቱም እንደ 16-bit FLAC ይላካሉ፣ የምልክት መንገዱም ይህንኑ ይናገራል።"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "يشغّل Sonos من الكمبيوتر موسيقى ثنائية القناة حتى 16 بت / 48 kHz. تُرسل ملفات FLAC وApple Lossless ضمن هذا الحد كما هي؛ وما فوقه يُعاد تشكيل عيناته إلى 48 أو 44.1 kHz بمحوّل بجودة المَسترة ويُرسل بصيغة FLAC بدقة 16 بت، ويذكر مسار الإشارة ذلك."
+            "value": "يشغّل Sonos من الكمبيوتر موسيقى ثنائية القناة حتى 16 بت / 48 kHz. تُرسل ملفات FLAC وApple Lossless ضمن هذا الحد كما هي؛ أما الأغنية بدقة 24 بت حتى 48 kHz فتُخفَّض إلى 16 بت فقط دون إعادة تشكيل عيناتها، وما فوق 48 kHz يُعاد تشكيل عيناته أيضًا إلى 48 أو 44.1 kHz بمحوّل بجودة المَسترة. وفي الحالتين يُرسل بصيغة FLAC بدقة 16 بت، ويذكر مسار الإشارة ذلك."
           }
         },
         "bn": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sonos কম্পিউটার থেকে 16-bit / 48 kHz পর্যন্ত দুই-চ্যানেলের মিউজিক চালায়। এর মধ্যে থাকা FLAC ও Apple Lossless ফাইল হুবহু যায়; এর উপরের সবকিছু মাস্টারিং-মানের কনভার্টার দিয়ে 48 বা 44.1 kHz-এ রিস্যাম্পল করে 16-bit FLAC হিসেবে পাঠানো হয়, এবং সিগন্যাল পাথ তা জানায়।"
+            "value": "Sonos কম্পিউটার থেকে 16-bit / 48 kHz পর্যন্ত দুই-চ্যানেলের মিউজিক চালায়। এর মধ্যে থাকা FLAC ও Apple Lossless ফাইল হুবহু যায়; 48 kHz পর্যন্ত 24-bit গান শুধু 16-bit-এ নামানো হয়, রিস্যাম্পল করা হয় না; 48 kHz-এর উপরের গান মাস্টারিং-মানের কনভার্টার দিয়ে 48 বা 44.1 kHz-এ রিস্যাম্পলও করা হয়। দুই ক্ষেত্রেই 16-bit FLAC হিসেবে পাঠানো হয়, এবং সিগন্যাল পাথ তা জানায়।"
           }
         },
         "cs": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sonos přehrává z počítače dvoukanálovou hudbu do 16 bitů / 48 kHz. FLAC a Apple Lossless v těchto mezích jdou jako samotný soubor; cokoli nad to se převzorkuje na 48 nebo 44,1 kHz převodníkem v masteringové kvalitě a pošle jako 16bitový FLAC, a cesta signálu to uvádí."
+            "value": "Sonos přehrává z počítače dvoukanálovou hudbu do 16 bitů / 48 kHz. FLAC a Apple Lossless v těchto mezích jdou jako samotný soubor; 24bitová skladba do 48 kHz se jen zkrátí na 16 bitů, nepřevzorkuje se; skladba nad 48 kHz se navíc převzorkuje na 48 nebo 44,1 kHz převodníkem v masteringové kvalitě. V obou případech jde jako 16bitový FLAC a cesta signálu to uvádí."
           }
         },
         "da": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sonos afspiller tokanalsmusik op til 16-bit / 48 kHz fra en computer. FLAC og Apple Lossless inden for det går som selve filen; alt derover resamples til 48 eller 44,1 kHz med konverteren i masteringkvalitet og sendes som 16-bit FLAC, og signalvejen siger det."
+            "value": "Sonos afspiller tokanalsmusik op til 16-bit / 48 kHz fra en computer. FLAC og Apple Lossless inden for det går som selve filen; en 24-bit sang op til 48 kHz bliver kun reduceret til 16-bit, ikke resamplet; en over 48 kHz resamples også til 48 eller 44,1 kHz med konverteren i masteringkvalitet. Begge sendes som 16-bit FLAC, og signalvejen siger det."
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sonos spielt von einem Computer Zweikanalmusik bis 16 Bit / 48 kHz. FLAC und Apple Lossless innerhalb dieser Grenze gehen als die Datei selbst; alles darüber wird mit dem Konverter in Mastering-Qualität auf 48 oder 44,1 kHz umgerechnet und als 16-Bit-FLAC gesendet, und der Signalweg sagt das."
+            "value": "Sonos spielt von einem Computer Zweikanalmusik bis 16 Bit / 48 kHz. FLAC und Apple Lossless innerhalb dieser Grenze gehen als die Datei selbst; ein 24-Bit-Song bis 48 kHz wird nur auf 16 Bit verkürzt, nicht umgerechnet; einer über 48 kHz wird zusätzlich mit dem Konverter in Mastering-Qualität auf 48 oder 44,1 kHz umgerechnet. Beide gehen als 16-Bit-FLAC, und der Signalweg sagt das."
           }
         },
         "el": {
           "stringUnit": {
             "state": "translated",
-            "value": "Το Sonos παίζει από υπολογιστή δικάναλη μουσική έως 16 bit / 48 kHz. Τα FLAC και Apple Lossless εντός αυτού του ορίου πηγαίνουν ως το ίδιο το αρχείο· ό,τι είναι πάνω από αυτό επαναδειγματοληπτείται στα 48 ή 44,1 kHz με τον μετατροπέα ποιότητας mastering και στέλνεται ως FLAC 16 bit, και η διαδρομή σήματος το αναφέρει."
+            "value": "Το Sonos παίζει από υπολογιστή δικάναλη μουσική έως 16 bit / 48 kHz. Τα FLAC και Apple Lossless εντός αυτού του ορίου πηγαίνουν ως το ίδιο το αρχείο· ένα τραγούδι 24 bit έως 48 kHz απλώς μειώνεται στα 16 bit, χωρίς επαναδειγματοληψία· ένα πάνω από 48 kHz επιπλέον επαναδειγματοληπτείται στα 48 ή 44,1 kHz με τον μετατροπέα ποιότητας mastering. Και τα δύο στέλνονται ως FLAC 16 bit, και η διαδρομή σήματος το αναφέρει."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sonos reproduce desde un ordenador música de dos canales hasta 16 bits / 48 kHz. FLAC y Apple Lossless dentro de eso van como el propio archivo; lo que esté por encima se remuestrea a 48 o 44,1 kHz con el conversor de calidad de masterización y se envía como FLAC de 16 bits, y la ruta de señal lo indica."
+            "value": "Sonos reproduce desde un ordenador música de dos canales hasta 16 bits / 48 kHz. FLAC y Apple Lossless dentro de eso van como el propio archivo; una canción de 24 bits de hasta 48 kHz solo se reduce a 16 bits, sin remuestrear; una por encima de 48 kHz además se remuestrea a 48 o 44,1 kHz con el conversor de calidad de masterización. En ambos casos se envía como FLAC de 16 bits, y la ruta de señal lo indica."
           }
         },
         "fa": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sonos از رایانه موسیقی دوکاناله تا ۱۶ بیت / 48 kHz پخش می‌کند. FLAC و Apple Lossless در این محدوده خودِ فایل فرستاده می‌شوند؛ هر چیز بالاتر با مبدل با کیفیت مسترینگ به 48 یا 44.1 kHz بازنمونه‌برداری و به صورت FLAC ۱۶ بیتی فرستاده می‌شود و مسیر سیگنال این را می‌گوید."
+            "value": "Sonos از رایانه موسیقی دوکاناله تا ۱۶ بیت / 48 kHz پخش می‌کند. FLAC و Apple Lossless در این محدوده خودِ فایل فرستاده می‌شوند؛ آهنگ ۲۴ بیتی تا 48 kHz فقط به ۱۶ بیت کاهش می‌یابد و بازنمونه‌برداری نمی‌شود؛ آهنگ بالای 48 kHz افزون بر این با مبدل با کیفیت مسترینگ به 48 یا 44.1 kHz بازنمونه‌برداری می‌شود. هر دو به صورت FLAC ۱۶ بیتی فرستاده می‌شوند و مسیر سیگنال این را می‌گوید."
           }
         },
         "fi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sonos toistaa tietokoneelta kaksikanavaista musiikkia enintään 16-bittisenä / 48 kHz. Näissä rajoissa olevat FLAC- ja Apple Lossless -tiedostot menevät sellaisinaan; kaikki tätä suurempi näytteistetään uudelleen 48 tai 44,1 kHz:iin masterointitason muuntimella ja lähetetään 16-bittisenä FLACina, ja signaalipolku kertoo sen."
+            "value": "Sonos toistaa tietokoneelta kaksikanavaista musiikkia enintään 16-bittisenä / 48 kHz. Näissä rajoissa olevat FLAC- ja Apple Lossless -tiedostot menevät sellaisinaan; enintään 48 kHz:n 24-bittinen kappale vain lyhennetään 16-bittiseksi, sitä ei näytteistetä uudelleen; yli 48 kHz:n kappale lisäksi näytteistetään uudelleen 48 tai 44,1 kHz:iin masterointitason muuntimella. Molemmat lähetetään 16-bittisenä FLACina, ja signaalipolku kertoo sen."
           }
         },
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nagpe-play ang Sonos ng two-channel na musika hanggang 16-bit / 48 kHz mula sa computer. Ang FLAC at Apple Lossless na pasok doon ay ipinapadala bilang mismong file; ang anumang lampas doon ay nire-resample sa 48 o 44.1 kHz gamit ang mastering-quality na converter at ipinapadala bilang 16-bit FLAC, at sinasabi ito ng signal path."
+            "value": "Nagpe-play ang Sonos ng two-channel na musika hanggang 16-bit / 48 kHz mula sa computer. Ang FLAC at Apple Lossless na pasok doon ay ipinapadala bilang mismong file; ang 24-bit na kanta hanggang 48 kHz ay ibinababa lang sa 16-bit, hindi nire-resample; ang lampas sa 48 kHz ay nire-resample din sa 48 o 44.1 kHz gamit ang mastering-quality na converter. Pareho silang ipinapadala bilang 16-bit FLAC, at sinasabi ito ng signal path."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sonos lit depuis un ordinateur la musique deux canaux jusqu’à 16 bits / 48 kHz. Le FLAC et l’Apple Lossless dans ces limites partent tels quels ; tout ce qui dépasse est rééchantillonné à 48 ou 44,1 kHz avec le convertisseur de qualité mastering et envoyé en FLAC 16 bits, et le chemin du signal l’indique."
+            "value": "Sonos lit depuis un ordinateur la musique deux canaux jusqu’à 16 bits / 48 kHz. Le FLAC et l’Apple Lossless dans ces limites partent tels quels ; un morceau 24 bits jusqu’à 48 kHz est seulement réduit à 16 bits, sans rééchantillonnage ; au-delà de 48 kHz, il est aussi rééchantillonné à 48 ou 44,1 kHz avec le convertisseur de qualité mastering. Dans les deux cas, il part en FLAC 16 bits, et le chemin du signal l’indique."
           }
         },
         "gu": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sonos કમ્પ્યુટરમાંથી 16-bit / 48 kHz સુધીનું બે-ચેનલ મ્યુઝિક વગાડે છે. તેની અંદરના FLAC અને Apple Lossless ફાઇલ જેમ છે તેમ જાય છે; તેનાથી ઉપરનું બધું માસ્ટરિંગ-ગુણવત્તાના કન્વર્ટરથી 48 અથવા 44.1 kHz પર રીસૅમ્પલ કરીને 16-bit FLAC તરીકે મોકલાય છે, અને સિગ્નલ પાથ તે જણાવે છે."
+            "value": "Sonos કમ્પ્યુટરમાંથી 16-bit / 48 kHz સુધીનું બે-ચેનલ મ્યુઝિક વગાડે છે. તેની અંદરના FLAC અને Apple Lossless ફાઇલ જેમ છે તેમ જાય છે; 48 kHz સુધીનું 24-bit ગીત ફક્ત 16-bit સુધી ઘટાડાય છે, રીસૅમ્પલ થતું નથી; 48 kHz થી ઉપરનું ગીત માસ્ટરિંગ-ગુણવત્તાના કન્વર્ટરથી 48 અથવા 44.1 kHz પર રીસૅમ્પલ પણ થાય છે. બંને 16-bit FLAC તરીકે મોકલાય છે, અને સિગ્નલ પાથ તે જણાવે છે."
           }
         },
         "ha": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sonos yana kunna waƙa mai tasha biyu har zuwa bit 16 / 48 kHz daga kwamfuta. FLAC da Apple Lossless da ke cikin wannan iyaka suna tafiya a matsayin fayil ɗin kansa; duk abin da ya fi haka ana sake samfurinsa zuwa 48 ko 44.1 kHz da mai juyawa mai ingancin mastering kuma a aika a matsayin FLAC bit 16, kuma hanyar siginar tana faɗin haka."
+            "value": "Sonos yana kunna waƙa mai tasha biyu har zuwa bit 16 / 48 kHz daga kwamfuta. FLAC da Apple Lossless da ke cikin wannan iyaka suna tafiya a matsayin fayil ɗin kansa; waƙa mai bit 24 har zuwa 48 kHz ana rage ta zuwa bit 16 kawai, ba a sake samfurinta ba; wadda ta fi 48 kHz kuma ana sake samfurinta zuwa 48 ko 44.1 kHz da mai juyawa mai ingancin mastering. Duka biyun ana aika su a matsayin FLAC bit 16, kuma hanyar siginar tana faɗin haka."
           }
         },
         "he": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sonos מנגן ממחשב מוזיקה דו־ערוצית עד 16 סיביות / 48 kHz. ‏FLAC ו־Apple Lossless בתוך הגבול הזה נשלחים כקובץ עצמו; כל מה שמעל עובר דגימה מחדש ל־48 או 44.1 kHz בממיר באיכות מאסטרינג ונשלח כ־FLAC ב־16 סיביות, ונתיב האות מציין זאת."
+            "value": "Sonos מנגן ממחשב מוזיקה דו־ערוצית עד 16 סיביות / 48 kHz. ‏FLAC ו־Apple Lossless בתוך הגבול הזה נשלחים כקובץ עצמו; שיר ב־24 סיביות עד 48 kHz רק מוקטן ל־16 סיביות, בלי דגימה מחדש; שיר מעל 48 kHz גם עובר דגימה מחדש ל־48 או 44.1 kHz בממיר באיכות מאסטרינג. בשני המקרים הוא נשלח כ־FLAC ב־16 סיביות, ונתיב האות מציין זאת."
           }
         },
         "hi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sonos कंप्यूटर से 16-bit / 48 kHz तक का दो-चैनल संगीत चलाता है। इसके भीतर के FLAC और Apple Lossless फ़ाइल जैसी है वैसी जाती है; इससे ऊपर का सब कुछ मास्टरिंग-क्वालिटी कन्वर्टर से 48 या 44.1 kHz पर रीसैंपल करके 16-bit FLAC के रूप में भेजा जाता है, और सिग्नल पाथ यह बताता है।"
+            "value": "Sonos कंप्यूटर से 16-bit / 48 kHz तक का दो-चैनल संगीत चलाता है। इसके भीतर के FLAC और Apple Lossless फ़ाइल जैसी है वैसी जाती है; 48 kHz तक का 24-bit गाना सिर्फ़ 16-bit पर घटाया जाता है, रीसैंपल नहीं होता; 48 kHz से ऊपर का गाना मास्टरिंग-क्वालिटी कन्वर्टर से 48 या 44.1 kHz पर रीसैंपल भी होता है। दोनों 16-bit FLAC के रूप में भेजे जाते हैं, और सिग्नल पाथ यह बताता है।"
           }
         },
         "hu": {
           "stringUnit": {
             "state": "translated",
-            "value": "A Sonos számítógépről legfeljebb 16 bit / 48 kHz-es kétcsatornás zenét játszik le. Az ezen belüli FLAC és Apple Lossless változatlan fájlként megy; minden e fölött masteringminőségű konverterrel 48 vagy 44,1 kHz-re mintavételeződik át, és 16 bites FLAC-ként megy, és a jelút ezt jelzi."
+            "value": "A Sonos számítógépről legfeljebb 16 bit / 48 kHz-es kétcsatornás zenét játszik le. Az ezen belüli FLAC és Apple Lossless változatlan fájlként megy; a legfeljebb 48 kHz-es 24 bites dal csak 16 bitre rövidül, nem mintavételeződik át; a 48 kHz feletti ezen felül masteringminőségű konverterrel 48 vagy 44,1 kHz-re mintavételeződik át. Mindkettő 16 bites FLAC-ként megy, és a jelút ezt jelzi."
           }
         },
         "id": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sonos memutar musik dua kanal hingga 16-bit / 48 kHz dari komputer. FLAC dan Apple Lossless dalam batas itu dikirim sebagai file aslinya; apa pun di atasnya di-resample ke 48 atau 44,1 kHz dengan konverter berkualitas mastering dan dikirim sebagai FLAC 16-bit, dan jalur sinyal menyebutkannya."
+            "value": "Sonos memutar musik dua kanal hingga 16-bit / 48 kHz dari komputer. FLAC dan Apple Lossless dalam batas itu dikirim sebagai file aslinya; lagu 24-bit hingga 48 kHz hanya diturunkan ke 16-bit, tidak di-resample; lagu di atas 48 kHz juga di-resample ke 48 atau 44,1 kHz dengan konverter berkualitas mastering. Keduanya dikirim sebagai FLAC 16-bit, dan jalur sinyal menyebutkannya."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sonos riproduce da un computer musica a due canali fino a 16 bit / 48 kHz. FLAC e Apple Lossless entro questi limiti partono come il file stesso; tutto ciò che va oltre viene ricampionato a 48 o 44,1 kHz con il convertitore di qualità mastering e inviato come FLAC a 16 bit, e il percorso del segnale lo indica."
+            "value": "Sonos riproduce da un computer musica a due canali fino a 16 bit / 48 kHz. FLAC e Apple Lossless entro questi limiti partono come il file stesso; un brano a 24 bit fino a 48 kHz viene solo ridotto a 16 bit, senza ricampionarlo; uno oltre 48 kHz viene anche ricampionato a 48 o 44,1 kHz con il convertitore di qualità mastering. In entrambi i casi parte come FLAC a 16 bit, e il percorso del segnale lo indica."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sonosはコンピュータから最大16ビット / 48 kHzの2チャンネル音楽を再生します。その範囲内のFLACとApple Losslessはファイルそのままで送られ、それを超えるものはマスタリング品質のコンバータで48または44.1 kHzにリサンプリングして16ビットFLACで送信し、信号経路にそう表示されます。"
+            "value": "Sonosはコンピュータから最大16ビット / 48 kHzの2チャンネル音楽を再生します。その範囲内のFLACとApple Losslessはファイルそのままで送られます。48 kHzまでの24ビットの曲は16ビットに減らすだけでリサンプリングはせず、48 kHzを超える曲はマスタリング品質のコンバータで48または44.1 kHzへのリサンプリングも行います。どちらも16ビットFLACで送信し、信号経路にそう表示されます。"
           }
         },
         "kn": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sonos ಕಂಪ್ಯೂಟರ್‌ನಿಂದ 16-bit / 48 kHz ವರೆಗಿನ ಎರಡು-ಚಾನಲ್ ಸಂಗೀತವನ್ನು ಪ್ಲೇ ಮಾಡುತ್ತದೆ. ಅದರೊಳಗಿನ FLAC ಮತ್ತು Apple Lossless ಫೈಲ್ ಇದ್ದಂತೆಯೇ ಹೋಗುತ್ತವೆ; ಅದಕ್ಕಿಂತ ಮೇಲಿನದೆಲ್ಲವನ್ನೂ ಮಾಸ್ಟರಿಂಗ್-ಗುಣಮಟ್ಟದ ಕನ್ವರ್ಟರ್‌ನಿಂದ 48 ಅಥವಾ 44.1 kHz ಗೆ ರೀಸ್ಯಾಂಪಲ್ ಮಾಡಿ 16-bit FLAC ಆಗಿ ಕಳುಹಿಸಲಾಗುತ್ತದೆ, ಮತ್ತು ಸಿಗ್ನಲ್ ಪಾತ್ ಅದನ್ನು ಹೇಳುತ್ತದೆ."
+            "value": "Sonos ಕಂಪ್ಯೂಟರ್‌ನಿಂದ 16-bit / 48 kHz ವರೆಗಿನ ಎರಡು-ಚಾನಲ್ ಸಂಗೀತವನ್ನು ಪ್ಲೇ ಮಾಡುತ್ತದೆ. ಅದರೊಳಗಿನ FLAC ಮತ್ತು Apple Lossless ಫೈಲ್ ಇದ್ದಂತೆಯೇ ಹೋಗುತ್ತವೆ; 48 kHz ವರೆಗಿನ 24-bit ಹಾಡನ್ನು 16-bit ಗೆ ಮಾತ್ರ ಇಳಿಸಲಾಗುತ್ತದೆ, ರೀಸ್ಯಾಂಪಲ್ ಮಾಡಲಾಗುವುದಿಲ್ಲ; 48 kHz ಗಿಂತ ಮೇಲಿನ ಹಾಡನ್ನು ಮಾಸ್ಟರಿಂಗ್-ಗುಣಮಟ್ಟದ ಕನ್ವರ್ಟರ್‌ನಿಂದ 48 ಅಥವಾ 44.1 kHz ಗೆ ರೀಸ್ಯಾಂಪಲ್ ಕೂಡ ಮಾಡಲಾಗುತ್ತದೆ. ಎರಡನ್ನೂ 16-bit FLAC ಆಗಿ ಕಳುಹಿಸಲಾಗುತ್ತದೆ, ಮತ್ತು ಸಿಗ್ನಲ್ ಪಾತ್ ಅದನ್ನು ಹೇಳುತ್ತದೆ."
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sonos는 컴퓨터에서 최대 16비트 / 48 kHz의 2채널 음악을 재생합니다. 그 범위 안의 FLAC과 Apple Lossless는 파일 그대로 보내고, 그 이상은 마스터링 품질 변환기로 48 또는 44.1 kHz로 리샘플링해 16비트 FLAC으로 보내며, 신호 경로에 그렇게 표시됩니다."
+            "value": "Sonos는 컴퓨터에서 최대 16비트 / 48 kHz의 2채널 음악을 재생합니다. 그 범위 안의 FLAC과 Apple Lossless는 파일 그대로 보냅니다. 48 kHz까지의 24비트 곡은 16비트로 줄이기만 하고 리샘플링하지 않으며, 48 kHz를 넘는 곡은 마스터링 품질 변환기로 48 또는 44.1 kHz로 리샘플링도 합니다. 둘 다 16비트 FLAC으로 보내며, 신호 경로에 그렇게 표시됩니다."
           }
         },
         "ml": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sonos കമ്പ്യൂട്ടറിൽ നിന്ന് 16-bit / 48 kHz വരെയുള്ള രണ്ട്-ചാനൽ സംഗീതം പ്ലേ ചെയ്യുന്നു. അതിനുള്ളിലെ FLAC, Apple Lossless എന്നിവ ഫയൽ അതേപടി പോകുന്നു; അതിന് മുകളിലുള്ളതെല്ലാം മാസ്റ്ററിംഗ് നിലവാരമുള്ള കൺവെർട്ടർ ഉപയോഗിച്ച് 48 അല്ലെങ്കിൽ 44.1 kHz-ലേക്ക് റീസാമ്പിൾ ചെയ്ത് 16-bit FLAC ആയി അയയ്ക്കുന്നു, സിഗ്നൽ പാത അത് പറയുന്നു."
+            "value": "Sonos കമ്പ്യൂട്ടറിൽ നിന്ന് 16-bit / 48 kHz വരെയുള്ള രണ്ട്-ചാനൽ സംഗീതം പ്ലേ ചെയ്യുന്നു. അതിനുള്ളിലെ FLAC, Apple Lossless എന്നിവ ഫയൽ അതേപടി പോകുന്നു; 48 kHz വരെയുള്ള 24-bit ഗാനം 16-bit-ലേക്ക് കുറയ്ക്കുക മാത്രം ചെയ്യുന്നു, റീസാമ്പിൾ ചെയ്യുന്നില്ല; 48 kHz-ന് മുകളിലുള്ളത് മാസ്റ്ററിംഗ് നിലവാരമുള്ള കൺവെർട്ടർ ഉപയോഗിച്ച് 48 അല്ലെങ്കിൽ 44.1 kHz-ലേക്ക് റീസാമ്പിളും ചെയ്യുന്നു. രണ്ടും 16-bit FLAC ആയി അയയ്ക്കുന്നു, സിഗ്നൽ പാത അത് പറയുന്നു."
           }
         },
         "mr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sonos संगणकावरून 16-bit / 48 kHz पर्यंतचे दोन-चॅनेल संगीत वाजवते. त्यातील FLAC आणि Apple Lossless फाइल जशीच्या तशी जाते; त्याहून वरचे सर्व काही मास्टरिंग-दर्जाच्या कन्व्हर्टरने 48 किंवा 44.1 kHz वर रीसॅम्पल करून 16-bit FLAC म्हणून पाठवले जाते, आणि सिग्नल पाथ ते सांगतो."
+            "value": "Sonos संगणकावरून 16-bit / 48 kHz पर्यंतचे दोन-चॅनेल संगीत वाजवते. त्यातील FLAC आणि Apple Lossless फाइल जशीच्या तशी जाते; 48 kHz पर्यंतचे 24-bit गाणे फक्त 16-bit वर कमी केले जाते, रीसॅम्पल केले जात नाही; 48 kHz वरचे गाणे मास्टरिंग-दर्जाच्या कन्व्हर्टरने 48 किंवा 44.1 kHz वर रीसॅम्पलही केले जाते. दोन्ही 16-bit FLAC म्हणून पाठवले जातात, आणि सिग्नल पाथ ते सांगतो."
           }
         },
         "ms": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sonos memainkan muzik dua saluran sehingga 16-bit / 48 kHz daripada komputer. FLAC dan Apple Lossless dalam had itu dihantar sebagai fail itu sendiri; apa-apa yang melebihinya disampel semula kepada 48 atau 44.1 kHz dengan penukar berkualiti mastering dan dihantar sebagai FLAC 16-bit, dan laluan isyarat menyatakannya."
+            "value": "Sonos memainkan muzik dua saluran sehingga 16-bit / 48 kHz daripada komputer. FLAC dan Apple Lossless dalam had itu dihantar sebagai fail itu sendiri; lagu 24-bit sehingga 48 kHz hanya dikurangkan kepada 16-bit, tidak disampel semula; lagu melebihi 48 kHz juga disampel semula kepada 48 atau 44.1 kHz dengan penukar berkualiti mastering. Kedua-duanya dihantar sebagai FLAC 16-bit, dan laluan isyarat menyatakannya."
           }
         },
         "nb": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sonos spiller tokanalsmusikk opptil 16-bit / 48 kHz fra en datamaskin. FLAC og Apple Lossless innenfor det går som selve filen; alt over resamples til 48 eller 44,1 kHz med konverteren i masteringkvalitet og sendes som 16-bit FLAC, og signalveien sier det."
+            "value": "Sonos spiller tokanalsmusikk opptil 16-bit / 48 kHz fra en datamaskin. FLAC og Apple Lossless innenfor det går som selve filen; en 24-bit sang opptil 48 kHz blir bare redusert til 16-bit, ikke resamplet; en over 48 kHz resamples også til 48 eller 44,1 kHz med konverteren i masteringkvalitet. Begge sendes som 16-bit FLAC, og signalveien sier det."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sonos speelt vanaf een computer tweekanaalsmuziek tot 16 bit / 48 kHz. FLAC en Apple Lossless binnen die grens gaan als het bestand zelf; alles daarboven wordt met de converter van masteringkwaliteit geresampled naar 48 of 44,1 kHz en als 16-bit FLAC verzonden, en het signaalpad meldt dat."
+            "value": "Sonos speelt vanaf een computer tweekanaalsmuziek tot 16 bit / 48 kHz. FLAC en Apple Lossless binnen die grens gaan als het bestand zelf; een 24-bit nummer tot 48 kHz wordt alleen tot 16 bit teruggebracht, niet geresampled; een nummer boven 48 kHz wordt ook met de converter van masteringkwaliteit geresampled naar 48 of 44,1 kHz. Beide gaan als 16-bit FLAC, en het signaalpad meldt dat."
           }
         },
         "pa": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sonos ਕੰਪਿਊਟਰ ਤੋਂ 16-bit / 48 kHz ਤੱਕ ਦਾ ਦੋ-ਚੈਨਲ ਸੰਗੀਤ ਚਲਾਉਂਦਾ ਹੈ। ਇਸਦੇ ਅੰਦਰ ਦੇ FLAC ਅਤੇ Apple Lossless ਫ਼ਾਈਲ ਜਿਉਂ ਦੀ ਤਿਉਂ ਜਾਂਦੀ ਹੈ; ਇਸ ਤੋਂ ਉੱਪਰ ਦਾ ਸਭ ਕੁਝ ਮਾਸਟਰਿੰਗ-ਕੁਆਲਟੀ ਕਨਵਰਟਰ ਨਾਲ 48 ਜਾਂ 44.1 kHz ’ਤੇ ਰੀਸੈਂਪਲ ਕਰਕੇ 16-bit FLAC ਵਜੋਂ ਭੇਜਿਆ ਜਾਂਦਾ ਹੈ, ਅਤੇ ਸਿਗਨਲ ਪਾਥ ਇਹ ਦੱਸਦਾ ਹੈ।"
+            "value": "Sonos ਕੰਪਿਊਟਰ ਤੋਂ 16-bit / 48 kHz ਤੱਕ ਦਾ ਦੋ-ਚੈਨਲ ਸੰਗੀਤ ਚਲਾਉਂਦਾ ਹੈ। ਇਸਦੇ ਅੰਦਰ ਦੇ FLAC ਅਤੇ Apple Lossless ਫ਼ਾਈਲ ਜਿਉਂ ਦੀ ਤਿਉਂ ਜਾਂਦੀ ਹੈ; 48 kHz ਤੱਕ ਦਾ 24-bit ਗੀਤ ਸਿਰਫ਼ 16-bit ਤੱਕ ਘਟਾਇਆ ਜਾਂਦਾ ਹੈ, ਰੀਸੈਂਪਲ ਨਹੀਂ ਹੁੰਦਾ; 48 kHz ਤੋਂ ਉੱਪਰ ਦਾ ਗੀਤ ਮਾਸਟਰਿੰਗ-ਕੁਆਲਟੀ ਕਨਵਰਟਰ ਨਾਲ 48 ਜਾਂ 44.1 kHz ’ਤੇ ਰੀਸੈਂਪਲ ਵੀ ਹੁੰਦਾ ਹੈ। ਦੋਵੇਂ 16-bit FLAC ਵਜੋਂ ਭੇਜੇ ਜਾਂਦੇ ਹਨ, ਅਤੇ ਸਿਗਨਲ ਪਾਥ ਇਹ ਦੱਸਦਾ ਹੈ।"
           }
         },
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sonos odtwarza z komputera muzykę dwukanałową do 16 bit / 48 kHz. FLAC i Apple Lossless w tych granicach idą jako sam plik; wszystko powyżej jest przepróbkowywane do 48 lub 44,1 kHz konwerterem jakości masteringowej i wysyłane jako 16-bitowy FLAC, a ścieżka sygnału to pokazuje."
+            "value": "Sonos odtwarza z komputera muzykę dwukanałową do 16 bit / 48 kHz. FLAC i Apple Lossless w tych granicach idą jako sam plik; 24-bitowy utwór do 48 kHz jest tylko skracany do 16 bitów, bez przepróbkowania; utwór powyżej 48 kHz jest też przepróbkowywany do 48 lub 44,1 kHz konwerterem jakości masteringowej. Oba idą jako 16-bitowy FLAC, a ścieżka sygnału to pokazuje."
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "O Sonos toca de um computador música de dois canais até 16 bits / 48 kHz. FLAC e Apple Lossless dentro disso vão como o próprio arquivo; o que passar disso é reamostrado para 48 ou 44,1 kHz com o conversor de qualidade de masterização e enviado como FLAC de 16 bits, e o caminho do sinal informa isso."
+            "value": "O Sonos toca de um computador música de dois canais até 16 bits / 48 kHz. FLAC e Apple Lossless dentro disso vão como o próprio arquivo; uma música de 24 bits até 48 kHz só é reduzida a 16 bits, sem reamostragem; uma acima de 48 kHz também é reamostrada para 48 ou 44,1 kHz com o conversor de qualidade de masterização. Nos dois casos vai como FLAC de 16 bits, e o caminho do sinal informa isso."
           }
         },
         "pt-PT": {
           "stringUnit": {
             "state": "translated",
-            "value": "O Sonos reproduz a partir de um computador música de dois canais até 16 bits / 48 kHz. FLAC e Apple Lossless dentro desse limite seguem como o próprio ficheiro; o que estiver acima é reamostrado para 48 ou 44,1 kHz com o conversor de qualidade de masterização e enviado como FLAC de 16 bits, e o percurso do sinal indica-o."
+            "value": "O Sonos reproduz a partir de um computador música de dois canais até 16 bits / 48 kHz. FLAC e Apple Lossless dentro desse limite seguem como o próprio ficheiro; uma música de 24 bits até 48 kHz é apenas reduzida a 16 bits, sem reamostragem; uma acima de 48 kHz é também reamostrada para 48 ou 44,1 kHz com o conversor de qualidade de masterização. Em ambos os casos segue como FLAC de 16 bits, e o percurso do sinal indica-o."
           }
         },
         "ro": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sonos redă de pe un computer muzică pe două canale până la 16 de biți / 48 kHz. FLAC și Apple Lossless în aceste limite pleacă drept fișierul însuși; orice depășește este reeșantionat la 48 sau 44,1 kHz cu convertorul de calitate mastering și trimis ca FLAC pe 16 de biți, iar calea semnalului spune asta."
+            "value": "Sonos redă de pe un computer muzică pe două canale până la 16 de biți / 48 kHz. FLAC și Apple Lossless în aceste limite pleacă drept fișierul însuși; o piesă pe 24 de biți de până la 48 kHz este doar redusă la 16 biți, fără reeșantionare; una peste 48 kHz este și reeșantionată la 48 sau 44,1 kHz cu convertorul de calitate mastering. În ambele cazuri pleacă drept FLAC pe 16 biți, iar calea semnalului spune asta."
           }
         },
         "sv": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sonos spelar tvåkanalsmusik upp till 16 bitar / 48 kHz från en dator. FLAC och Apple Lossless inom det går som själva filen; allt över omsamplas till 48 eller 44,1 kHz med omvandlaren i masteringkvalitet och skickas som 16-bitars FLAC, och signalvägen säger det."
+            "value": "Sonos spelar tvåkanalsmusik upp till 16 bitar / 48 kHz från en dator. FLAC och Apple Lossless inom det går som själva filen; en 24-bitarslåt upp till 48 kHz reduceras bara till 16 bitar, den omsamplas inte; en över 48 kHz omsamplas också till 48 eller 44,1 kHz med omvandlaren i masteringkvalitet. Båda skickas som 16-bitars FLAC, och signalvägen säger det."
           }
         },
         "sw": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sonos hucheza muziki wa chaneli mbili hadi biti 16 / 48 kHz kutoka kwa kompyuta. FLAC na Apple Lossless zilizo ndani ya kikomo hicho hutumwa kama faili lenyewe; chochote kilicho juu yake hubadilishwa kiwango hadi 48 au 44.1 kHz kwa kigeuzi cha ubora wa mastering na kutumwa kama FLAC ya biti 16, na njia ya ishara inasema hivyo."
+            "value": "Sonos hucheza muziki wa chaneli mbili hadi biti 16 / 48 kHz kutoka kwa kompyuta. FLAC na Apple Lossless zilizo ndani ya kikomo hicho hutumwa kama faili lenyewe; wimbo wa biti 24 hadi 48 kHz hupunguzwa tu hadi biti 16, haubadilishwi kiwango; ulio juu ya 48 kHz pia hubadilishwa kiwango hadi 48 au 44.1 kHz kwa kigeuzi cha ubora wa mastering. Yote mawili hutumwa kama FLAC ya biti 16, na njia ya ishara inasema hivyo."
           }
         },
         "ta": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sonos கணினியிலிருந்து 16-bit / 48 kHz வரையிலான இரு-சேனல் இசையை இயக்கும். அதற்குள் உள்ள FLAC மற்றும் Apple Lossless கோப்பு உள்ளபடியே செல்லும்; அதற்கு மேல் உள்ள அனைத்தும் மாஸ்டரிங் தர கன்வெர்ட்டரால் 48 அல்லது 44.1 kHz ஆக ரீசாம்பிள் செய்யப்பட்டு 16-bit FLAC ஆக அனுப்பப்படும், சிக்னல் பாதை அதைக் காட்டும்."
+            "value": "Sonos கணினியிலிருந்து 16-bit / 48 kHz வரையிலான இரு-சேனல் இசையை இயக்கும். அதற்குள் உள்ள FLAC மற்றும் Apple Lossless கோப்பு உள்ளபடியே செல்லும்; 48 kHz வரையிலான 24-bit பாடல் 16-bit ஆக மட்டும் குறைக்கப்படும், ரீசாம்பிள் செய்யப்படாது; 48 kHz-க்கு மேலான பாடல் மாஸ்டரிங் தர கன்வெர்ட்டரால் 48 அல்லது 44.1 kHz ஆக ரீசாம்பிளும் செய்யப்படும். இரண்டும் 16-bit FLAC ஆக அனுப்பப்படும், சிக்னல் பாதை அதைக் காட்டும்."
           }
         },
         "te": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sonos కంప్యూటర్ నుండి 16-bit / 48 kHz వరకు ఉన్న రెండు-ఛానెల్ సంగీతాన్ని ప్లే చేస్తుంది. దానిలోపు ఉన్న FLAC మరియు Apple Lossless ఫైల్ ఉన్నది ఉన్నట్లుగానే వెళ్తాయి; దానికంటే ఎక్కువ ఉన్నదంతా మాస్టరింగ్-నాణ్యత కన్వర్టర్‌తో 48 లేదా 44.1 kHz కి రీశాంపుల్ చేసి 16-bit FLAC గా పంపబడుతుంది, సిగ్నల్ పాత్ అదే చెబుతుంది."
+            "value": "Sonos కంప్యూటర్ నుండి 16-bit / 48 kHz వరకు ఉన్న రెండు-ఛానెల్ సంగీతాన్ని ప్లే చేస్తుంది. దానిలోపు ఉన్న FLAC మరియు Apple Lossless ఫైల్ ఉన్నది ఉన్నట్లుగానే వెళ్తాయి; 48 kHz వరకు ఉన్న 24-bit పాటను 16-bit కి మాత్రమే తగ్గిస్తారు, రీశాంపుల్ చేయరు; 48 kHz కంటే ఎక్కువ ఉన్న పాటను మాస్టరింగ్-నాణ్యత కన్వర్టర్‌తో 48 లేదా 44.1 kHz కి రీశాంపుల్ కూడా చేస్తారు. రెండూ 16-bit FLAC గా పంపబడతాయి, సిగ్నల్ పాత్ అదే చెబుతుంది."
           }
         },
         "th": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sonos เล่นเพลงสองแชนเนลจากคอมพิวเตอร์ได้สูงสุด 16 บิต / 48 kHz ไฟล์ FLAC และ Apple Lossless ที่อยู่ในขอบเขตนี้จะส่งไปทั้งไฟล์ตามเดิม ส่วนที่สูงกว่านั้นจะถูกรีแซมเปิลเป็น 48 หรือ 44.1 kHz ด้วยตัวแปลงคุณภาพระดับมาสเตอริงแล้วส่งเป็น FLAC 16 บิต และเส้นทางสัญญาณจะแจ้งไว้"
+            "value": "Sonos เล่นเพลงสองแชนเนลจากคอมพิวเตอร์ได้สูงสุด 16 บิต / 48 kHz ไฟล์ FLAC และ Apple Lossless ที่อยู่ในขอบเขตนี้จะส่งไปทั้งไฟล์ตามเดิม เพลง 24 บิตที่ไม่เกิน 48 kHz จะถูกลดเหลือ 16 บิตเท่านั้นโดยไม่รีแซมเปิล ส่วนเพลงที่สูงกว่า 48 kHz จะถูกรีแซมเปิลเป็น 48 หรือ 44.1 kHz ด้วยตัวแปลงคุณภาพระดับมาสเตอริงด้วย ทั้งสองแบบส่งเป็น FLAC 16 บิต และเส้นทางสัญญาณจะแจ้งไว้"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sonos bir bilgisayardan en fazla 16 bit / 48 kHz iki kanallı müzik çalar. Bu sınırdaki FLAC ve Apple Lossless dosyanın kendisi olarak gider; üstündeki her şey mastering kalitesindeki dönüştürücüyle 48 veya 44,1 kHz’e yeniden örneklenir ve 16 bit FLAC olarak gönderilir, sinyal yolu da bunu söyler."
+            "value": "Sonos bir bilgisayardan en fazla 16 bit / 48 kHz iki kanallı müzik çalar. Bu sınırdaki FLAC ve Apple Lossless dosyanın kendisi olarak gider; 48 kHz’e kadar 24 bit bir şarkı yalnızca 16 bit’e indirilir, yeniden örneklenmez; 48 kHz’in üstündeki bir şarkı ayrıca mastering kalitesindeki dönüştürücüyle 48 veya 44,1 kHz’e yeniden örneklenir. İkisi de 16 bit FLAC olarak gönderilir, sinyal yolu da bunu söyler."
           }
         },
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sonos відтворює з комп’ютера двоканальну музику до 16 біт / 48 kHz. FLAC і Apple Lossless у цих межах ідуть як сам файл; усе, що вище, передискретизовано до 48 або 44,1 kHz перетворювачем якості мастерингу й надіслано як 16-бітний FLAC, і шлях сигналу про це повідомляє."
+            "value": "Sonos відтворює з комп’ютера двоканальну музику до 16 біт / 48 kHz. FLAC і Apple Lossless у цих межах ідуть як сам файл; 24-бітна пісня до 48 kHz лише скорочується до 16 біт, без передискретизації; пісня понад 48 kHz ще й передискретизується до 48 або 44,1 kHz перетворювачем якості мастерингу. Обидві надсилаються як 16-бітний FLAC, і шлях сигналу про це повідомляє."
           }
         },
         "ur": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sonos کمپیوٹر سے 16-bit / 48 kHz تک کی دو چینل والی موسیقی چلاتا ہے۔ اس کے اندر کی FLAC اور Apple Lossless فائل جوں کی توں جاتی ہے؛ اس سے اوپر کی ہر چیز ماسٹرنگ معیار کے کنورٹر سے 48 یا 44.1 kHz پر ری سیمپل کر کے 16-bit FLAC کے طور پر بھیجی جاتی ہے، اور سگنل پاتھ یہ بتاتا ہے۔"
+            "value": "Sonos کمپیوٹر سے 16-bit / 48 kHz تک کی دو چینل والی موسیقی چلاتا ہے۔ اس کے اندر کی FLAC اور Apple Lossless فائل جوں کی توں جاتی ہے؛ 48 kHz تک کا 24-bit گانا صرف 16-bit تک کم کیا جاتا ہے، ری سیمپل نہیں ہوتا؛ 48 kHz سے اوپر کا گانا ماسٹرنگ معیار کے کنورٹر سے 48 یا 44.1 kHz پر ری سیمپل بھی ہوتا ہے۔ دونوں 16-bit FLAC کے طور پر بھیجے جاتے ہیں، اور سگنل پاتھ یہ بتاتا ہے۔"
           }
         },
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sonos phát nhạc hai kênh tối đa 16 bit / 48 kHz từ máy tính. FLAC và Apple Lossless trong giới hạn đó được gửi nguyên tệp; mọi thứ cao hơn được lấy mẫu lại thành 48 hoặc 44,1 kHz bằng bộ chuyển đổi chất lượng mastering và gửi dưới dạng FLAC 16 bit, và đường tín hiệu cho biết điều đó."
+            "value": "Sonos phát nhạc hai kênh tối đa 16 bit / 48 kHz từ máy tính. FLAC và Apple Lossless trong giới hạn đó được gửi nguyên tệp; bài 24 bit đến 48 kHz chỉ được giảm xuống 16 bit, không lấy mẫu lại; bài trên 48 kHz còn được lấy mẫu lại thành 48 hoặc 44,1 kHz bằng bộ chuyển đổi chất lượng mastering. Cả hai đều được gửi dưới dạng FLAC 16 bit, và đường tín hiệu cho biết điều đó."
           }
         },
         "zh-HK": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sonos 從電腦播放最高 16 位元 / 48 kHz 的雙聲道音樂。在此範圍內的 FLAC 及 Apple Lossless 以原始檔案傳送；超出的部分會用母帶級轉換器重新取樣為 48 或 44.1 kHz，並以 16 位元 FLAC 傳送，訊號路徑會註明這一點。"
+            "value": "Sonos 從電腦播放最高 16 位元 / 48 kHz 的雙聲道音樂。在此範圍內的 FLAC 及 Apple Lossless 以原始檔案傳送；最高 48 kHz 的 24 位元歌曲只會降為 16 位元，不會重新取樣；高於 48 kHz 的歌曲亦會用母帶級轉換器重新取樣為 48 或 44.1 kHz。兩者都以 16 位元 FLAC 傳送，訊號路徑會註明這一點。"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sonos 从电脑播放最高 16 位 / 48 kHz 的双声道音乐。在此范围内的 FLAC 和 Apple Lossless 按原文件发送；超出的部分会用母带级转换器重采样为 48 或 44.1 kHz，并以 16 位 FLAC 发送，信号路径会注明这一点。"
+            "value": "Sonos 从电脑播放最高 16 位 / 48 kHz 的双声道音乐。在此范围内的 FLAC 和 Apple Lossless 按原文件发送；最高 48 kHz 的 24 位歌曲只会降为 16 位，不会重采样；高于 48 kHz 的歌曲还会用母带级转换器重采样为 48 或 44.1 kHz。两者都以 16 位 FLAC 发送，信号路径会注明这一点。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sonos 從電腦播放最高 16 位元 / 48 kHz 的雙聲道音樂。在此範圍內的 FLAC 與 Apple Lossless 以原始檔案傳送；超出的部分會用母帶級轉換器重新取樣為 48 或 44.1 kHz，並以 16 位元 FLAC 傳送，訊號路徑會註明這一點。"
+            "value": "Sonos 從電腦播放最高 16 位元 / 48 kHz 的雙聲道音樂。在此範圍內的 FLAC 與 Apple Lossless 以原始檔案傳送；最高 48 kHz 的 24 位元歌曲只會降為 16 位元，不會重新取樣；高於 48 kHz 的歌曲還會用母帶級轉換器重新取樣為 48 或 44.1 kHz。兩者都以 16 位元 FLAC 傳送，訊號路徑會註明這一點。"
           }
         }
       }
