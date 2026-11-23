@@ -30,8 +30,12 @@ private final class StuckStreamMaker: ProcessedStreamMaking, @unchecked Sendable
         set { lock.withLock { _fails = newValue } }
     }
 
+    private var _settings: [RendererSettings] = []
+    /// The settings each stream was asked for with, in order.
+    var settingsAsked: [RendererSettings] { lock.withLock { _settings } }
+
     func makeStream(item: PlayableItem, url: URL, settings: RendererSettings, startSeconds: TimeInterval) throws -> (GrowingFile, SourceFormat) {
-        lock.withLock { _begun += 1 }
+        lock.withLock { _begun += 1; _settings.append(settings) }
         if fails { throw RendererPlaybackError.unplayable("the encoder couldn't open it") }
         if openDelay > 0 { Thread.sleep(forTimeInterval: openDelay) }
         let file = try GrowingFile(url: directory.appendingPathComponent(UUID().uuidString + ".flac"))
@@ -936,6 +940,57 @@ struct NextPreparationTests {
         await rig.playback.settleForTests()
         #expect(!rig.fake.actions.dropFirst(before).contains("Seek"), "the next song was seeked to the old song's position")
         #expect(!rig.events.all.contains { $0.hasPrefix("notice") })
+    }
+
+    // MARK: After the eighth review (2026-11-23): a change of settings queued before a command
+
+    @Test("A change of settings that restarts the song, queued before a song chosen or a Stop: the song chosen plays, or the Stop holds; the old song isn't started again, and the settings still apply",
+          arguments: [false, true])
+    func settingsRestartQueuedBeforeCommand(select: Bool) async throws {
+        let chosen = PlayableItem(url: try makeFLAC(from: try makeWAV(seconds: 2, seed: 9)))
+        let rig = try await Rig.make()
+        defer { rig.close() }
+        // The song converted for Sonos: any change of settings starts it again where it is.
+        rig.playback.wholeFileWait = 0
+        rig.playback.play(rig.stuck)
+        #expect(await rig.events.wait(for: "started \(rig.stuck.url.lastPathComponent)"))
+        await rig.playback.settleForTests()
+        let streams = rig.maker.begun
+        let loads = rig.fake.calls.filter { $0.action == "SetAVTransportURI" }.count
+        // The worker is held in a poll; the change of settings (a volume, which every song is then processed for), and then
+        // the command, are queued behind it.
+        let quieter = RendererSettings(digitalVolumeDB: -6)
+        rig.transport.statusHeld.withLock { $0 = true }
+        #expect(await within(2) { rig.transport.statusWaiting.withLock { $0 } > 0 })
+        rig.playback.queueSettingsForTests(quieter)
+        if select { rig.playback.play(chosen) } else { rig.playback.stop() }
+        rig.transport.statusHeld.withLock { $0 = false }
+        if select {
+            #expect(await rig.events.wait(for: "started \(chosen.url.lastPathComponent)", timeout: 5), "the song chosen didn't play")
+        } else {
+            #expect(await within(3) { rig.fake.transportState == "Stopped" })
+        }
+        try await Task.sleep(for: .milliseconds(500))
+        await rig.playback.settleForTests()
+        let loaded = rig.fake.calls.filter { $0.action == "SetAVTransportURI" }.dropFirst(loads).map { $0.arguments["CurrentURI"] ?? "" }
+        #expect(loaded.count == (select ? 1 : 0), "loaded after the command: \(loaded)")
+        if select {
+            // Only the chosen song's stream was made since, with the new settings.
+            #expect(rig.maker.begun == streams + 1, "the old song's stream was made again for the settings, after the command")
+            #expect(rig.maker.settingsAsked.last == quieter, "the chosen song wasn't made with the new settings")
+            #expect(rig.playback.snapshot.item?.id == chosen.id)
+            #expect(rig.playback.wantsPlaying)
+            #expect(rig.playback.snapshot.state == .playing)
+        } else {
+            #expect(rig.maker.begun == streams, "the old song's stream was made again for the settings, after the Stop")
+            #expect(!rig.playback.wantsPlaying)
+            #expect(rig.playback.snapshot.item == nil)
+            #expect(!rig.playback.isEngaged)
+            // The settings were kept all the same: the next song played is made with them.
+            rig.playback.play(chosen)
+            #expect(await within(5) { rig.maker.begun > streams }, "the song played after the Stop wasn't processed")
+            #expect(rig.maker.settingsAsked.last == quieter, "the settings given before the Stop were lost")
+        }
     }
 
     @Test("The player goes on to the old next song between a poll's answer and the clear's success: it is still recognised and put right")

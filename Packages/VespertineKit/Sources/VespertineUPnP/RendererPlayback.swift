@@ -412,6 +412,13 @@ public final class RendererPlayback: @unchecked Sendable {
         enqueue.yield(.poll)
     }
 
+    /// Queues a change of settings now, as `update(settings:)` does once its pause is over (behind whatever the worker is
+    /// doing): the order against a command asked for next is then certain.
+    func queueSettingsForTests(_ settings: RendererSettings) {
+        settingsGeneration.withLock { $0 += 1 }
+        enqueue.yield(.settings(settings))
+    }
+
     /// The addresses of the songs Vespertine still keeps (their token and their copy) as the player's next song.
     var heldNextURIsForTests: [String] { state.withLock { ([$0.next].compactMap { $0 } + $0.staleNexts).map(\.mediaURL.absoluteString) } }
 
@@ -985,16 +992,22 @@ public final class RendererPlayback: @unchecked Sendable {
         }
     }
 
+    /// The settings are kept at once, whatever happens to the song playing: a song started after this is made with them.
     private func apply(_ settings: RendererSettings) async throws {
         let before = state.withLock { s -> RendererSettings in defer { s.settings = settings }; return s.settings }
-        guard before != settings, let current = state.withLock({ $0.current }) else { return }
+        // The song loaded, and the play it was loaded for, read together (as a poll does).
+        guard before != settings, let (current, loadedFor) = state.withLock({ s in s.current.map { ($0, s.currentGeneration) } }) else { return }
         let url = current.staged?.url ?? urlResolver?(current.item) ?? current.item.url
         let decision = RendererMode.decide(item: current.item, url: url, source: current.path.source, settings: settings, capabilities: renderer.capabilities,
                                            limits: renderer.limits)
         let processing: [SignalPath.RendererStage.Processing] = if case .processed(let r) = decision { r } else { [] }
         // The song playing restarts where it is when what's done to it changes; the next one is prepared again either way.
         if processing != (current.path.renderer?.processing ?? []) || current.processedFile != nil {
-            play(current.item, at: snapshot.position, announce: false)
+            // Only while that play is still the current one, checked under the generation lock where a stop, a song chosen
+            // or another restart moves it: queued ahead of a Stop or a song chosen, the restart would otherwise overtake
+            // the command (its play dropped as stale, or the old song loaded again after the Stop). Not restarted, the
+            // settings still hold: whatever plays next (the song chosen, or this one restarted for a seek) is made with them.
+            play(current.item, at: snapshot.position, announce: false, ifStill: loadedFor)
         } else {
             try await replanNext(force: true)
         }
