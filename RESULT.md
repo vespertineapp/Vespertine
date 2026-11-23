@@ -9,6 +9,28 @@ Branch `feat/sonos-and-output-routes`, local commits only, not pushed; `git log 
 - **No silent downgrade**: every output row says what the loaded song would be played as ("Will play 24-bit / 48 kHz FLAC, stereo (source 24/96)", copper when samples change); while playing, the badge (RESAMPLED / FOLDED TO STEREO / DSD AS PCM · 24/48 SENT) and a "Player limit" line in the signal path. Same planner for DACs, HDMI, Bluetooth, AirPlay and other network players.
 - **Sonos volume** slider (room or group), the room's details (speaker setup, Music Playback Ambient/Full, read only), plain error for "couldn't fetch" (firewall), `vespertine-probe sonos`, and docs/output-routes.md.
 
+## The seventh review's findings (2026-11-23, 11:55 onwards)
+
+A seventh review (Codex, run fbdae0) found two P2s in `RendererPlayback.swift`, both there before this branch's review passes. Signed commits d9750e53 (P2 1) and 69447320 (P2 2), each with its test written first and seen failing, and this RESULT commit; nothing pushed.
+
+**P2 1, a seek queued before a Stop or a song chosen overtook it.** A seek in a processed stream the player can't seek in (one offered while it was still being written) starts the song again at the position. That restart ran on the worker as an unconditional `play(…, announce: false)`. Queued ahead of a song chosen, it moved the generation past the chosen song's play, which was then dropped as stale, and the old song was loaded again. Queued ahead of a Stop, it loaded the old song again after the Stop (paused). Now `seek(to:)` notes the selection (`State.selection`) and the song shown when it is asked for. On the worker the seek does nothing unless both still hold for the song loaded, and the restart is made only while the selection is unchanged, checked under the generation lock, where `stop()` and `play()` move it. It checks the selection, not the generation, because a restart for an earlier seek or a change of settings moves the generation on, and the last seek asked for must still win. A seek the player does itself updates the snapshot only while the same check holds. Checking the song as well means a seek asked for just before the player went on to its next song isn't applied to that next song.
+- `processedSeekQueuedBeforeCommand` (2 cases, Stop or a song chosen): the converted song plays from a stream that is never finished. The worker is held in a poll while the seek and then the command are queued. **Red before, both cases** (7 issues: the old song's stream was made and loaded again; after Stop it stayed loaded; the chosen song never started).
+
+**P2 2, a pending seek was carried to the song the player went on to.** A song started part-way in keeps its position as a pending seek until the player plays it. If the player refused that seek and then went on to its next song by itself, the poll that followed it made the next song current but kept `pendingSeek` and its count of tries. It then sent the old song's position to the new song. The poll that follows the player now clears both, with the rest of the song's state.
+- `pendingSeekNotCarriedToNextSong`: the first song is started at 1 s and is kept from playing until its next song has been handed to the player. Then it plays, the seek is refused once, and the poll after it is held while the player goes on. **Red before** (a `Seek` was sent to the next song). New test hooks: `GatedTransport.holdsStatusAfterFailedSeek`, `FakeRenderer.playOnDevice`.
+- Red run: `build/logs/r9/red.log` (2 tests, 3 cases, 8 issues; all 3 cases red). After both fixes, `NextPreparationTests`: 31 tests, all passed (`green.log`).
+
+Not changed (unverified, no test): a change of settings while a song plays restarts it the same way (`apply`, an unconditional `play(…, announce: false)` on the worker). A `.settings` command already queued when Stop is pressed, or when a song is chosen, looks open to the same overtaking. The review didn't name it.
+
+### Test figures, this pass
+
+Logs: `build/logs/r9/` and the audit folder named below. All from the code at 69447320. Other work was running on the machine (load average 38 to 103 on 8 cores).
+
+- **UPnP and Sonos** (`swift test --filter VespertineUPnPTests`, debug, 12:05 to 12:07): **passed**, 185 tests in 33 suites, 0 failed (183 before, plus the 2 new tests, 3 cases) (`upnp.log`).
+- **The rest of the audit** (`audit-rest.sh`, `scripts/audit.sh` without its first step, the same script as in the last two passes; 12:07 to 12:38, `build/audit-rest-20261123-120718/`, load average 38 to 75): **script exit 0, "All audit checks passed"**. **Release-mode package tests** (`swift test -c release`): engine **1484 tests in 235 suites, passed**; UPnP and Sonos **185**, library 274, AirPlay 2 211, and 151, 73, 37 and 31 in the other four: **every group passed, 0 failed**. Analysis package **72 tests in 8 suites, passed**. Sanitizer runs (address/undefined, thread) clean; DST audit "1800 random frames, 1712 rejected; crafted frames handled"; static analysis 0 findings for both. **App tests** (`xcodebuild test`, Debug, `build/AuditDD`) **284 tests in 61 suites, passed** (`** TEST SUCCEEDED **`; no app code changed). Release universal build `** BUILD SUCCEEDED **`; `git diff --check` clean.
+
+Not run this pass: `scripts/audit.sh`'s first step, the whole package in debug mode. On this loaded machine its engine group failed timing tests in each of the last runs (above); the same 1484 engine tests passed in release mode here.
+
 ## The two gaps the sixth pass left open (2026-11-23, 10:40 onwards)
 
 Closes the sixth pass's "Not changed (unverified)" note (below). Signed commits 6cb41f71 (`fail()`) and 58e969c0 (the seek notice), each with its tests written first, and this RESULT commit; nothing pushed.
