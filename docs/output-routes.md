@@ -1,6 +1,6 @@
 # Output routes: what each one can carry
 
-What reaches the speakers depends on the route, not only on the file. This page says, for every kind of output Vespertine plays to from a Mac, the best the route can carry, what Vespertine sends, and what it tells you when a song has to change to fit. The output list shows the same per song: under each output, "Will play 24-bit / 48 kHz FLAC, stereo (source 24/192)", in copper whenever the samples that arrive are not the file's own.
+What reaches the speakers depends on the route, not only on the file. This page says, for every kind of output Vespertine plays to from a Mac, the best the route can carry, what Vespertine sends, and what it tells you when a song has to change to fit. The output list shows the same per song: under each output, "Will play 24-bit / 48 kHz FLAC, stereo (source 24/192)", in copper whenever the samples that arrive are not the file's own. For a network player the line comes from the same decision playback makes, with what the player says it plays: one that takes neither the file nor FLAC shows why instead of a format.
 
 The rule everywhere: nothing is taken away without saying so. A change shows in the output list before you choose the output, in the status badge while the song plays, and as a sentence in the signal path.
 
@@ -70,7 +70,7 @@ The rate is always the highest Sonos takes that divides the song's own exactly (
 
 **Volume.** The slider is the room's own volume (RenderingControl; GroupRenderingControl for several rooms), as in the Sonos app. It never changes the samples sent.
 
-**Gapless.** Vespertine hands Sonos the next song while the current one plays (SetNextAVTransportURI). Whether Sonos then joins the two without a gap for songs played this way has not been checked on a real system; if it doesn't move on by itself, Vespertine starts the next song when the current one ends, which leaves a short gap.
+**Gapless.** Vespertine hands Sonos the next song while the current one plays (SetNextAVTransportURI). It is prepared beside playback, not in its way: while a hi-res next song is still being converted, pause, seek, skip and stop act at once, and a skip or stop gives the conversion up. Whether Sonos then joins the two without a gap for songs played this way has not been checked on a real system; if it doesn't move on by itself, Vespertine starts the next song when the current one ends, which leaves a short gap.
 
 ## Other network players (UPnP AV and OpenHome)
 
