@@ -423,8 +423,9 @@ struct SonosPlayerTests {
     }
 }
 
-/// A 16-bit WAV with `channels` channels, each a steady tone of its own, each with its speaker named.
-func makeSurroundWAV(channels: Int, rate: Int = 48_000, seconds: Double = 0.5) throws -> URL {
+/// A 16-bit WAV with `channels` channels, each a steady tone of its own, each with its speaker named; `named` false writes
+/// a plain PCM header with the count only (no channel mask), as some tools and old recorders do.
+func makeSurroundWAV(channels: Int, rate: Int = 48_000, seconds: Double = 0.5, named: Bool = true) throws -> URL {
     let frames = Int(Double(rate) * seconds)
     var data = Data()
     func le32(_ v: UInt32) { withUnsafeBytes(of: v.littleEndian) { data.append(contentsOf: $0) } }
@@ -432,10 +433,16 @@ func makeSurroundWAV(channels: Int, rate: Int = 48_000, seconds: Double = 0.5) t
     let dataSize = UInt32(frames * channels * 2)
     // WAVE_FORMAT_EXTENSIBLE with a speaker for each channel (L R C LFE Ls Rs for six), as real surround files have.
     let mask: UInt32 = channels == 1 ? 0x4 : channels == 2 ? 0x3 : channels == 6 ? 0x3F : (1 << UInt32(channels)) - 1
-    data.append(contentsOf: Array("RIFF".utf8)); le32(60 + dataSize); data.append(contentsOf: Array("WAVE".utf8))
-    data.append(contentsOf: Array("fmt ".utf8)); le32(40); le16(0xFFFE); le16(UInt16(channels)); le32(UInt32(rate)); le32(UInt32(rate * channels * 2))
-    le16(UInt16(channels * 2)); le16(16); le16(22); le16(16); le32(mask)
-    data.append(contentsOf: [0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71])
+    if named {
+        data.append(contentsOf: Array("RIFF".utf8)); le32(60 + dataSize); data.append(contentsOf: Array("WAVE".utf8))
+        data.append(contentsOf: Array("fmt ".utf8)); le32(40); le16(0xFFFE); le16(UInt16(channels)); le32(UInt32(rate)); le32(UInt32(rate * channels * 2))
+        le16(UInt16(channels * 2)); le16(16); le16(22); le16(16); le32(mask)
+        data.append(contentsOf: [0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71])
+    } else {
+        data.append(contentsOf: Array("RIFF".utf8)); le32(36 + dataSize); data.append(contentsOf: Array("WAVE".utf8))
+        data.append(contentsOf: Array("fmt ".utf8)); le32(16); le16(1); le16(UInt16(channels)); le32(UInt32(rate)); le32(UInt32(rate * channels * 2))
+        le16(UInt16(channels * 2)); le16(16)
+    }
     data.append(contentsOf: Array("data".utf8)); le32(dataSize)
     for i in 0..<frames {
         for c in 0..<channels {
@@ -467,6 +474,39 @@ struct LimitedStreamTests {
         let right = stride(from: 1, to: out.count, by: 2).map { abs(out[$0]) }.max() ?? 0
         #expect(left > 100_000)
         #expect(right > 100_000)
+    }
+
+    @Test("A 6-channel WAV with no channel mask is taken as 5.1 (L R C LFE Ls Rs) and folds exactly as the named one")
+    func unnamedSurroundToStereo() throws {
+        let named = try makeSurroundWAV(channels: 6), plain = try makeSurroundWAV(channels: 6, named: false)
+        var outputs: [[Int32]] = []
+        for wav in [named, plain] {
+            let format = try SourceDescription.describe(PlayableItem(url: wav), url: wav).format
+            #expect(format.channels == 6)
+            let plan = StreamNegotiation.plan(source: format, mime: "audio/wav", limits: .sonos)
+            #expect(plan.changes == [.downmixed(from: 6, to: 2)])
+            let render = try NetworkRender(item: PlayableItem(url: wav), url: wav, equalizer: nil, roomCorrection: nil, digitalVolumeDB: nil, target: .init(plan))
+            #expect(render.format.channels == 2)
+            outputs.append(renderAll(render))
+        }
+        let out = outputs[1]
+        let left = stride(from: 0, to: out.count, by: 2).map { abs(out[$0]) }.max() ?? 0
+        let right = stride(from: 1, to: out.count, by: 2).map { abs(out[$0]) }.max() ?? 0
+        #expect(left > 100_000)
+        #expect(right > 100_000)
+        #expect(outputs[1] == outputs[0])
+    }
+
+    @Test("Unnamed 3, 4, 7 and 8 channels fold to stereo with sound in both, taken in WAV order", arguments: [3, 4, 7, 8])
+    func unnamedOtherCounts(channels: Int) throws {
+        let wav = try makeSurroundWAV(channels: channels, named: false)
+        let format = try SourceDescription.describe(PlayableItem(url: wav), url: wav).format
+        let plan = StreamNegotiation.plan(source: format, mime: "audio/wav", limits: .sonos)
+        let render = try NetworkRender(item: PlayableItem(url: wav), url: wav, equalizer: nil, roomCorrection: nil, digitalVolumeDB: nil, target: .init(plan))
+        let out = renderAll(render)
+        #expect(abs(out.count / 2 - 24_000) <= 64)
+        #expect((stride(from: 0, to: out.count, by: 2).map { abs(out[$0]) }.max() ?? 0) > 100_000)
+        #expect((stride(from: 1, to: out.count, by: 2).map { abs(out[$0]) }.max() ?? 0) > 100_000)
     }
 
     @Test("176.4 kHz comes out at 44.1 kHz and 192 kHz at 48 kHz, a quarter of the frames, at 24 bits")
