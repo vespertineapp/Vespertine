@@ -861,6 +861,49 @@ struct NextPreparationTests {
         #expect(!rig.playback.wantsPlaying)
     }
 
+    // MARK: After the seventh review (2026-11-23): a seek queued before a command
+
+    @Test("A seek in a processed stream, queued before a song chosen or a Stop: the song chosen plays, or the Stop holds; the old song isn't started again",
+          arguments: [false, true])
+    func processedSeekQueuedBeforeCommand(select: Bool) async throws {
+        let chosen = PlayableItem(url: try makeFLAC(from: try makeWAV(seconds: 2, seed: 9)))
+        let rig = try await Rig.make()
+        defer { rig.close() }
+        // The song converted for Sonos is offered as its stream grows (never written whole here): the player can't seek
+        // in it, so a seek starts it again at the position.
+        rig.playback.wholeFileWait = 0
+        rig.playback.play(rig.stuck)
+        #expect(await rig.events.wait(for: "started \(rig.stuck.url.lastPathComponent)"))
+        await rig.playback.settleForTests()
+        let streams = rig.maker.begun
+        let loads = rig.fake.calls.filter { $0.action == "SetAVTransportURI" }.count
+        // The worker is held in a poll; the seek, and then the command, are queued behind it.
+        rig.transport.statusHeld.withLock { $0 = true }
+        #expect(await within(2) { rig.transport.statusWaiting.withLock { $0 } > 0 })
+        rig.playback.seek(to: 0.5)
+        if select { rig.playback.play(chosen) } else { rig.playback.stop() }
+        rig.transport.statusHeld.withLock { $0 = false }
+        if select {
+            #expect(await rig.events.wait(for: "started \(chosen.url.lastPathComponent)", timeout: 5), "the song chosen didn't play")
+        } else {
+            #expect(await within(3) { rig.fake.transportState == "Stopped" })
+        }
+        try await Task.sleep(for: .milliseconds(500))
+        await rig.playback.settleForTests()
+        #expect(rig.maker.begun == streams, "the old song's stream was made again for the seek, after the command")
+        let loaded = rig.fake.calls.filter { $0.action == "SetAVTransportURI" }.dropFirst(loads).map { $0.arguments["CurrentURI"] ?? "" }
+        #expect(loaded.count == (select ? 1 : 0), "loaded after the command: \(loaded)")
+        if select {
+            #expect(rig.playback.snapshot.item?.id == chosen.id)
+            #expect(rig.playback.wantsPlaying)
+            #expect(rig.playback.snapshot.state == .playing)
+        } else {
+            #expect(!rig.playback.wantsPlaying)
+            #expect(rig.playback.snapshot.item == nil)
+            #expect(!rig.playback.isEngaged)
+        }
+    }
+
     @Test("The player goes on to the old next song between a poll's answer and the clear's success: it is still recognised and put right")
     func advanceBeforeClearCompletes() async throws {
         let ready = PlayableItem(url: try makeFLAC(from: try makeWAV(seconds: 2, seed: 7)))

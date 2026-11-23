@@ -161,11 +161,20 @@ public final class RendererPlayback: @unchecked Sendable {
     private let settingsPause: @Sendable () async -> Void
 
     enum Command {
-        case play(PlayableItem, at: TimeInterval, announce: Bool, generation: Int), pause, resume, seek(TimeInterval), stop, queueChanged, settings(RendererSettings), poll
+        case play(PlayableItem, at: TimeInterval, announce: Bool, generation: Int), pause, resume, seek(TimeInterval, SeekTarget), stop, queueChanged, settings(RendererSettings), poll
         /// A poll a test asked for, which is told when it is done.
         case step(CheckedContinuation<Void, Never>)
         /// The next song, prepared off the worker, is ready (or couldn't be): handed to the renderer if it is still wanted.
         case nextPrepared(NextPreparation)
+    }
+
+    /// What a seek was asked for: the selection (`State.selection`) and the song shown then. Carried out only while both are
+    /// still what plays: a stop or a song chosen after the seek was asked for wins, and so does the player going on to its
+    /// next song (the seek was for the song before). Not the generation: a restart of the same song at a position (an
+    /// earlier seek in a processed stream, a change of settings) moves that on, and the last seek asked for must still win.
+    struct SeekTarget {
+        let selection: Int
+        let item: UUID?
     }
 
     /// The next song being prepared off the worker: which song, after which, for which play. Given up (`cancel`) the moment
@@ -258,9 +267,10 @@ public final class RendererPlayback: @unchecked Sendable {
     /// a song asked for since wins. The check, the new generation and what the snapshot says are done under the generation
     /// lock, as `stop()` does them, so no command comes in between. Returns whether it plays.
     @discardableResult
-    private func play(_ item: PlayableItem, at seconds: TimeInterval, announce: Bool, ifStill expected: Int?) -> Bool {
+    /// `ifSelection`: played only while that is still the selection (a restart for a seek asked for then).
+    private func play(_ item: PlayableItem, at seconds: TimeInterval, announce: Bool, ifStill expected: Int?, ifSelection selection: Int? = nil) -> Bool {
         let g = generation.withLock { g -> Int? in
-            guard expected.map({ $0 == g }) ?? true else { return nil }
+            guard expected.map({ $0 == g }) ?? true, selection.map({ selection in state.withLock { $0.selection } == selection }) ?? true else { return nil }
             g += 1
             state.withLock {
                 // A restart of the song at a position (a seek in a processed stream, a change of settings) keeps what the
@@ -311,7 +321,13 @@ public final class RendererPlayback: @unchecked Sendable {
         refreshActivity()
         enqueue.yield(.resume)
     }
-    public func seek(to seconds: TimeInterval) { state.withLock { $0.snapshot.position = seconds; $0.anchor = nil }; enqueue.yield(.seek(seconds)) }
+    public func seek(to seconds: TimeInterval) {
+        let target = state.withLock { s -> SeekTarget in
+            s.snapshot.position = seconds; s.anchor = nil
+            return SeekTarget(selection: s.selection, item: s.snapshot.item?.id)
+        }
+        enqueue.yield(.seek(seconds, target))
+    }
     public func stop() {
         // Under the generation lock, so a song put right by a poll (`play(_:at:announce:ifStill:)`) is either before it or
         // finds it.
@@ -441,7 +457,7 @@ public final class RendererPlayback: @unchecked Sendable {
             }
         case .pause: await retrying(.pause, resync: true) { try await self.transport.pause() }
         case .resume: await retrying(.play, resync: true) { try await self.transport.play() }
-        case .seek(let seconds): await retrying(.seek, resync: false) { try await self.seek(seconds) }
+        case .seek(let seconds, let target): await retrying(.seek, resync: false) { try await self.seek(seconds, target) }
         case .stop:
             // A next song planned after `stop()` was called (by a start that was still loading its song then) is given
             // up here too.
@@ -758,18 +774,35 @@ public final class RendererPlayback: @unchecked Sendable {
         return true
     }
 
-    private func seek(_ seconds: TimeInterval) async throws {
-        guard let current = state.withLock({ $0.current }) else { return }
+    /// A seek asked for as `target` says: nothing once a stop, another song, or the player's own next song has come since
+    /// (queued ahead of the seek, a stop or a song chosen has already been told to the snapshot; the command itself comes
+    /// after it on the worker).
+    private func seek(_ seconds: TimeInterval, _ target: SeekTarget) async throws {
+        guard let current = state.withLock({ s -> Entry? in
+            guard s.selection == target.selection, let current = s.current, current.item.id == target.item else { return nil }
+            return current
+        }) else { return }
+        // What the player was told is shown only while it is still the song seeked (a stop or a song chosen while the
+        // player answered has set the snapshot itself).
+        let landed = { [state] (heard: TimeInterval) in
+            state.withLock { s in
+                guard s.selection == target.selection, s.current?.item.id == target.item else { return }
+                s.anchor = nil; s.snapshot.position = seconds; s.heard = heard
+            }
+        }
         if let stream = current.processedFile, renderer.limits?.wholeFiles == true, stream.isFinished, seconds >= current.startOffset {
             // A processed stream that was written whole before it was offered is a file like any other to the player.
             try await transport.seek(to: seconds - current.startOffset)
-            state.withLock { $0.anchor = nil; $0.snapshot.position = seconds; $0.heard = seconds - current.startOffset }
+            landed(seconds - current.startOffset)
         } else if current.processedFile != nil {
             // A processed stream is written ahead and can't be seeked by the renderer: it starts again at the position.
-            play(current.item, at: seconds, announce: false)
+            // Only while the selection is still the one the seek was asked in, checked under the generation lock where a
+            // stop or a song chosen moves it: else the restart would overtake the command (its play dropped as stale, or
+            // the song loaded again after a Stop).
+            play(current.item, at: seconds, announce: false, ifStill: nil, ifSelection: target.selection)
         } else {
             try await transport.seek(to: seconds)
-            state.withLock { $0.anchor = nil; $0.snapshot.position = seconds; $0.heard = seconds }
+            landed(seconds)
         }
     }
 
