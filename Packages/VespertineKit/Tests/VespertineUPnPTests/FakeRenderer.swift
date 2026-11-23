@@ -38,6 +38,17 @@ final class FakeRenderer: @unchecked Sendable {
         set { lock.withLock { _ignoresPlay = newValue } }
     }
 
+    /// A Sonos speaker: its room's name. The description is then a ZonePlayer with the renderer inside it, as a Sonos's is,
+    /// and it answers for how its system is arranged (`zoneGroupState`) and for its volume.
+    var sonosRoom: String?
+    var sonosModel = "Sonos Playbar"
+    /// What GetZoneGroupState answers.
+    var zoneGroupState = ""
+    private var _volume = 20
+    private var _muted = false
+    var volume: Int { lock.withLock { _volume } }
+    var muted: Bool { lock.withLock { _muted } }
+
     /// Its UDN; by default one of its own. Two fakes with the same one are the same renderer at two addresses.
     private let udn: String?
 
@@ -142,6 +153,13 @@ final class FakeRenderer: @unchecked Sendable {
             }
             switch (service, action) {
             case ("ConnectionManager", "GetProtocolInfo"): return .success([("Source", ""), ("Sink", sink)])
+            case ("ZoneGroupTopology", "GetZoneGroupState"): return .success([("ZoneGroupState", zoneGroupState)])
+            case ("RenderingControl", "GetVolume"), ("GroupRenderingControl", "GetGroupVolume"): return .success([("CurrentVolume", String(_volume))])
+            case ("RenderingControl", "SetVolume"), ("GroupRenderingControl", "SetGroupVolume"):
+                _volume = Int(arguments["DesiredVolume"] ?? "") ?? _volume; return .success([])
+            case ("RenderingControl", "GetMute"), ("GroupRenderingControl", "GetGroupMute"): return .success([("CurrentMute", _muted ? "1" : "0")])
+            case ("RenderingControl", "SetMute"), ("GroupRenderingControl", "SetGroupMute"): _muted = arguments["DesiredMute"] == "1"; return .success([])
+            case ("GroupRenderingControl", "SnapshotGroupVolume"): return .success([])
             case ("Product", "SourceXml"):
                 return .success([("Value", "<SourceList><Source><Name>Radio</Name><Type>Radio</Type><Visible>true</Visible></Source><Source><Name>Playlist</Name><Type>Playlist</Type><Visible>true</Visible></Source><Source><Name>Receiver</Name><Type>Receiver</Type><Visible>true</Visible></Source></SourceList>")])
             case ("Product", "SourceIndex"): return .success([("Value", String(sourceIndex))])
@@ -217,6 +235,23 @@ final class FakeRenderer: @unchecked Sendable {
         if case .openHome = kind {
             services += service("urn:av-openhome-org:service:Product:1", "Product") + service("urn:av-openhome-org:service:Playlist:1", "Playlist")
                 + service("urn:av-openhome-org:service:Time:1", "Time") + service("urn:av-openhome-org:service:Info:1", "Info")
+        }
+        if let room = sonosRoom {
+            // As a Sonos speaker describes itself: the speaker, with its media server and its renderer inside it.
+            let own = udn ?? "uuid:RINCON_FAKE\(port)01400_MR"
+            let speaker = String(own.dropLast(3))
+            services += service("urn:schemas-upnp-org:service:GroupRenderingControl:1", "GroupRenderingControl")
+            return "<?xml version=\"1.0\"?><root xmlns=\"urn:schemas-upnp-org:device-1-0\"><device>"
+                + "<deviceType>urn:schemas-upnp-org:device:ZonePlayer:1</deviceType><friendlyName>127.0.0.1 - \(sonosModel)</friendlyName>"
+                + "<manufacturer>Sonos, Inc.</manufacturer><modelNumber>S9</modelNumber><modelName>\(sonosModel)</modelName>"
+                + "<roomName>\(room)</roomName><displayName>Playbar</displayName><UDN>\(speaker)</UDN>"
+                + "<serviceList>\(service("urn:schemas-upnp-org:service:ZoneGroupTopology:1", "ZoneGroupTopology"))</serviceList><deviceList>"
+                + "<device><deviceType>urn:schemas-upnp-org:device:MediaServer:1</deviceType><friendlyName>127.0.0.1 - \(sonosModel) Media Server</friendlyName>"
+                + "<manufacturer>Sonos, Inc.</manufacturer><modelName>\(sonosModel)</modelName><UDN>\(speaker)_MS</UDN>"
+                + "<serviceList>\(service("urn:schemas-upnp-org:service:ContentDirectory:1", "ContentDirectory"))</serviceList></device>"
+                + "<device><deviceType>urn:schemas-upnp-org:device:MediaRenderer:1</deviceType><friendlyName>\(room) - \(sonosModel) Media Renderer</friendlyName>"
+                + "<manufacturer>Sonos, Inc.</manufacturer><modelName>\(sonosModel)</modelName><UDN>\(own)</UDN>"
+                + "<serviceList>\(services)</serviceList></device></deviceList></device></root>"
         }
         return "<?xml version=\"1.0\"?><root xmlns=\"urn:schemas-upnp-org:device-1-0\"><device>"
             + "<deviceType>urn:schemas-upnp-org:device:MediaRenderer:1</deviceType><friendlyName>Fake Renderer</friendlyName>"

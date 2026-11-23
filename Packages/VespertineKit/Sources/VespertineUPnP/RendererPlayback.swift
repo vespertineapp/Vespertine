@@ -13,6 +13,15 @@ import VespertineAudio
 /// `startSeconds` on. Returns the file being written and the format of what it holds.
 public protocol ProcessedStreamMaking: Sendable {
     func makeStream(item: PlayableItem, url: URL, settings: RendererSettings, startSeconds: TimeInterval) throws -> (GrowingFile, SourceFormat)
+    /// The same for a player that takes less than the source has: the stream is made as `target` says (a rate, at most so
+    /// many channels).
+    func makeStream(item: PlayableItem, url: URL, settings: RendererSettings, startSeconds: TimeInterval, target: NetworkRender.Target) throws -> (GrowingFile, SourceFormat)
+}
+
+extension ProcessedStreamMaking {
+    public func makeStream(item: PlayableItem, url: URL, settings: RendererSettings, startSeconds: TimeInterval, target: NetworkRender.Target) throws -> (GrowingFile, SourceFormat) {
+        try makeStream(item: item, url: url, settings: settings, startSeconds: startSeconds)
+    }
 }
 
 public final class RendererPlayback: @unchecked Sendable {
@@ -121,6 +130,8 @@ public final class RendererPlayback: @unchecked Sendable {
     private let activity = PlaybackActivity(reason: "Playing to a network player")
     /// A renderer that hasn't started a song this long after being told to has failed to play it.
     let startTimeout: TimeInterval
+    /// How long a player that wants whole files waits for a processed stream to be written before it is offered as it grows.
+    var wholeFileWait: TimeInterval = 30
     /// Status polls failing for this long (and at least three times) mean the renderer is gone.
     let lostAfter: TimeInterval
     /// The time, for everything judged by how long it has been (a renderer that has stopped answering, a song that hasn't
@@ -415,7 +426,11 @@ public final class RendererPlayback: @unchecked Sendable {
         let url = staged?.url ?? resolved
         let described = try? SourceDescription.describe(item, url: url)
         let settings = state.withLock { $0.settings }
-        let decision = RendererMode.decide(item: item, url: url, source: described?.format, settings: settings, capabilities: renderer.capabilities)
+        let limits = renderer.limits
+        let wholeFile = item.regionStartFrame == nil && item.regionFrameLength == nil && item.sacdArea == nil && item.dvd == nil
+            && item.audioStream == nil && url.isFileURL
+        let fitted = limits.flatMap { limits in described.map { StreamNegotiation.plan(source: $0.format, mime: wholeFile ? MediaType.mime(forExtension: url.pathExtension) : nil, limits: limits) } }
+        let decision = RendererMode.decide(item: item, url: url, source: described?.format, settings: settings, capabilities: renderer.capabilities, limits: limits)
         let info = metadataProvider?(item) ?? RendererTrackInfo(title: url.deletingPathExtension().lastPathComponent)
         var processing: [SignalPath.RendererStage.Processing] = []
         let resource: MediaResource
@@ -431,7 +446,17 @@ public final class RendererPlayback: @unchecked Sendable {
         case .processed(let reasons):
             guard let processed else { throw RendererPlaybackError.unplayable(String(localized: "Processed streams aren't available.")) }
             processing = reasons
-            let (growing, format) = try processed.makeStream(item: item, url: url, settings: settings, startSeconds: seconds)
+            let (growing, format) = if let fitted, !fitted.original {
+                try processed.makeStream(item: item, url: url, settings: settings, startSeconds: seconds, target: .init(fitted))
+            } else {
+                try processed.makeStream(item: item, url: url, settings: settings, startSeconds: seconds)
+            }
+            // A player that wants whole files is offered the stream once it is written (encoding runs many times faster than
+            // the music plays). One that takes long is offered as it grows after all, rather than keep the listener waiting.
+            if limits?.wholeFiles == true {
+                let deadline = Date().addingTimeInterval(wholeFileWait)
+                while !growing.isFinished, !growing.isAbandoned, Date() < deadline { Thread.sleep(forTimeInterval: 0.02) }
+            }
             file = growing
             sent = format
             mime = "audio/flac"
@@ -440,10 +465,14 @@ public final class RendererPlayback: @unchecked Sendable {
         guard let mediaURL = media.register(resource, toward: renderer.host) else {
             throw RendererPlaybackError.unplayable(String(localized: "no network interface reaches it"))
         }
-        let size = file == nil ? (try? FileManager.default.attributesOfItem(atPath: url.path)[.size] as? Int64) ?? nil : nil
+        // A processed stream that is already whole is described like a file: its length lets the player show and seek it.
+        let sizedFile = file.map { $0.isFinished ? $0.url : nil } ?? url
+        let size = sizedFile.flatMap { (try? FileManager.default.attributesOfItem(atPath: $0.path)[.size] as? Int64) ?? nil }
         let didl = DIDLLite.item(id: item.id.uuidString, info: info, url: mediaURL, mime: mime, size: size, format: sent)
         let source = described?.format ?? SourceFormat(encoding: .pcm, codec: url.pathExtension.uppercased(), sampleRate: 0, bitDepth: nil, channels: 2)
-        let warnings = sent.map { renderer.capabilities.warnings(for: $0, sending: mime).map(\.message) } ?? []
+        var warnings = sent.map { renderer.capabilities.warnings(for: $0, sending: mime).map(\.message) } ?? []
+        // What fitting the song to the player cost, each in a sentence: nothing is taken away without saying so.
+        if let limits, let fitted, file != nil { warnings += fitted.changes.filter(\.changesSamples).map { $0.message(player: limits.playerKind) } }
         let stage = SignalPath.RendererStage(name: renderer.name, protocolName: renderer.kind.protocolName, processing: processing,
                                              sentCodec: file == nil ? source.codec : "FLAC", sentSampleRate: sent?.sampleRate ?? source.sampleRate,
                                              sentBitDepth: file == nil ? source.bitDepth : 24, sentChannels: sent?.channels ?? source.channels,
@@ -548,7 +577,11 @@ public final class RendererPlayback: @unchecked Sendable {
 
     private func seek(_ seconds: TimeInterval) async throws {
         guard let current = state.withLock({ $0.current }) else { return }
-        if current.processedFile != nil {
+        if let stream = current.processedFile, renderer.limits?.wholeFiles == true, stream.isFinished, seconds >= current.startOffset {
+            // A processed stream that was written whole before it was offered is a file like any other to the player.
+            try await transport.seek(to: seconds - current.startOffset)
+            state.withLock { $0.anchor = nil; $0.snapshot.position = seconds; $0.heard = seconds - current.startOffset }
+        } else if current.processedFile != nil {
             // A processed stream is written ahead and can't be seeked by the renderer: it starts again at the position.
             play(current.item, at: seconds, announce: false)
         } else {
@@ -600,7 +633,8 @@ public final class RendererPlayback: @unchecked Sendable {
         let before = state.withLock { s -> RendererSettings in defer { s.settings = settings }; return s.settings }
         guard before != settings, let current = state.withLock({ $0.current }) else { return }
         let url = current.staged?.url ?? urlResolver?(current.item) ?? current.item.url
-        let decision = RendererMode.decide(item: current.item, url: url, source: current.path.source, settings: settings, capabilities: renderer.capabilities)
+        let decision = RendererMode.decide(item: current.item, url: url, source: current.path.source, settings: settings, capabilities: renderer.capabilities,
+                                           limits: renderer.limits)
         let processing: [SignalPath.RendererStage.Processing] = if case .processed(let r) = decision { r } else { [] }
         // The song playing restarts where it is when what's done to it changes; the next one is prepared again either way.
         if processing != (current.path.renderer?.processing ?? []) || current.processedFile != nil {

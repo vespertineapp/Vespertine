@@ -141,7 +141,10 @@ public struct SignalPath: Sendable, Hashable {
                 case .equalizer: String(localized: "PROCESSED · EQ", comment: "Status badge (short, uppercase): a network renderer gets Vespertine's equalized stream.")
                 case .volume: String(localized: "PROCESSED · VOLUME", comment: "Status badge (short, uppercase): a network renderer gets a stream with Vespertine's digital volume.")
                 case .replayGain: String(localized: "PROCESSED · REPLAYGAIN", comment: "Status badge (short, uppercase): a network renderer gets a stream with ReplayGain applied.")
-                case .format, .resampled, .dithered, .downmix, .dsdToPCM: String(localized: "PROCESSED · FLAC", comment: "Status badge (short, uppercase): the file was decoded and sent to a network renderer as FLAC (it doesn't take the file's own format).")
+                case .resampled: String(localized: "RESAMPLED · \(sentFormatShort) SENT", comment: "Status badge (short, uppercase): the song was resampled to a rate the network player takes; %@ is e.g. 24/48.")
+                case .downmix: String(localized: "FOLDED TO STEREO · \(sentFormatShort) SENT", comment: "Status badge (short, uppercase): a surround song was folded down to the two channels the network player takes; %@ is e.g. 24/48.")
+                case .dsdToPCM: String(localized: "DSD AS PCM · \(sentFormatShort) SENT", comment: "Status badge (short, uppercase): a DSD song was converted to PCM for a network player that doesn't play DSD; %@ is e.g. 24/44.1.")
+                case .format, .dithered: String(localized: "PROCESSED · FLAC", comment: "Status badge (short, uppercase): the file was decoded and sent to a network renderer as FLAC (it doesn't take the file's own format).")
                 }
             }
             switch source.encoding {

@@ -63,8 +63,12 @@ public final class ProcessedStreamMaker: ProcessedStreamMaking, @unchecked Senda
     }
 
     public func makeStream(item: PlayableItem, url: URL, settings: RendererSettings, startSeconds: TimeInterval) throws -> (GrowingFile, SourceFormat) {
+        try makeStream(item: item, url: url, settings: settings, startSeconds: startSeconds, target: .sourceRate24)
+    }
+
+    public func makeStream(item: PlayableItem, url: URL, settings: RendererSettings, startSeconds: TimeInterval, target: NetworkRender.Target) throws -> (GrowingFile, SourceFormat) {
         let render = try NetworkRender(item: item, url: url, equalizer: settings.activeEqualizer, roomCorrection: settings.activeRoomCorrection,
-                                       digitalVolumeDB: settings.activeVolumeDB, startSeconds: startSeconds)
+                                       digitalVolumeDB: settings.activeVolumeDB, startSeconds: startSeconds, target: target)
         let file = try GrowingFile(url: directory.appendingPathComponent(UUID().uuidString + ".flac"))
         let log = self.log
         let thread = Thread {

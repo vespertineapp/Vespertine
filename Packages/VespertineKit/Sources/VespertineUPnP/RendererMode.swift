@@ -39,8 +39,11 @@ public enum RendererModeDecision: Sendable, Equatable {
 public enum RendererMode {
     /// `renderer` capabilities with no entries (GetProtocolInfo failed or answered nothing) accept everything: the renderer
     /// is left to refuse what it can't play.
+    ///
+    /// `limits`: what the player takes beyond what it lists (a Sonos: 48 kHz, two channels). A song past them is never sent
+    /// as its file: it is processed, and the reasons name what was done to fit it (`StreamNegotiation.plan`).
     public static func decide(item: PlayableItem, url: URL, source: SourceFormat?, settings: RendererSettings,
-                              capabilities: RendererCapabilities) -> RendererModeDecision {
+                              capabilities: RendererCapabilities, limits: StreamLimits? = nil) -> RendererModeDecision {
         var reasons: [SignalPath.RendererStage.Processing] = []
         if settings.activeRoomCorrection != nil { reasons.append(.roomCorrection) }
         if settings.activeEqualizer != nil { reasons.append(.equalizer) }
@@ -51,7 +54,12 @@ public enum RendererMode {
             && item.audioStream == nil && url.isFileURL
         let mime = MediaType.mime(forExtension: url.pathExtension)
         // DSD is passed through only as a file the renderer lists; it can't be processed into FLAC without becoming PCM.
-        if reasons.isEmpty, wholeFile, let mime, accepts(mime) { return .passThrough(mime: mime) }
+        let fitted: StreamPlan? = if let limits, let source { StreamNegotiation.plan(source: source, mime: wholeFile ? mime : nil, limits: limits) } else { nil }
+        if reasons.isEmpty, wholeFile, let mime, accepts(mime), fitted?.original ?? true { return .passThrough(mime: mime) }
+        // What fitting the song to the player does to it, after what the listener asked for.
+        if let fitted, !fitted.original {
+            for step in fitted.changes.map(\.processing) where !reasons.contains(step) && (step != .format || reasons.isEmpty) { reasons.append(step) }
+        }
         if reasons.isEmpty { reasons.append(.format) }
         guard accepts("audio/flac") else {
             return .unplayable(String(localized: "The player doesn't take FLAC, so this song can't be sent to it processed.", comment: "Error for a network renderer."))
