@@ -178,7 +178,7 @@ private struct Rig {
     let queue: Locked<[PlayableItem]>
 
     /// `second`: the song after the first one, in place of the one converted for Sonos.
-    /// `pollInterval` 0: no polls of its own (a test steps them with `settleForTests`).
+    /// `pollInterval` 0: no poller (`polling: nil`); a test steps the polls with `settleForTests`.
     static func make(second: PlayableItem? = nil, startTimeout: TimeInterval = 15, lostAfter: TimeInterval = 10, pollInterval: TimeInterval = 0.05) async throws -> Rig {
         let fake = try await FakeRenderer(kind: .av(setNext: true), udn: "uuid:RINCON_BAR01400_MR")
         fake.sonosRoom = "Living Room"
@@ -188,7 +188,7 @@ private struct Rig {
         let device = try await RendererDevice.load(location: fake.location)
         let maker = StuckStreamMaker()
         let transport = GatedTransport(try device.makeTransport())
-        let playback = RendererPlayback(renderer: device, transport: transport, media: media, processed: maker, pollInterval: pollInterval,
+        let playback = RendererPlayback(renderer: device, transport: transport, media: media, processed: maker, polling: pollInterval > 0 ? pollInterval : nil,
                                         startTimeout: startTimeout, lostAfter: lostAfter)
         // Long enough that a worker held by it would fail every check below; short enough not to hold the run up for long.
         playback.wholeFileWait = 30
@@ -964,6 +964,8 @@ struct NextPreparationTests {
 
     // MARK: After the eighth review (2026-11-23): a change of settings queued before a command, and a seek after a pending one
 
+    // queueSettingsForTests is in debug builds only (`swift test -c release` doesn't run this test).
+    #if DEBUG
     @Test("A change of settings that restarts the song, queued before a song chosen or a Stop: the song chosen plays, or the Stop holds; the old song isn't started again, and the settings still apply",
           arguments: [false, true])
     func settingsRestartQueuedBeforeCommand(select: Bool) async throws {
@@ -1012,6 +1014,7 @@ struct NextPreparationTests {
             #expect(rig.maker.settingsAsked.last == quieter, "the settings given before the Stop were lost")
         }
     }
+    #endif
 
     @Test("A song started part-way in, seeked by the listener before the player played it: the seek asked for holds, the start's position isn't sent after it")
     func explicitSeekClearsPendingSeek() async throws {
@@ -1065,6 +1068,8 @@ struct NextPreparationTests {
         #expect(!rig.events.all.contains { $0.hasPrefix("notice") }, "the refused resume of the old song was reported after the song chosen")
     }
 
+    // queueSettingsForTests is in debug builds only (`swift test -c release` doesn't run this test).
+    #if DEBUG
     @Test("The next song prepared with the old settings, then a change of settings queued before it is chosen: it is made again with the new settings, not played as prepared")
     func preparedNextRebuiltForNewSettings() async throws {
         let rig = try await Rig.make()
@@ -1092,6 +1097,7 @@ struct NextPreparationTests {
         #expect(loaded.count == 1 && loaded.first != prepared, "the stream prepared with the old settings was loaded: \(loaded)")
         #expect(rig.playback.snapshot.signalPath?.volume == .digital(dB: -6), "volume \(String(describing: rig.playback.snapshot.signalPath?.volume))")
     }
+    #endif
 
     @Test("The player goes on to the old next song between a poll's answer and the clear's success: it is still recognised and put right")
     func advanceBeforeClearCompletes() async throws {

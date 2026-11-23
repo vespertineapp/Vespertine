@@ -220,12 +220,36 @@ public final class RendererPlayback: @unchecked Sendable {
     /// Every next song's preparation still running, given up or not: `stopAndWait` waits for them too.
     private let livePreparations = DispatchGroup()
 
-    /// `pollInterval` 0: the renderer is asked for its state only when `settleForTests` says so (a test that steps the
-    /// polls itself).
-    public init(renderer: RendererDevice, transport: any RendererTransport, media: MediaServer, processed: (any ProcessedStreamMaking)? = nil,
-                pollInterval: TimeInterval = 0.5, startTimeout: TimeInterval = 15, lostAfter: TimeInterval = 10,
-                now: @escaping @Sendable () -> Date = { Date() },
-                settingsPause: @escaping @Sendable () async -> Void = { try? await Task.sleep(for: .milliseconds(300)) }) {
+    /// `pollInterval`: how often the renderer is asked for its state, kept between `minimumPollInterval` and
+    /// `maximumPollInterval` (0 or less is the shortest; not a number, the default). The polls are what a song's start, its
+    /// end and a lost renderer are found by, so there are always some.
+    public convenience init(renderer: RendererDevice, transport: any RendererTransport, media: MediaServer, processed: (any ProcessedStreamMaking)? = nil,
+                            pollInterval: TimeInterval = RendererPlayback.defaultPollInterval, startTimeout: TimeInterval = 15, lostAfter: TimeInterval = 10,
+                            now: @escaping @Sendable () -> Date = { Date() },
+                            settingsPause: @escaping @Sendable () async -> Void = { try? await Task.sleep(for: .milliseconds(300)) }) {
+        self.init(renderer: renderer, transport: transport, media: media, processed: processed, polling: Self.pollInterval(pollInterval),
+                  startTimeout: startTimeout, lostAfter: lostAfter, now: now, settingsPause: settingsPause)
+    }
+
+    public static let defaultPollInterval: TimeInterval = 0.5
+    public static let minimumPollInterval: TimeInterval = 0.05
+    public static let maximumPollInterval: TimeInterval = 60
+
+    /// The poll interval used for `asked`.
+    static func pollInterval(_ asked: TimeInterval) -> TimeInterval {
+        asked.isNaN ? defaultPollInterval : min(max(asked, minimumPollInterval), maximumPollInterval)
+    }
+
+    /// How often the renderer is asked for its state; nil, only when `settleForTests` says so.
+    let pollInterval: TimeInterval?
+
+    /// `polling` nil: the renderer is asked for its state only when `settleForTests` says so (a test that steps the polls
+    /// itself). Not reachable from outside the package: an app always has polls.
+    init(renderer: RendererDevice, transport: any RendererTransport, media: MediaServer, processed: (any ProcessedStreamMaking)? = nil,
+         polling pollInterval: TimeInterval?, startTimeout: TimeInterval = 15, lostAfter: TimeInterval = 10,
+         now: @escaping @Sendable () -> Date = { Date() },
+         settingsPause: @escaping @Sendable () async -> Void = { try? await Task.sleep(for: .milliseconds(300)) }) {
+        self.pollInterval = pollInterval
         self.startTimeout = startTimeout
         self.lostAfter = lostAfter
         self.now = now
@@ -242,7 +266,7 @@ public final class RendererPlayback: @unchecked Sendable {
                 await self.run(command)
             }
         }
-        guard pollInterval > 0 else { return }
+        guard let pollInterval else { return }
         poller = Task { [weak self] in
             while !Task.isCancelled {
                 try? await Task.sleep(for: .seconds(pollInterval))
@@ -427,12 +451,15 @@ public final class RendererPlayback: @unchecked Sendable {
         enqueue.yield(.poll)
     }
 
+    #if DEBUG
     /// Queues a change of settings now, as `update(settings:)` does once its pause is over (behind whatever the worker is
-    /// doing): the order against a command asked for next is then certain.
+    /// doing): the order against a command asked for next is then certain. Debug builds only: it skips the pause and
+    /// moves `settingsGeneration` on, which nothing in a release build may do.
     func queueSettingsForTests(_ settings: RendererSettings) {
         settingsGeneration.withLock { $0 += 1 }
         enqueue.yield(.settings(settings))
     }
+    #endif
 
     /// The addresses of the songs Vespertine still keeps (their token and their copy) as the player's next song.
     var heldNextURIsForTests: [String] { state.withLock { ([$0.next].compactMap { $0 } + $0.staleNexts).map(\.mediaURL.absoluteString) } }
