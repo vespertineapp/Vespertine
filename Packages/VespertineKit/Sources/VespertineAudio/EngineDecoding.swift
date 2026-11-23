@@ -22,6 +22,9 @@ final class Decoding {
     var decoder: PCMDecoding
     let converter: AVAudioConverter
     let input: AVAudioPCMBuffer
+    /// `input`'s samples under the converter's names for its channels, when they differ (a multichannel file with no speaker
+    /// names folded to stereo, `OutputSession.namedForFold`): the converter mixes by the buffer's own layout, not its input format's.
+    private let named: AVAudioPCMBuffer?
     let output: AVAudioPCMBuffer
     let path: SignalPath
     let gain: Float
@@ -109,6 +112,18 @@ final class Decoding {
             throw SourceOpenerError.unsupported(item.url)
         }
         input = inBuffer
+        // Compared by layout tag: AVAudioFormat's equality takes an unknown layout as equal to any. The buffer list is shared at
+        // full length, so the second buffer's capacity is the first's (it takes its capacity from the list's byte sizes).
+        if converter.inputFormat.channelLayout?.layoutTag == decoder.processingFormat.channelLayout?.layoutTag {
+            named = nil
+        } else {
+            inBuffer.frameLength = inBuffer.frameCapacity
+            guard let alias = AVAudioPCMBuffer(pcmFormat: converter.inputFormat, bufferListNoCopy: inBuffer.audioBufferList, deallocator: nil) else {
+                throw SourceOpenerError.unsupported(item.url)
+            }
+            inBuffer.frameLength = 0
+            named = alias
+        }
         output = outBuffer
         routed = (renderer?.outputChannels ?? groupRouter?.outputChannels ?? router?.bedChannels).flatMap { width in
             AudioFormats.float32(sampleRate: path.plan.deviceSampleRate, channels: width, interleaved: true, layout: layout)
@@ -294,6 +309,10 @@ final class Decoding {
                 return nil
             }
             inputStatus.pointee = .haveData
+            if let named = self.named {
+                named.frameLength = self.input.frameLength
+                return named
+            }
             return self.input
         }
         return (status, conversionError, waiting)

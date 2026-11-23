@@ -79,6 +79,10 @@ final class OutputSession: @unchecked Sendable {
 
     /// The converter from a decoder's output to the ring, as playback sets it up for `plan`.
     static func converter(from input: AVAudioFormat, to output: AVAudioFormat, plan: OutputPlan) -> AVAudioConverter? {
+        // Folded to stereo or mono by layout, a multichannel file with no speaker names came out as silence: it is given the
+        // speakers of WAV order for its count (L R C LFE Ls Rs for six, WAVE_FORMAT_EXTENSIBLE's default), as the
+        // multichannel paths below already take it. The samples handed in are the same; only their names change.
+        let input = output.channelCount <= 2 ? namedForFold(input) : input
         guard let converter = AVAudioConverter(from: input, to: output) else { return nil }
         converter.sampleRateConverterAlgorithm = AVSampleRateConverterAlgorithm_Mastering
         converter.sampleRateConverterQuality = .max
@@ -105,6 +109,18 @@ final class OutputSession: @unchecked Sendable {
             converter.channelMap = (0..<Int(output.channelCount)).map { NSNumber(value: $0 < Int(input.channelCount) ? $0 : -1) }
         }
         return converter
+    }
+
+    /// `format` as it is when its channels name their speakers (or it has two or fewer), else the same samples with the
+    /// speakers of WAV order for the count; as it is where there is no such order. The standard layout's tag is used where
+    /// it lists those speakers (3 to 6 channels), so a 5.1 with no names folds exactly as one with them.
+    static func namedForFold(_ format: AVAudioFormat) -> AVAudioFormat {
+        let channels = Int(format.channelCount)
+        guard channels > 2, ChannelLayouts.speakerLabels(format.channelLayout) == nil,
+              let labels = ChannelLayouts.wavOrderLabels(channels: channels) else { return format }
+        let standard = ChannelLayouts.layout(channels: channels).flatMap { $0.channelLabels == labels ? $0 : nil }
+        guard let layout = standard ?? ChannelLayouts.layout(labels: labels) else { return format }
+        return AVAudioFormat(streamDescription: format.streamDescription, channelLayout: layout) ?? format
     }
 
     /// The speakers of a multichannel decoder's output: its own, else WAV order for the count (as the discrete path takes them).

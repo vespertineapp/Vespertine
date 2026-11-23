@@ -337,14 +337,20 @@ struct TagEditorView: View {
         if readOnlyFiles { return String(localized: "Read-only location · saved in Vespertine's library; the files aren't changed") }
         // Only CUE or disc-image tracks selected: their tags live in the library alone, so no file is written.
         if files == 0 { return String(localized: "Saved in Vespertine's library; the files aren't changed") }
-        let kind: String = switch Set(tracks.map(\.codec)).first ?? "" {
+        let kind = Self.tagFormat(codec: Set(tracks.map(\.codec)).first ?? "")
+        return String(localized: "Writes \(kind) to \(files) files · backup retained for undo", comment: "First value: the tag format, e.g. ID3v2 tags")
+    }
+
+    /// The kind of tags a file of `codec` holds, as the footer names it.
+    nonisolated static func tagFormat(codec: String) -> String {
+        switch codec {
         case "FLAC", "Vorbis", "Opus": String(localized: "Vorbis comments")
         case "MP3", "AIFF", "WAV", "DSF": String(localized: "ID3v2 tags")
-        case "ALAC", "AAC": String(localized: "MP4 atoms")
+        // xHE-AAC: an MP4 file like any AAC one (the name apart is for network players).
+        case "ALAC", "AAC", "xHE-AAC": String(localized: "MP4 atoms")
         case "APE", "WavPack", "Musepack": String(localized: "APEv2 tags")
         default: String(localized: "tags", comment: "Generic name for the metadata written to a file, as in: Writes tags to 3 files")
         }
-        return String(localized: "Writes \(kind) to \(files) files · backup retained for undo", comment: "First value: the tag format, e.g. ID3v2 tags")
     }
 
     /// Shows the tags of the selection. The library changes under a selection all the time (a scan, an analysis,

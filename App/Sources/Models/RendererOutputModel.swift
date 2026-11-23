@@ -1,5 +1,5 @@
 //
-// Vespertine: network players (UPnP AV / OpenHome renderers) as outputs, behind Settings › Playback › Network Players (UPnP, beta), off by
+// Vespertine: network players (UPnP AV / OpenHome renderers) as outputs, behind Settings › Playback › Network Players (Sonos and UPnP, beta), off by
 // default. The model exists only while the switch is on; until then nothing is searched for and no port is open.
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
@@ -19,12 +19,23 @@ final class RendererOutputModel {
     private(set) var failure: String?
     /// The renderer playback goes to, and its control, while one is the chosen output.
     @ObservationIgnored private(set) var playback: RendererPlayback?
+    /// The chosen player's own volume, 0…1, where Vespertine sets it (a Sonos room); nil when it has none Vespertine sets,
+    /// or it hasn't answered yet.
+    private(set) var playerVolume: Double?
+    /// How the chosen Sonos room's surrounds play two-channel music (the Sonos app's Music Playback setting), as last read;
+    /// nil for a room without surrounds or one that didn't say.
+    private(set) var surroundMusic: SonosSurroundMusic?
+    @ObservationIgnored private var volumeControl: (uid: String, description: DeviceDescription, isGroup: Bool, control: any RendererVolume)?
+    @ObservationIgnored private var volumeSend: Task<Void, Never>?
+    @ObservationIgnored private var volumeWatch: Task<Void, Never>?
+    /// The player's own volume control for a device (the tests hand in one that records what it is told).
+    @ObservationIgnored var makeVolume: (RendererDevice) -> (any RendererVolume)? = { $0.makeVolume() }
     /// Called when the list of renderers changes.
     @ObservationIgnored var onChange: (() -> Void)?
     /// A renderer that is never listed: this Mac's own receiver (Receive from Other Apps), which would only play to itself.
     @ObservationIgnored var hiddenUDN: String? { didSet { if hiddenUDN != oldValue { renderers.removeAll { $0.description.udn == hiddenUDN } } } }
 
-    init(service: RendererService = RendererService()) {
+    init(service: RendererService = RendererOutputModel.defaultService()) {
         self.service = service
         service.discovery.onChange = { [weak self] list in
             Task { @MainActor in
@@ -36,6 +47,18 @@ final class RendererOutputModel {
                 if changed { self.onChange?() }
             }
         }
+    }
+
+    /// The real service; in a debug build given `-VespertineRendererDemo <description URL>[,…]`, one whose discovery finds exactly
+    /// those players (the tests' pretend Sonos, say) and sends no search on the network, for screenshots.
+    static func defaultService() -> RendererService {
+        #if DEBUG
+        if let list = LaunchArguments().string(forKey: "VespertineRendererDemo") {
+            let locations = list.split(separator: ",").compactMap { URL(string: String($0)) }
+            return RendererService(discovery: RendererDiscovery(searcher: DemoRendererSearch(locations: locations)))
+        }
+        #endif
+        return RendererService()
     }
 
     func start() {
@@ -53,8 +76,65 @@ final class RendererOutputModel {
     func stop() {
         playback?.shutdown()
         playback = nil
+        // Network Players off: nothing more goes to any player, a volume change on its way included.
+        cancelVolumeSend()
+        watchVolume(of: nil)
         service.want(false)
         renderers = []
+    }
+
+    /// The player's own volume for `device`: read now, and every few seconds while it stays the chosen one (the level is
+    /// also changed from the Sonos app and the TV remote). nil lets go of it.
+    func watchVolume(of device: RendererDevice?) {
+        guard let device, let control = makeVolume(device) else {
+            // A change still on its way was meant for the player let go of: it isn't sent after all.
+            cancelVolumeSend()
+            volumeControl = nil
+            volumeWatch?.cancel()
+            volumeWatch = nil
+            playerVolume = nil
+            surroundMusic = nil
+            return
+        }
+        // The same player, arranged as before: the watch that is running carries on.
+        if let held = volumeControl, held.uid == device.uid, held.description == device.description, held.isGroup == (device.sonos?.isGroup == true) { return }
+        // Another player (or the same one somewhere else, with a control of its own): what was on its way to the old one stays unsent.
+        cancelVolumeSend()
+        volumeControl = (device.uid, device.description, device.sonos?.isGroup == true, control)
+        volumeWatch?.cancel()
+        playerVolume = nil
+        surroundMusic = nil
+        let room = device.sonos?.isHomeTheater == true ? RenderingControlVolume(description: device.description) : nil
+        volumeWatch = Task { [weak self] in
+            while !Task.isCancelled {
+                if let room, let mode = await room.surroundMusic(), let self, self.volumeControl?.uid == device.uid { self.surroundMusic = mode }
+                if let level = try? await control.volume() {
+                    // Not while the listener's own change is still on its way: the slider would jump back.
+                    if let self, self.volumeSend == nil, self.volumeControl?.uid == device.uid { self.playerVolume = Double(level) / 100 }
+                }
+                try? await Task.sleep(for: .seconds(3))
+            }
+        }
+    }
+
+    /// Sets the player's own volume (0…1). The slider moves at once; the player is told a moment after the last change, so a
+    /// drag sends a few calls, not hundreds.
+    func setPlayerVolume(_ level: Double) {
+        guard let control = volumeControl?.control else { return }
+        let level = min(1, max(0, level))
+        playerVolume = level
+        volumeSend?.cancel()
+        volumeSend = Task { [weak self] in
+            try? await Task.sleep(for: .milliseconds(120))
+            guard !Task.isCancelled else { return }
+            try? await control.setVolume(Int((level * 100).rounded()))
+            if !Task.isCancelled { self?.volumeSend = nil }
+        }
+    }
+
+    private func cancelVolumeSend() {
+        volumeSend?.cancel()
+        volumeSend = nil
     }
 
     /// Searches again (the output list opened).
@@ -77,6 +157,8 @@ final class RendererOutputModel {
             }
             playback?.shutdown()
             playback = nil
+            // No network player plays now: a volume change still on its way to one stays unsent.
+            cancelVolumeSend()
             return nil
         }
         // The same renderer at the same address, or one that is answering as it is: its playback carries on. So does one
@@ -102,11 +184,11 @@ final class RendererOutputModel {
 @MainActor
 enum RendererSwitch {
     static var title: String {
-        String(localized: "Network Players (UPnP, beta)", comment: "Settings › Playback: the switch that brings network players (UPnP AV and OpenHome, such as moOde or a streamer) into the app as outputs. “UPnP” and “beta” stay as they are in your language.")
+        String(localized: "Network Players (Sonos and UPnP, beta)", comment: "Settings › Playback: the switch that brings network players (Sonos rooms, and UPnP AV and OpenHome players such as moOde or a streamer) into the app as outputs. “Sonos”, “UPnP” and “beta” stay as they are in your language.")
     }
 
     static var explanation: String {
-        String(localized: "Plays to network players on your network (UPnP and OpenHome). Off, Vespertine doesn't look for them, opens no port for them, and plays as before.", comment: "Settings › Playback: the caption under the Network Players (UPnP, beta) switch.")
+        String(localized: "Plays to Sonos rooms and other network players on your network (UPnP and OpenHome). Off, Vespertine doesn't look for them, opens no port for them, and plays as before.", comment: "Settings › Playback: the caption under the Network Players (Sonos and UPnP, beta) switch.")
     }
 
     /// Turns the feature on or off and answers the model that should exist now: `current` or a new, started one while on; nil off.
@@ -144,3 +226,17 @@ extension AppSettings {
         if !unlocked { setAppVolumeLevel(1, for: uid) }
     }
 }
+
+#if DEBUG
+/// `-VespertineRendererDemo`: answers every search with the given descriptions, as if each player had replied from its own host.
+private struct DemoRendererSearch: SSDPSearching {
+    let locations: [URL]
+
+    func search(targets: [String], mx: Int, wait: TimeInterval) async -> [SSDPResponse] {
+        locations.map { location in
+            let udn = "uuid:demo-\(location.host ?? "")-\(location.port ?? 0)"
+            return SSDPResponse(location: location, st: targets.first ?? "", usn: udn, udn: udn, responder: location.host)
+        }
+    }
+}
+#endif

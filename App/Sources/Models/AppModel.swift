@@ -186,7 +186,7 @@ final class AppModel {
     let settings: AppSettings
     /// The saved speaker groups; nil unless the Settings switch (Speaker Groups (beta)) is on.
     private(set) var speakerGroups: SpeakerGroupsModel?
-    /// Network renderers; nil unless the Settings switch (Network Players (UPnP, beta)) is on.
+    /// Network renderers; nil unless the Settings switch (Network Players (Sonos and UPnP, beta)) is on.
     private(set) var renderers: RendererOutputModel?
     /// AirPlay receivers; nil unless the Settings switch (AirPlay Players (beta)) is on.
     private(set) var airPlay: AirPlayOutputModel?
@@ -582,7 +582,7 @@ final class AppModel {
         }
     }
 
-    /// The Network Players (UPnP, beta) switch. Turning it off while a renderer is the chosen output stops the music and lets
+    /// The Network Players (Sonos and UPnP, beta) switch. Turning it off while a renderer is the chosen output stops the music and lets
     /// go of it: what was playing on the renderer doesn't start on this Mac's own output.
     func setRenderersFeature(_ on: Bool) {
         if !RendererSwitch.keepsOutput(settings.selectedDeviceUID, turningOnTo: on) {

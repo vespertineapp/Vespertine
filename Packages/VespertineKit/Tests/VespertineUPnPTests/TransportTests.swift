@@ -117,6 +117,41 @@ struct TransportTests {
         #expect(fake.calls.last?.arguments["Unit"] == "REL_TIME")
     }
 
+    @Test("AV: a clear of the next song the renderer refuses leaves it known, so the transport recognises the renderer going on to it")
+    func avRefusedClearKeepsNext() async throws {
+        let fake = try await FakeRenderer(kind: .av(setNext: true))
+        defer { fake.stop() }
+        let device = try await RendererDevice.load(location: fake.location)
+        let transport = try AVTransportControl(description: device.description, gapless: true)
+        try await transport.load(current: track("a"), next: track("b"))
+        fake.fail("SetNextAVTransportURI", code: 501)
+        await #expect(throws: UPnPError.self) { try await transport.replaceNext(nil) }
+        #expect(fake.nextURI == track("b").uri.absoluteString)
+        fake.advance()
+        #expect(try await transport.status().currentURI == track("b").uri)
+        // And so with a new next song refused.
+        try await transport.replaceNext(track("c"))
+        fake.fail("SetNextAVTransportURI", code: 501)
+        await #expect(throws: UPnPError.self) { try await transport.replaceNext(track("d")) }
+        fake.advance()
+        #expect(try await transport.status().currentURI == track("c").uri)
+    }
+
+    @Test("AV: the renderer went on to the next song just before it was cleared: the transport still reports the song it is on")
+    func avClearedAfterAdvance() async throws {
+        let fake = try await FakeRenderer(kind: .av(setNext: true))
+        defer { fake.stop() }
+        let device = try await RendererDevice.load(location: fake.location)
+        let transport = try AVTransportControl(description: device.description, gapless: true)
+        try await transport.load(current: track("a"), next: track("b"))
+        #expect(try await transport.status().currentURI == track("a").uri)
+        fake.advance()
+        try await transport.replaceNext(nil)
+        #expect(try await transport.status().currentURI == track("b").uri)
+        // Reconciled: once seen on it, it stays the song reported.
+        #expect(try await transport.status().currentURI == track("b").uri)
+    }
+
     @Test("AV without SetNext: not gapless; the renderer is never sent a next song, and stops when one ends")
     func avNoSetNext() async throws {
         let fake = try await FakeRenderer(kind: .av(setNext: false))

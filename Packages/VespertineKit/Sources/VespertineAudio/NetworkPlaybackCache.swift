@@ -1109,20 +1109,20 @@ public final class StagedRemoteFile: @unchecked Sendable {
     }
 
     /// Copies `item` whole when its URL is a remote scheme's (it waits for the last byte; call it off the main and real-time
-    /// threads), or returns nil for a file. A cancelled stage gives up the copy.
+    /// threads), or returns nil for a file. A cancelled stage lets go of its hold on the copy: the download is given up when
+    /// nobody else holds it, and goes on for whoever does.
     public static func stage(_ item: PlayableItem, cancelled: () -> Bool = { false }) throws -> StagedRemoteFile? {
         try stage(item, in: .shared, cancelled: cancelled)
     }
 
     static func stage(_ item: PlayableItem, in cache: NetworkPlaybackCache, cancelled: () -> Bool) throws -> StagedRemoteFile? {
         guard !item.url.isFileURL else { return nil }
+        // The copy is the cache's entry for the song, shared with everyone who plays it: the engine, when the listener
+        // switches from a network player to the Mac while it downloads, holds this very entry. A stage that fails or is given
+        // up only lets go of it (the entry is dropped as this returns), never cancels it: the entry's own end (the last
+        // holder letting go) cancels the download, so a player's give-up can't fail the Mac's playback of the same song.
         let entry = try cache.entry(key: item.cacheKey ?? item.url.absoluteString, url: item.url, cancelled: cancelled)
-        do {
-            try entry.prepare(full: true, lead: entry.size, cancelled: cancelled)
-        } catch {
-            entry.cancel()
-            throw error
-        }
+        try entry.prepare(full: true, lead: entry.size, cancelled: cancelled)
         return StagedRemoteFile(entry: entry)
     }
 }

@@ -44,7 +44,8 @@ public enum FormatKind: String, CaseIterable, Sendable, Hashable, Identifiable {
         case "WavPack": return .wavPack
         case "APE": return .ape
         case "MP3": return .mp3
-        case "AAC": return .aac
+        // xHE-AAC is named apart only for what a network player takes (a Sonos takes AAC, not it); to the listener it is AAC.
+        case "AAC", "xHE-AAC": return .aac
         default:
             if codec.hasPrefix("Dolby") { return .dolby }
             if codec.hasPrefix("DTS") { return .dts }

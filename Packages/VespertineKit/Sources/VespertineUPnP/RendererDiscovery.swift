@@ -13,19 +13,24 @@ public struct RendererDevice: Sendable, Hashable, Identifiable {
     public var description: DeviceDescription
     public var kind: RendererKind
     public var capabilities: RendererCapabilities
+    /// A Sonos speaker's place in its system (its room, the rooms grouped with it, its surrounds and Sub), as last read;
+    /// nil for other players, and for a Sonos whose system didn't say.
+    public var sonos: SonosZone?
 
     /// The output UID Vespertine stores for it: `upnp:` and its UDN.
     public var uid: String { Self.uidPrefix + description.udn }
     public var id: String { uid }
-    public var name: String { description.friendlyName }
+    /// A Sonos is named by its room, or by all the rooms playing together ("Living Room + Kitchen").
+    public var name: String { sonos?.displayName ?? description.friendlyName }
     public var host: String { description.location.host ?? "" }
 
     public static func isRendererUID(_ uid: String?) -> Bool { uid?.hasPrefix(uidPrefix) == true }
 
-    public init(description: DeviceDescription, kind: RendererKind, capabilities: RendererCapabilities) {
+    public init(description: DeviceDescription, kind: RendererKind, capabilities: RendererCapabilities, sonos: SonosZone? = nil) {
         self.description = description
         self.kind = kind
         self.capabilities = capabilities
+        self.sonos = sonos
     }
 
     public enum LoadError: Error { case notARenderer }
@@ -155,25 +160,60 @@ public final class RendererDiscovery: @unchecked Sendable {
         let replies = await searcher.search(targets: SSDP.rendererTargets, mx: 2, wait: 3)
         var locations: [String: URL] = [:]
         // A reply naming a description on another host than its own isn't followed (it could point Vespertine anywhere).
-        for reply in replies where locations[reply.udn] == nil {
+        for reply in replies {
+            // A Sonos answers as a speaker, as its renderer and as its media server, all at one description: one renderer,
+            // known by the renderer's own name whichever of them answered.
+            let udn = SonosTopology.uuid(udn: reply.udn).map { "uuid:\($0)_MR" } ?? reply.udn
+            guard locations[udn] == nil else { continue }
             if let responder = reply.responder, reply.location.host != responder { continue }
             // UPnP descriptions are served over plain HTTP; nothing else (a file, another scheme) is read.
             guard reply.location.scheme?.lowercased() == "http" else { continue }
-            locations[reply.udn] = reply.location
+            locations[udn] = reply.location
         }
         var loaded: [String: RendererDevice] = [:]
+        var hidden: [String] = []
+        /// Sonos speakers as their system arranges them now: each given its place, and only the rooms that lead a group kept
+        /// (surrounds, a Sub, the second speaker of a pair and rooms following another aren't outputs of their own). The
+        /// arrangement is read from the first speaker that answers; when none does, they are all kept as they were found.
+        func arranged(_ devices: [String: RendererDevice]) async -> [String: RendererDevice] {
+            let speakers = devices.filter { $0.value.isSonos }
+            guard !speakers.isEmpty else { return devices }
+            var topology: SonosTopology?
+            for device in speakers.values.sorted(by: { $0.uid < $1.uid }) {
+                guard let service = device.description.service(.zoneGroupTopology),
+                      let state = try? await client.call(service, "GetZoneGroupState")["ZoneGroupState"] else { continue }
+                topology = SonosTopology.parse(state)
+                if topology != nil { break }
+            }
+            guard let topology else { return devices }
+            var out = devices
+            for (udn, device) in speakers {
+                guard let uuid = SonosTopology.uuid(udn: device.description.udn), let zone = topology.zone(uuid: uuid) else { continue }
+                if zone.isOutput {
+                    out[udn]?.sonos = zone
+                } else {
+                    out[udn] = nil
+                    hidden.append(udn)
+                }
+            }
+            return out
+        }
         for (udn, location) in locations {
             let known = lock.withLock { found[udn]?.device }
-            if let known, known.description.location == location { loaded[udn] = known; continue }
+            // Its place in a Sonos system is read again at every search (rooms are grouped and ungrouped from the Sonos app).
+            if var known, known.description.location == location { known.sonos = nil; loaded[udn] = known; continue }
             if let device = try? await RendererDevice.load(location: location, client: client) {
                 loaded[udn] = device
             } else {
                 lock.withLock { failures[udn, default: 0] += 1 }
             }
         }
+        loaded = await arranged(loaded)
         let list = lock.withLock { () -> [RendererDevice]? in
             _searching = false
             guard running else { return nil }
+            // A Sonos speaker that is part of a room (or of a group led by another room) stops being an output at once.
+            for udn in hidden { found[udn] = nil }
             for (udn, device) in loaded { found[udn] = (device, 0); failures[udn] = nil }
             for udn in found.keys where loaded[udn] == nil {
                 found[udn]?.missed += 1

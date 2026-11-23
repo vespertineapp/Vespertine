@@ -69,7 +69,7 @@ struct Harness {
     let events: EventLog
     let queue: [PlayableItem]
 
-    /// `pollInterval` 0 with a `clock`: the test steps the polls (`settleForTests`) and the time itself.
+    /// `pollInterval` 0 with a `clock`: no poller (`polling: nil`); the test steps the polls (`settleForTests`) and the time itself.
     static func make(kind: FakeRenderer.Kind, files: Int = 3, startTimeout: TimeInterval = 15, lostAfter: TimeInterval = 0.3,
                      pollInterval: TimeInterval = 0.05, clock: SteppedClock? = nil) async throws -> Harness {
         let fake = try await FakeRenderer(kind: kind)
@@ -78,7 +78,7 @@ struct Harness {
         let device = try await RendererDevice.load(location: fake.location)
         let queue = try (0..<files).map { PlayableItem(url: try makeWAV(seed: $0 + 1)) }
         let now: @Sendable () -> Date = if let clock { { clock.now } } else { { Date() } }
-        let playback = RendererPlayback(renderer: device, transport: try device.makeTransport(), media: media, pollInterval: pollInterval,
+        let playback = RendererPlayback(renderer: device, transport: try device.makeTransport(), media: media, polling: pollInterval > 0 ? pollInterval : nil,
                                         startTimeout: startTimeout, lostAfter: lostAfter, now: now)
         let items = Locked(queue)
         playback.nextItemProvider = { finished in
@@ -121,6 +121,8 @@ struct RendererPlaybackTests {
         let first = try #require(h.fake.currentURI)
         #expect(first.contains("/media/"))
         #expect(await h.fake.fetched(first) == (try Data(contentsOf: h.queue[0].url)))
+        // The next song is prepared off the command worker and handed over once ready.
+        await h.playback.settleForTests()
         #expect(h.fake.playlistURIs.count == 2)   // current + next only
         let snap = h.playback.snapshot
         #expect(snap.state == .playing)
@@ -371,6 +373,26 @@ struct RendererPlaybackTests {
         if case .unplayable = RendererMode.decide(item: wav, url: wav.url, source: nil, settings: .init(), capabilities: none) {} else { Issue.record("expected unplayable") }
         // A renderer that says nothing accepts everything.
         #expect(RendererMode.decide(item: wav, url: wav.url, source: nil, settings: .init(), capabilities: .init()) == .passThrough(mime: "audio/wav"))
+    }
+
+    @Test("A poll interval of 0, below 0 or not a number, given to the public initialiser, still polls the player: the song is seen to start",
+          arguments: [0, -1, Double.nan])
+    func pollIntervalClamped(interval: Double) async throws {
+        let fake = try await FakeRenderer(kind: .openHome)
+        let media = MediaServer()
+        try await media.start()
+        let device = try await RendererDevice.load(location: fake.location)
+        let playback = RendererPlayback(renderer: device, transport: try device.makeTransport(), media: media, pollInterval: interval)
+        #expect(playback.pollInterval == (interval.isNaN ? RendererPlayback.defaultPollInterval : RendererPlayback.minimumPollInterval))
+        #expect(RendererPlayback.pollInterval(2) == 2)
+        #expect(RendererPlayback.pollInterval(.infinity) == RendererPlayback.maximumPollInterval)
+        let events = EventLog()
+        playback.eventHandler = { events.add($0) }
+        defer { playback.shutdown(); media.stop(); fake.stop() }
+        let item = PlayableItem(url: try makeWAV(seed: 1))
+        playback.play(item)
+        // Only a poll sees the song start: with no poller it is never announced.
+        #expect(await events.wait(for: "started \(item.url.lastPathComponent)", timeout: 5), "the player wasn't polled")
     }
 }
 

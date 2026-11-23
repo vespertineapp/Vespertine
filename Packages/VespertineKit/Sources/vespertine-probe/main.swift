@@ -13,6 +13,9 @@
 //                             exits 0 when every case is bit-exact, 1 on a failure, 2 on a test setup problem
 //   vespertine-probe group-info <leader> [<follower> …] [--json]   (Phase 0 of multi-DAC speaker groups: read-only; see
 //                             GroupProbeCLI.usage for this and the group-play / group-skew commands)
+//   vespertine-probe sonos [<file>…]          searches the network for Sonos speakers and other network players (read-only:
+//                             plays nothing, changes nothing), prints what each said, how the Sonos system is arranged,
+//                             which rooms Vespertine would list, and for each file what each room would be sent
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
 
@@ -20,6 +23,7 @@ import CoreAudio
 import Foundation
 import VespertineAudio
 import VespertineGroupProbe
+import VespertineUPnP
 
 func readback(_ id: AudioObjectID) -> (rate: Double, physical: String, hogPID: pid_t) {
     var addr = AudioObjectPropertyAddress(mSelector: kAudioDevicePropertyNominalSampleRate, mScope: kAudioObjectPropertyScopeGlobal, mElement: kAudioObjectPropertyElementMain)
@@ -41,6 +45,64 @@ func readback(_ id: AudioObjectID) -> (rate: Double, physical: String, hogPID: p
 let args = CommandLine.arguments
 if args.count >= 2, GroupProbeCLI.commands.contains(args[1]) { exit(GroupProbeCLI.run(args[1], Array(args.dropFirst(2)))) }
 let devices = OutputDevices.list()
+
+if args.count >= 2, args[1] == "sonos" {
+    let files = args.dropFirst(2).map { URL(fileURLWithPath: $0) }
+    let done = DispatchSemaphore(value: 0)
+    // Detached: this thread waits for it below, so it can't run here.
+    Task.detached {
+        defer { done.signal() }
+        let replies = await SSDPSearcher().search(targets: SSDP.rendererTargets, mx: 2, wait: 4)
+        print("\(replies.count) answer(s) to the search")
+        for reply in replies.sorted(by: { $0.usn < $1.usn }) { print("  \(reply.responder ?? "?")  \(reply.usn)  \(reply.location.absoluteString)") }
+        let client = SOAPClient()
+        var devices: [RendererDevice] = []
+        for location in Set(replies.map(\.location)).sorted(by: { $0.absoluteString < $1.absoluteString }) {
+            do {
+                let device = try await RendererDevice.load(location: location, client: client)
+                if !devices.contains(where: { $0.uid == device.uid }) { devices.append(device) }
+            } catch { print("  \(location.absoluteString): not read as a player (\(error))") }
+        }
+        var topology: SonosTopology?
+        for device in devices where device.isSonos {
+            guard let service = device.description.service(.zoneGroupTopology) else { print("\(device.name): no ZoneGroupTopology service in its description"); continue }
+            do {
+                let state = try await client.call(service, "GetZoneGroupState")["ZoneGroupState"] ?? ""
+                topology = SonosTopology.parse(state)
+                print("\nHow the Sonos system says it is arranged (from \(device.host)), \(topology == nil ? "NOT UNDERSTOOD" : "understood"):\n\(state)\n")
+                if topology != nil { break }
+            } catch { print("\(device.name): GetZoneGroupState failed (\(error))") }
+        }
+        print("Players:")
+        for var device in devices.sorted(by: { $0.name < $1.name }) {
+            let zone = SonosTopology.uuid(udn: device.description.udn).flatMap { topology?.zone(uuid: $0) }
+            device.sonos = zone
+            let listed = !device.isSonos || zone?.isOutput ?? true
+            print("  \(listed ? "LISTED " : "hidden ") \(device.name)  [\(device.description.modelName)] \(device.host)  \(device.kind.protocolName)\(device.kind.gapless ? ", takes a next song" : "")"
+                  + (zone.map { "  room: \($0.roomName), leads its group: \($0.isCoordinator), speakers: \($0.speakerSetup ?? "one")" } ?? ""))
+            if listed {
+                print("          formats it lists: \(device.capabilities.acceptedFormats.joined(separator: ", "))")
+                if device.isSonos {
+                    let d = device.description
+                    print("          software: \(device.sonosGeneration) (swGen \(d.softwareGeneration ?? "not stated"), version \(d.displayVersion ?? "not stated")); "
+                          + "held to up to \(device.limits?.maxBitDepth ?? 0)-bit / \(Int(device.limits?.maxSampleRate ?? 0)) Hz")
+                }
+                if let volume = device.makeVolume(client: client), let level = try? await volume.volume() { print("          volume now: \(level)") }
+                for file in files {
+                    guard let described = try? SourceDescription.describe(PlayableItem(url: file), url: file) else { print("          \(file.lastPathComponent): can't be read"); continue }
+                    let item = PlayableItem(url: file)
+                    let forecast = RouteForecast.renderer(item: item, url: file, source: described.format, settings: RendererSettings(),
+                                                          capabilities: device.capabilities, limits: device.limits, homeTheater: zone?.isHomeTheater == true)
+                    print("          \(file.lastPathComponent): \(forecast.line)")
+                    forecast.notes.forEach { print("            \($0)") }
+                }
+            }
+        }
+        if devices.isEmpty { print("  none. Check that this Mac and the speakers are on the same network, and that this tool may use the local network.") }
+    }
+    done.wait()
+    exit(0)
+}
 
 if args.count < 2 || args[1] == "list" {
     for d in devices {

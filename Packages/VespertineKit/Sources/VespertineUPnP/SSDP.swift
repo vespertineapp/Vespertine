@@ -10,10 +10,12 @@ import Foundation
 public enum SSDP {
     public static let multicastHost = "239.255.255.250"
     public static let port: UInt16 = 1900
-    /// What a search asks for: UPnP AV renderers, and OpenHome ones (some announce only their Product service).
+    /// What a search asks for: UPnP AV renderers, OpenHome ones (some announce only their Product service), and Sonos
+    /// speakers by their own device type (a Sonos is a renderer inside a ZonePlayer, and always answers for the outer one).
     public static let rendererTargets = [
         "urn:schemas-upnp-org:device:MediaRenderer:1",
         "urn:av-openhome-org:service:Product:1",
+        "urn:schemas-upnp-org:device:ZonePlayer:1",
     ]
 
     public static func searchMessage(target: String, mx: Int) -> Data {

@@ -423,6 +423,11 @@ enum DeveloperHooks {
         case "findMusic": model.showFindMusic = true
         case "enrich": model.enrichAlbumKeys = []
         case "connectServer": model.showConnectServer = true
+        case "outputs":
+            // The output list, as the output chip opens it, in a window of its own (a popover isn't drawn by -VespertineSnapshot).
+            showForQA(titled: "Outputs", width: 360, height: 1100, model: model) { ScrollView { DevicePicker() } }
+            // What the list shows under it for a chosen network player (its notes), which a screen-high window cuts off.
+            showForQA(titled: "Output Details", width: 360, height: 760, model: model) { QAChosenRendererDetails() }
         case "spatialExport":
             if let album = model.library.albums.first(where: { $0.title == (open ?? play) }) {
                 model.spatialExportTracks = model.library.tracks(albumKey: album.key)
@@ -604,5 +609,16 @@ private struct SpeakerGroupEditorLowerHalf: View {
             .padding(20)
         }
         .onChange(of: group) { _, new in groups.upsert(new) }
+    }
+}
+
+/// `-VespertineOpenSheet outputs`: the chosen network player's details, once it has been found.
+private struct QAChosenRendererDetails: View {
+    @Environment(AppModel.self) private var model
+
+    var body: some View {
+        ScrollView {
+            if let renderer = model.chosenRenderer { RendererDetails(renderer: renderer).padding(.vertical, 12) }
+        }
     }
 }

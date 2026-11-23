@@ -476,6 +476,9 @@ enum SourceOpener {
         case kAudioFormatFLAC: return "FLAC"
         case kAudioFormatAppleLossless: return "ALAC"
         case kAudioFormatMPEG4AAC, kAudioFormatMPEG4AAC_HE, kAudioFormatMPEG4AAC_HE_V2, kAudioFormatMPEG4AAC_LD: return "AAC"
+        // xHE-AAC (MPEG-D USAC) is a codec of its own to a player: one that takes AAC needn't take it (a Sonos doesn't). The
+        // same name FFmpeg's profile gives it (FFmpegDecoder).
+        case kAudioFormatMPEGD_USAC: return "xHE-AAC"
         case kAudioFormatMPEGLayer3: return "MP3"
         case kAudioFormatOpus: return "Opus"
         case kAudioFormatAC3: return "Dolby Digital"
