@@ -38,6 +38,9 @@ private final class GatedTransport: RendererTransport, @unchecked Sendable {
     let inner: any RendererTransport
     let held = Locked(false)
     let loadsAsked = Locked(0)
+    /// While set, every change of the next song fails (a player busy or briefly off the network); counted while set.
+    let refusesNext = Locked(false)
+    let nextRefused = Locked(0)
     init(_ inner: any RendererTransport) { self.inner = inner }
     var gapless: Bool { inner.gapless }
     func load(current: RendererTrack, next: RendererTrack?) async throws {
@@ -45,7 +48,13 @@ private final class GatedTransport: RendererTransport, @unchecked Sendable {
         while held.withLock({ $0 }) { try? await Task.sleep(for: .milliseconds(10)) }
         try await inner.load(current: current, next: next)
     }
-    func replaceNext(_ next: RendererTrack?) async throws { try await inner.replaceNext(next) }
+    func replaceNext(_ next: RendererTrack?) async throws {
+        if refusesNext.withLock({ $0 }) {
+            nextRefused.withLock { $0 += 1 }
+            throw UPnPError.fault(code: 501, description: "Action Failed")
+        }
+        try await inner.replaceNext(next)
+    }
     func play() async throws { try await inner.play() }
     func pause() async throws { try await inner.pause() }
     func stop() async throws { try await inner.stop() }
@@ -287,5 +296,57 @@ struct NextPreparationTests {
         rig.fake.advance()
         try await Task.sleep(for: .milliseconds(300))
         #expect(rig.fake.currentURI != old, "the player went on to the song no longer next")
+    }
+
+    // MARK: The third review (2026-11-23)
+
+    /// The first song plays and its next one is on the player; then the player refuses changes of its next song and the queue
+    /// is edited to `queue`. Hands back the next song's address the player still holds.
+    private func refusedClear(_ rig: Rig, queue: [PlayableItem]) async throws -> String {
+        rig.playback.play(rig.first)
+        #expect(await rig.events.wait(for: "started \(rig.first.url.lastPathComponent)"))
+        #expect(await within(5) { rig.fake.nextURI != nil })
+        await rig.playback.settleForTests()
+        let old = try #require(rig.fake.nextURI)
+        rig.transport.refusesNext.withLock { $0 = true }
+        rig.queue.withLock { $0 = queue }
+        rig.playback.queueChanged()
+        #expect(await within(2) { rig.transport.nextRefused.withLock { $0 } > 0 }, "the clear wasn't asked for")
+        await rig.playback.settleForTests()
+        return old
+    }
+
+    @Test("A clear of the next song that fails keeps the song (its address, its copy) until the clear is confirmed, and is tried again")
+    func refusedClearIsKeptAndRetried() async throws {
+        let ready = PlayableItem(url: try makeFLAC(from: try makeWAV(seconds: 2, seed: 7)))
+        let rig = try await Rig.make(second: ready)
+        defer { rig.close() }
+        // The next song is taken out of the queue: nothing follows the first song now.
+        let old = try await refusedClear(rig, queue: [rig.first])
+        #expect(rig.fake.nextURI == old)
+        #expect(rig.playback.heldNextURIsForTests.contains(old), "let go of while the player may still go on to it")
+        // The player answers again: the clear is tried again, and the song let go of once the player has taken it off.
+        rig.transport.refusesNext.withLock { $0 = false }
+        #expect(await within(3) { rig.fake.nextURI == nil }, "the clear wasn't tried again")
+        #expect(await within(2) { !rig.playback.heldNextURIsForTests.contains(old) }, "kept after the clear was confirmed")
+    }
+
+    @Test("A player that goes on to a next song it couldn't be told to drop is put right: the queue's next song plays, or it stops at the queue's end",
+          arguments: [false, true])
+    func refusedClearPlayerMovesOn(following: Bool) async throws {
+        let ready = PlayableItem(url: try makeFLAC(from: try makeWAV(seconds: 2, seed: 7)))
+        let rig = try await Rig.make(second: ready)
+        defer { rig.close() }
+        let old = try await refusedClear(rig, queue: following ? [rig.first, rig.third] : [rig.first])
+        // The player still refuses: the first song ends and it goes on to the song no longer in the queue.
+        rig.fake.advance()
+        #expect(rig.fake.currentURI == old)
+        if following {
+            #expect(await rig.events.wait(for: "started \(rig.third.url.lastPathComponent)", timeout: 5), "the queue's next song didn't play")
+            #expect(rig.fake.currentURI != old)
+        } else {
+            #expect(await rig.events.wait(for: "ended", timeout: 5), "the queue's end wasn't reached")
+            #expect(await within(2) { rig.fake.transportState == "Stopped" }, "the song no longer in the queue plays on")
+        }
     }
 }
