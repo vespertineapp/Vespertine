@@ -40,6 +40,9 @@ private final class KeepingMac: @unchecked Sendable {
     /// The ReplayGain values the Mac has for each song.
     var gains: [Int64: ReplayGain] = [:]
     private var _asked: [Int64] = []
+    private var _offsets: [(song: Int64, offset: Int64)] = []
+    /// Every range it sent, by song and where it started.
+    var offsets: [(song: Int64, offset: Int64)] { lock.withLock { _offsets } }
     /// The songs it was asked about without opening them.
     var asked: [Int64] { lock.withLock { _asked } }
 
@@ -76,6 +79,7 @@ private final class KeepingMac: @unchecked Sendable {
                 reads += 1
                 if let limit = _failAfter, reads > limit { _connected = false }
                 guard _connected, let id = numbers[stream] else { return nil }
+                _offsets.append((id, offset))
                 return files[id]
             }
             guard let data else { throw RemoteLinkError.closed }
@@ -184,20 +188,62 @@ private func bytes(_ id: Int64, count: Int = 3500) -> Data { Data((0..<count).ma
         #expect(keeper.progress(of: "album:a").done == 3 && !keeper.isFull)
     }
 
-    @Test func aMacThatGoesAwayMidSongLeavesNoBrokenFileAndTheRestComesLater() async throws {
+    @Test func aMacThatGoesAwayMidSongLeavesNoBrokenSongAndCarriesOnFromWhereItStopped() async throws {
         let (keeper, mac, directory) = try made([1, 2, 3])
         mac.drop(afterReads: 5)
         keeper.keep(album([1, 2, 3]))
         try await wait { keeper.isIdle }
         #expect(keeper.progress(of: "album:a").done == 1)
         #expect(keeper.unavailable.isEmpty)
+        // Song 2 is not kept (nothing broken plays), but what arrived of it waits beside the songs, with its note.
+        #expect(keeper.store.kept(2) == nil)
         let names = try FileManager.default.contentsOfDirectory(atPath: directory.path)
-        #expect(names.filter { $0.hasSuffix(".part") }.isEmpty)
+        #expect(names.contains("2.part") && names.contains("2.part.progress"))
+        let before = mac.offsets.filter { $0.song == 2 }.map(\.offset)
         mac.connected = true
         keeper.resume()
         try await wait { keeper.isIdle }
         #expect(keeper.progress(of: "album:a").done == 3)
         #expect(try Data(contentsOf: #require(keeper.store.kept(2)).file) == bytes(2))
+        // The second time, song 2's first range was not asked for again.
+        let after = mac.offsets.filter { $0.song == 2 }.map(\.offset).dropFirst(before.count)
+        #expect(before.contains(0) && !after.contains(0))
+        let left = try FileManager.default.contentsOfDirectory(atPath: directory.path)
+        #expect(left.filter { $0.hasSuffix(".part") || $0.hasSuffix(".progress") }.isEmpty)
+    }
+
+    @Test func aSongPartFetchedWhenTheAppClosedCarriesOnWhenItOpensAgain() async throws {
+        let (keeper, mac, directory) = try made([1, 2])
+        mac.drop(afterReads: 2)
+        keeper.keep(album([1, 2]))
+        try await wait { keeper.isIdle }
+        #expect(keeper.progress(of: "album:a").done == 0)
+        // The app is closed and opened again: a new store on the same folder keeps the part-made song.
+        let reopened = Keeper(store: try KeptStore(directory: directory))
+        reopened.pollInterval = .milliseconds(10)
+        mac.connected = true
+        let asked = mac.offsets.count
+        reopened.client = mac.client
+        try await wait { reopened.isIdle }
+        #expect(reopened.progress(of: "album:a").done == 2)
+        #expect(!mac.offsets.dropFirst(asked).contains { $0.song == 1 && $0.offset == 0 })
+        #expect(try Data(contentsOf: #require(reopened.store.kept(1)).file) == bytes(1))
+    }
+
+    @Test func removingAListClearsWhatWasPartFetchedOfIt() async throws {
+        let (keeper, mac, directory) = try made([1, 2])
+        mac.drop(afterReads: 2)
+        keeper.keep(album([1, 2]))
+        try await wait { keeper.isIdle }
+        #expect(try FileManager.default.contentsOfDirectory(atPath: directory.path).contains("1.part"))
+        keeper.remove("album:a")
+        let names = try FileManager.default.contentsOfDirectory(atPath: directory.path)
+        #expect(names.filter { $0.hasSuffix(".part") || $0.hasSuffix(".progress") }.isEmpty)
+        // And a part-made song nothing wants any more is cleared when the app opens.
+        try Data([1, 2, 3]).write(to: directory.appendingPathComponent("9.part"))
+        try Data("{}".utf8).write(to: directory.appendingPathComponent("9.part.progress"))
+        _ = try KeptStore(directory: directory)
+        #expect(!FileManager.default.fileExists(atPath: directory.appendingPathComponent("9.part").path))
     }
 
     @Test func aKeptPlaylistFollowsWhatItHoldsOnTheMac() async throws {

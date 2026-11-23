@@ -89,7 +89,8 @@ public final class KeptStore {
 
     private var indexFile: URL { directory.appendingPathComponent("index.json") }
 
-    /// Opens (or starts) the folder. Song files the index doesn't know, and half-made ones, are cleared out.
+    /// Opens (or starts) the folder. Song files the index doesn't know are cleared out, and so are half-made ones of songs
+    /// no kept list wants any more; a half-made song that is still wanted stays, to carry on from.
     public init(directory: URL) throws {
         self.directory = directory
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
@@ -100,7 +101,10 @@ public final class KeptStore {
                 songs[id] = record
             }
         }
-        let known = Set(songs.values.map(\.name) + ["index.json"])
+        let parts = missing.compactMap(\.track.id).flatMap { id in
+            [partFile(for: id), StreamDownloader.progressFile(for: partFile(for: id))].map(\.lastPathComponent)
+        }
+        let known = Set(songs.values.map(\.name) + ["index.json"] + parts)
         for name in (try? FileManager.default.contentsOfDirectory(atPath: directory.path)) ?? [] where !known.contains(name) {
             try? FileManager.default.removeItem(at: directory.appendingPathComponent(name))
         }
@@ -218,6 +222,11 @@ public final class KeptStore {
 
     private func prune() {
         let wanted = Set(lists.flatMap { $0.tracks.compactMap(\.id) })
+        // Half-made songs no list wants any more.
+        for name in (try? FileManager.default.contentsOfDirectory(atPath: directory.path)) ?? [] {
+            let stem = name.hasSuffix(".part") ? name.dropLast(5) : name.hasSuffix(".part.progress") ? name.dropLast(14) : nil
+            if let stem, let id = Int64(stem), !wanted.contains(id) { try? FileManager.default.removeItem(at: directory.appendingPathComponent(name)) }
+        }
         for (id, record) in songs where !wanted.contains(id) {
             try? FileManager.default.removeItem(at: directory.appendingPathComponent(record.name))
             bytes -= record.descriptor.byteSize

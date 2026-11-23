@@ -107,8 +107,8 @@ public final class Keeper {
             isFull = true
             return false
         }
+        // What an earlier try left of this song is kept when it is the same bytes (the downloader checks); only the rest is fetched.
         let part = store.partFile(for: song)
-        try? FileManager.default.removeItem(at: part)
         let number = descriptor.stream
         let size = max(1, descriptor.byteSize)
         fetching = (song, 0)
