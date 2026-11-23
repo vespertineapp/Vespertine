@@ -1,6 +1,6 @@
 # Sonos and output routes: result
 
-Branch `feat/sonos-and-output-routes`, local commits only (unsigned, not pushed). Nothing here has been heard on a real Sonos; Sonos-specific behaviour is verified against a pretend Sonos on 127.0.0.1 and against Sonos's documentation and the SoCo library's source. The checklist at the end is the first real test.
+Branch `feat/sonos-and-output-routes`, local commits only (the four commits before this one were made unsigned, this one is signed; not pushed). Nothing here has been heard on a real Sonos; Sonos-specific behaviour is verified against a pretend Sonos on 127.0.0.1 and against Sonos's documentation and the SoCo library's source. The checklist at the end is the first real test.
 
 ## What the branch adds
 
@@ -18,7 +18,23 @@ Branch `feat/sonos-and-output-routes`, local commits only (unsigned, not pushed)
 
 ## Test and build figures (this machine, after the last change)
 
-TESTS_PLACEHOLDER
+**App tests** (`xcodebuild test`, Debug, macOS): **passed**, 276 tests in 59 suites, 0 failed (`** TEST SUCCEEDED **`).
+
+**Engine package tests** (`swift test` in `Packages/VespertineKit`, whole suite, run on its own with the app tests not running): 1483 tests in 234 suites, **5 failed** (8 issues), the rest passed; the separate 211-test group (AirPlay 2) passed. The 5 that failed in that run:
+
+1. "Stop while the next song at another rate waits on its share" (`RateJoinStopTests`)
+2. "A seek while the next song is fetched lands and plays from there" (`LookAheadYieldTests`)
+3. "With a scan in flight, the song's copy goes over the link…" (`NetworkPriorityTests`)
+4. "The compressed frames macOS is handed are byte-identical with the meters…" (`BedMeterTests`)
+5. "Streams that arrive without a notice are found by re-checking" (`DeviceHotplugTests`)
+
+None of the five test files, and none of the code they exercise for this branch, was touched by this branch. **I could not confirm they are "the same 5" as before:** the earlier full run on this branch (build/logs/kit-tests.log, 03:00) failed a different five (one name in common: the scan-in-flight test and the meters test; the others were a flush-notice test, a play/pause/play test and a "scans start nothing" test). What I found instead:
+
+- Run again on their own, on a quiet machine, the same suites (39 tests in 7 suites) **pass, on this branch and on a clean copy of `main` (1.2.3)**.
+- The failures show waits of 400 to 960 seconds, so they look like timing trouble when the whole suite runs on a loaded machine, not like a change in behaviour. That is a reading, not proven: I did not run the whole suite on `main`, which would be the proper like-for-like check (about 20 minutes).
+- I fixed nothing in them, as asked. No test touched by this branch (Sonos, UPnP, output routes, `LimitedStreamTests`, the 6-channel fold) failed.
+
+Not run this pass: the release-mode engine tests, the analysis package tests, the sanitizer checks and the Release build (`scripts/audit.sh` does these). The Release build did succeed in the earlier pass (build/logs/release-build.log), before the last small changes.
 
 ## Not verified: needs a real Sonos
 
