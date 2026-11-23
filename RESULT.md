@@ -31,7 +31,31 @@ An independent review said not to ship yet. Each finding below was fixed with a 
 5. **P2, a Sonos volume change could reach a speaker after it was let go of.** The pending send is cancelled when the room is let go of or replaced, when playback leaves network players, and when Network Players is switched off. Tests: `SonosVolumeSendTests`.
 6. **P2, version.** `project.yml` is 1.2.4, build 77; the Xcode project was regenerated with XcodeGen (it is not tracked in git). No test: a test pinned to a version number would break at every release.
 
-## Test figures (this machine, after the last change)
+## Test figures, this pass (this machine, after the last change, 2026-11-23 07:20–07:37)
+
+**App tests** (`xcodebuild test`, Debug, macOS, as before): **passed**, 283 tests in 60 suites, 0 failed (`** TEST SUCCEEDED **`; the S1 wording is a new check in an existing test, so the count is unchanged). Log: build/logs/r2-app-tests.log.
+
+**UPnP and Sonos** (`VespertineUPnPTests`): **162 passed** (154 before this pass: 5 new in `NextPreparationTests` with two of them run for two cases each, 2 in `XHEAACTests`, 1 in `SonosGenerationTests`), alone and again inside the whole run. The new tests and their suites (20 tests) were run 5 more times on their own: all passed each time.
+
+**Engine package tests** (`swift test`, the whole package, run once, nothing else of mine running alongside; 12 min 51 s):
+
+| Test group | Clean `origin/main` (f39e3116, from the first pass) | This branch, first pass | This branch, now |
+|---|---|---|---|
+| Engine (`VespertineAudioTests`) | 1483 tests, **5 failed** (6 issues) | 1483 tests, **4 failed** (4 issues) | 1483 tests, **3 failed** (6 issues) |
+| UPnP and Sonos | 107 passed | 154 passed | 162 passed |
+| The six other groups (AirPlay 2 211, 273, 151, 73, 37, 31) | all passed | all passed | all passed |
+
+The three failures now:
+
+- "Stop while the next song at another rate waits on its share" (`RateJoinStopTests`): failed on `main` and on the branch's first pass too.
+- "Play pressed twice while the share is quiet…" (`ShareCloseTests`): failed on `main` before.
+- "The compressed frames macOS is handed are byte-identical with the meters and the visualizer on or off" (`BedMeterTests`): new on this list. The Mac's own output renderer was never handed the whole stream (`run.exhausted` false) during the whole run's busiest stretch; the test hands compressed audio to the real output device and gives up after 150 s.
+
+All three waited 380 to 445 s, as the earlier timing failures did. Run alone right after (their three suites, 18 tests): **all passed** (build/logs/r2-engine-failing3-alone.log). The engine code this pass touched is two lines' worth: the codec name for USAC in `SourceOpener.codecName` and the ReplayGain term in `NetworkRender`'s dither decision; neither is on these tests' path (share copies, rate changes, compressed pass-through to a device). Logs: build/logs/r2-engine-whole.log.
+
+Not run this pass: the release-mode engine tests, the analysis package tests, the sanitizer checks and the Release build (`scripts/audit.sh`). `scripts/check-localizations.py`: complete, 44 languages.
+
+## Test figures, first pass (2026-11-23, morning)
 
 **App tests** (`xcodebuild test`, Debug, macOS): **passed**, 283 tests in 60 suites, 0 failed (`** TEST SUCCEEDED **`; 276 in 59 before this pass). Log: build/logs/app-tests-1123-final.log.
 
