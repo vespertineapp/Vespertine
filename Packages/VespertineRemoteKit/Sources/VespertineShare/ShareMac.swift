@@ -260,8 +260,8 @@ public final class ShareMac: RemoteChannel {
                 self.onPush?(.outputs(OutputsState(outputs: [])))
             }
             return .welcome(info)
-        case .streamOpen(let id, let maxSampleRate, let smaller, let dop):
-            return await openStream(id, maxSampleRate: maxSampleRate, smaller: smaller ?? false, dop: dop)
+        case .streamOpen(let id, let maxSampleRate, let smaller, let dop, let original):
+            return await openStream(id, maxSampleRate: maxSampleRate, smaller: smaller ?? false, dop: dop, original: original ?? false)
         case .artwork(let key, let size):
             return await artwork(key, size: size)
         case .streamInfo(let ids, let maxSampleRate) where ids.count == 1:
@@ -415,16 +415,18 @@ public final class ShareMac: RemoteChannel {
                      channels: song.tags.channels, channelLabels: nil, lossless: song.tags.lossless)
     }
 
-    private static func tag(size: Int64, modified: Date) -> String { "\(size)-\(Int64(modified.timeIntervalSince1970))" }
+    nonisolated static func tag(size: Int64, modified: Date) -> String { "\(size)-\(Int64(modified.timeIntervalSince1970))" }
 
     /// A DSD file's tag says the form first: the phone names a stream's file by the start of its tag, and the DoP form and
     /// a PCM form of one song can be the same size.
-    private static func tag(_ rendering: DSDRendering, size: Int64, modified: Date) -> String {
+    nonisolated static func tag(_ rendering: DSDRendering, size: Int64, modified: Date) -> String {
         "\(rendering.form.rawValue)\(Int(rendering.sampleRate))-" + tag(size: size, modified: modified)
     }
 
     /// What the player is given for a DSD file: 24-bit PCM in a CAF file (as DoP, the samples are the DSD's packaging).
-    private func delivered(_ rendering: DSDRendering) -> StreamFormat {
+    private func delivered(_ rendering: DSDRendering) -> StreamFormat { Self.delivered(rendering) }
+
+    nonisolated static func delivered(_ rendering: DSDRendering) -> StreamFormat {
         StreamFormat(codec: "PCM", container: "caf", sampleRate: rendering.sampleRate, bitDepth: 24, channels: rendering.channels, channelLabels: nil, lossless: true)
     }
 
@@ -433,7 +435,8 @@ public final class ShareMac: RemoteChannel {
     ///
     /// A DSD file is opened as the player can read it (`DSDRendering`): as DoP frames when the output takes them (`dop`,
     /// the highest carrier rate), else as PCM no higher than `maxSampleRate`.
-    private func openStream(_ id: Int64, maxSampleRate: Double? = nil, smaller: Bool = false, dop: Double? = nil) async -> RemoteReply {
+    /// `original`: to be kept as the file is; a DSD song is then sent as its own file (see `RemoteCommand.streamOpen`).
+    private func openStream(_ id: Int64, maxSampleRate: Double? = nil, smaller: Bool = false, dop: Double? = nil, original: Bool = false) async -> RemoteReply {
         guard let song = catalog.songs[id] else { return .failed(reason: sayings.notInLibrary) }
         let playback = playback
         do {
@@ -451,7 +454,7 @@ public final class ShareMac: RemoteChannel {
         }
         guard isOpen else { return .failed(reason: "") }
         var rendering: DSDRendering?
-        if let dsd = song.tags.dsd {
+        if let dsd = song.tags.dsd, !(original && !smaller && dsd.playsHere) {
             rendering = DSDRendering.plan(dsd, maxSampleRate: maxSampleRate, smaller: smaller, dop: dop)
             guard rendering != nil else { return .failed(reason: sayings.notInLibrary) }
         }

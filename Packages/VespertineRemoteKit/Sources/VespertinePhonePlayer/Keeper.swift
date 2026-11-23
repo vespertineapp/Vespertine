@@ -69,6 +69,15 @@ public final class Keeper {
         resume()
     }
 
+    /// Songs still to fetch (not counting ones that can't be: refused, or damaged twice).
+    public var remaining: Int { next().count }
+
+    /// Stops fetching now (iOS is ending the app's time in the background). What arrived of the song being fetched stays,
+    /// to carry on from with `resume`.
+    public func pause() {
+        worker?.cancel()
+    }
+
     /// Carries on with whatever is missing. Does nothing while already fetching.
     public func resume() {
         guard worker == nil, client != nil, !next().isEmpty else { return }
@@ -162,7 +171,15 @@ public final class Keeper {
         let deadline = ContinuousClock.now + preparingTimeout
         while true {
             try Task.checkCancellation()
-            let reply = if let rate, let smaller = client.openSmaller { await smaller(song, rate) } else { await client.open(song, rate) }
+            // The original file unless smaller copies were asked for: a DSD song then stays DSD (the player makes PCM or DoP
+            // of it each time it plays, for whatever it is plugged into).
+            let reply = if let rate, let smaller = client.openSmaller {
+                await smaller(song, rate)
+            } else if rate == nil, let original = client.openOriginal {
+                await original(song)
+            } else {
+                await client.open(song, rate)
+            }
             switch reply {
             case .streamOpened(let descriptor): return descriptor
             case .streamPreparing:

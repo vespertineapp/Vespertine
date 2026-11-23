@@ -443,6 +443,47 @@ private func dsdShare() -> (share: FakeShare, files: [String: Data]) {
         #expect(kept.dsdRate == nil && kept.format.sampleRate == 44_100)
     }
 
+    @Test func toKeepADSDSongItOpensAsItsOwnFile() async throws {
+        // "Keep on This Device" keeps the original: the DSF itself, not PCM or DoP made from it for the output of the day.
+        let (mac, files, song) = try await opened()
+        let file = try #require(files["Night Rooms/01 Lantern Street.dsf"])
+        guard case .streamOpened(let kept) = try await mac.request(.streamOpen(id: song, maxSampleRate: nil, original: true), timeout: .seconds(1)) else {
+            throw RemoteLinkError.closed
+        }
+        #expect(kept.kind == .original && kept.dsdRate == nil && kept.format.codec == "DSD" && kept.format.container == "dsf")
+        #expect(kept.byteSize == Int64(file.count))
+        #expect(Data(try await whole(mac, kept)) == file)
+        // Smaller copies are still PCM made from it: that is what "smaller" asks for.
+        let smaller = try await open(mac, song, maxSampleRate: 48_000, smaller: true)
+        #expect(smaller.kind == .pcm)
+    }
+
+    @Test func aKeptDSDFilePlaysAsTheShareWouldHavePlayedIt() async throws {
+        let (mac, files, song) = try await opened()
+        let file = try #require(files["Night Rooms/01 Lantern Street.dsf"])
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("kept-\(UUID()).dsf")
+        defer { try? FileManager.default.removeItem(at: url) }
+        try file.write(to: url)
+        for (rate, dop) in [(nil, nil), (48_000.0, nil), (nil, 768_000.0)] as [(Double?, Double?)] {
+            let fromShare = try await open(mac, song, maxSampleRate: rate, dop: dop)
+            let kept = try #require(try KeptDSD.open(url, maxSampleRate: rate, dop: dop))
+            #expect(kept.descriptor.kind == fromShare.kind && kept.descriptor.format == fromShare.format && kept.descriptor.byteSize == fromShare.byteSize)
+            #expect(kept.descriptor.dsdRate == fromShare.dsdRate && kept.descriptor.frames == fromShare.frames)
+            var bytes = Data()
+            while Int64(bytes.count) < kept.descriptor.byteSize {
+                let piece = try kept.read(offset: Int64(bytes.count), length: 7_777)
+                guard !piece.isEmpty else { break }
+                bytes += piece
+            }
+            #expect([UInt8](bytes) == (try await whole(mac, fromShare)))
+        }
+        // Not a DSD file: nothing to render.
+        let other = FileManager.default.temporaryDirectory.appendingPathComponent("kept-\(UUID()).dsf")
+        defer { try? FileManager.default.removeItem(at: other) }
+        try Data(repeating: 0, count: 500).write(to: other)
+        #expect(try KeptDSD.open(other, maxSampleRate: nil, dop: nil) == nil)
+    }
+
     @Test func theFormsOfOneSongAreNeverTakenForEachOther() async throws {
         // The phone names a stream's file by the first 16 characters of its tag, and reuses a file of the right size:
         // the DoP form and the 176.4 kHz PCM form of a song are the same size.

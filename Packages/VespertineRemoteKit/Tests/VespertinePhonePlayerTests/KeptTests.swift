@@ -35,6 +35,8 @@ private final class KeepingMac: @unchecked Sendable {
     private var reads = 0
     var files: [Int64: Data] = [:]
     var refused: Set<Int64> = []
+    /// How long each read takes.
+    var readDelay: Duration = .zero
     /// Songs sent as FLAC files (the rest as WAV).
     var flac: Set<Int64> = []
     /// Called (with the files) after the first song is opened: a Mac whose file changes between tries.
@@ -45,6 +47,9 @@ private final class KeepingMac: @unchecked Sendable {
     var gains: [Int64: ReplayGain] = [:]
     private var _asked: [Int64] = []
     private var _offsets: [(song: Int64, offset: Int64)] = []
+    private var _originals: [Int64] = []
+    /// Songs asked for as their own files (to keep the original).
+    var originals: [Int64] { lock.withLock { _originals } }
     /// Every range it sent, by song and where it started.
     var offsets: [(song: Int64, offset: Int64)] { lock.withLock { _offsets } }
     /// The songs it was asked about without opening them.
@@ -90,9 +95,21 @@ private final class KeepingMac: @unchecked Sendable {
                 return files[id]
             }
             guard let data else { throw RemoteLinkError.closed }
+            if readDelay > .zero { try await Task.sleep(for: readDelay) }
             let end = min(Int(offset) + length, data.count)
             return StreamFrame(request: 1, stream: stream, offset: offset, endOfStream: end >= data.count, payload: Data(data[Int(offset)..<end]))
         }, close: { [self] _ in lock.withLock { _closed += 1 } }, isConnected: { [self] in connected })
+    }
+
+    /// The same Mac, one that also takes "the original, to keep" (as a share does: a DSD song comes as its own file).
+    var originalClient: PhoneStreamClient {
+        var client = client
+        let open = client.open
+        client.openOriginal = { [self] id in
+            lock.withLock { _originals.append(id) }
+            return await open(id, nil)
+        }
+        return client
     }
 
     /// The same Mac, one that can also say what it knows about a song without opening it.
@@ -270,6 +287,76 @@ private func bytes(_ id: Int64, count: Int = 3500) -> Data { Data((0..<count).ma
         #expect(keeper.damaged == [1])
         let names = try FileManager.default.contentsOfDirectory(atPath: directory.path)
         #expect(!names.contains { $0.hasPrefix("1") })
+    }
+
+    @Test func aSongIsKeptAsTheOriginalUnlessSmallerCopiesWereAskedFor() async throws {
+        let (keeper, mac, _) = try made([1, 2, 3])
+        keeper.client = mac.originalClient
+        keeper.keep(album([1, 2]))
+        try await wait { keeper.isIdle }
+        #expect(mac.originals == [1, 2])
+        keeper.keep(album([3], id: "album:b", smaller: true))
+        try await wait { keeper.isIdle }
+        #expect(mac.originals == [1, 2] && mac.rates.last == Keeper.smallerSampleRate)
+    }
+
+    @Test func aDSDSongKeptAsItsOwnFileIsMadeIntoWhatTheOutputTakesEachTimeItPlays() async throws {
+        // What the share would make of the DSD is a stand-in here (a WAV file): the player only has to ask for it with the
+        // output's rate and DoP ceiling, and play what comes back.
+        let wav = FileManager.default.temporaryDirectory.appendingPathComponent("rendered-\(UUID()).wav")
+        do {
+            let settings: [String: Any] = [AVFormatIDKey: kAudioFormatLinearPCM, AVSampleRateKey: 44_100.0, AVNumberOfChannelsKey: 2,
+                                           AVLinearPCMBitDepthKey: 24, AVLinearPCMIsFloatKey: false, AVLinearPCMIsBigEndianKey: false]
+            let file = try AVAudioFile(forWriting: wav, settings: settings, commonFormat: .pcmFormatFloat32, interleaved: false)
+            let buffer = AVAudioPCMBuffer(pcmFormat: file.processingFormat, frameCapacity: 22_050)!
+            buffer.frameLength = 22_050
+            try file.write(from: buffer)
+        }
+        defer { try? FileManager.default.removeItem(at: wav) }
+        let mac = KeepingMac()
+        mac.connected = false
+        let dsf = StreamDescriptor(stream: 0, kind: .original, byteSize: 1000,
+                                   format: StreamFormat(codec: "DSD", container: "dsf", sampleRate: 2_822_400, bitDepth: 1, channels: 2, channelLabels: nil, lossless: true),
+                                   frames: nil, tag: "dsf-1", chunkSize: 1000)
+        let engine = AVAudioEngine()
+        try engine.enableManualRenderingMode(.offline, format: AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: 44_100, channels: 2, interleaved: false)!,
+                                             maximumFrameCount: 4096)
+        let playback = PhonePlayback(client: mac.client, player: PhonePlayer(engine: engine), cacheDirectory: folder())
+        playback.maxSampleRate = { 48_000 }
+        playback.kept = { id in id == 1 ? (URL(fileURLWithPath: "/kept/1.dsf"), dsf) : nil }
+        var asked: [(URL, Double?, Double?)] = []
+        playback.keptRendering = { file, descriptor, rate, dop in
+            asked.append((file, rate, dop))
+            guard descriptor == dsf, let source = try? FileByteSource(url: wav) else { return nil }
+            let rendered = StreamDescriptor(stream: 0, kind: .pcm, byteSize: source.byteSize, format: KeepingMac.format(), frames: nil, tag: "pcm44100-1", chunkSize: 1000)
+            return (rendered, source)
+        }
+        playback.play([song(1)])
+        try await wait { playback.player.state == .playing }
+        #expect(asked.count == 1 && asked.first?.0.path == "/kept/1.dsf" && asked.first?.1 == 48_000)
+        #expect(playback.stream?.tag == "pcm44100-1")
+        #expect(mac.opened.isEmpty)
+        playback.stop()
+    }
+
+    @Test func pausingStopsAndKeepsWhatArrivedAndResumingCarriesOnFromThere() async throws {
+        // iOS ends the background time: the keeper stops at once, the half song stays to carry on from.
+        let (keeper, mac, directory) = try made([1, 2])
+        mac.files[1] = bytes(1, count: 200_000)
+        mac.readDelay = .milliseconds(20)
+        keeper.keep(album([1, 2]))
+        try await wait { (keeper.fetching?.fraction ?? 0) > 0.05 }
+        keeper.pause()
+        try await wait { keeper.isIdle }
+        #expect(keeper.remaining == 2)
+        #expect(try FileManager.default.contentsOfDirectory(atPath: directory.path).contains("1.part.progress"))
+        let asked = mac.offsets.count
+        mac.readDelay = .zero
+        keeper.resume()
+        try await wait { keeper.isIdle }
+        #expect(keeper.remaining == 0)
+        #expect(!mac.offsets.dropFirst(asked).contains { $0.song == 1 && $0.offset == 0 })
+        #expect(try Data(contentsOf: #require(keeper.store.kept(1)).file) == bytes(1, count: 200_000))
     }
 
     @Test func removingAListClearsWhatWasPartFetchedOfIt() async throws {

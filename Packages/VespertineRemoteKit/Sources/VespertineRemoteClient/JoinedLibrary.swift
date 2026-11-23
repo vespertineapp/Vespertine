@@ -378,9 +378,9 @@ public final class JoinedLibrary: RemoteChannel {
             return .streamInfo(items: ids.compactMap { found[$0] })
 
         // Streams: opened in the library the song is in, and known to the phone by a number of this channel's own.
-        case .streamOpen(let id, let maxSampleRate, let smaller, let dop):
+        case .streamOpen(let id, let maxSampleRate, let smaller, let dop, let original):
             guard let split = JoinedID.split(id), let member = member(split.slot) else { return .failed(reason: sayings.gone) }
-            let reply = await member.library.send(.streamOpen(id: split.id, maxSampleRate: maxSampleRate, smaller: smaller, dop: dop))
+            let reply = await member.library.send(.streamOpen(id: split.id, maxSampleRate: maxSampleRate, smaller: smaller, dop: dop, original: original))
             guard case .streamOpened(var descriptor) = reply else { return reply }
             guard isOpen else { return .failed(reason: "") }
             nextStream += 1
