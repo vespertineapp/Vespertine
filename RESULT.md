@@ -9,6 +9,24 @@ Branch `feat/sonos-and-output-routes`, local commits only, not pushed; `git log 
 - **No silent downgrade**: every output row says what the loaded song would be played as ("Will play 24-bit / 48 kHz FLAC, stereo (source 24/96)", copper when samples change); while playing, the badge (RESAMPLED / FOLDED TO STEREO / DSD AS PCM · 24/48 SENT) and a "Player limit" line in the signal path. Same planner for DACs, HDMI, Bluetooth, AirPlay and other network players.
 - **Sonos volume** slider (room or group), the room's details (speaker setup, Music Playback Ambient/Full, read only), plain error for "couldn't fetch" (firewall), `vespertine-probe sonos`, and docs/output-routes.md.
 
+## The eighth review's findings (2026-11-23, 12:50 onwards)
+
+An eighth review (Codex, run 8ec6f3) found two P2s in `RendererPlayback.swift`. The first is the gap the seventh pass left open (its "Not changed" note, below). Signed commits 13b4db2c (P2 1) and fd43c53f (P2 2), each with its test written first and seen failing, and this RESULT commit; nothing pushed.
+
+**P2 1, a change of settings queued before a Stop or a song chosen overtook it.** A change of settings that restarts the song playing (any change for a processed stream, or one that changes what is done to the song) ran on the worker as an unconditional `play(…, announce: false)`, the same pattern as the seventh pass's seek. Queued ahead of a song chosen, it moved the generation past the chosen song's play, which was dropped as stale, and the old song was loaded again. Queued ahead of a Stop, it loaded the old song again after the Stop (paused). Now `apply` reads the song loaded and the play it was loaded for (`currentGeneration`) in one step. It restarts the song only while that is still the current play, checked under the generation lock (generation, then state, as `play()` and `stop()` take them). The settings are kept either way, so the song chosen, or a restart already queued, is made with them. It checks the generation, not the selection as the seek does: if a restart is already queued (a seek or an earlier change), the song is made again with the settings in force when its turn comes, so this one needn't restart it too.
+- `settingsRestartQueuedBeforeCommand` (2 cases, Stop or a song chosen): the converted song plays from a stream that is never finished. The worker is held in a poll while the change (a volume, through a new hook `queueSettingsForTests`) and then the command are queued. It also checks that the settings still apply: the song chosen, or the song played after the Stop, is made with them. **Red before, both cases** (8 issues: the old song's stream was made and loaded again; after Stop it stayed loaded; the chosen song never started).
+
+**P2 2, a seek that landed left the start's older pending seek.** A song started part-way in keeps its position as a pending seek until a poll sees it play. A seek asked for before then was carried out, but `pendingSeek` and its count of tries were left, so the next poll sent the start's older position after it and the song jumped back. The seek's own state update, already checked against the selection and the song it was asked for, now clears both. A refused seek leaves them as they were.
+- `explicitSeekClearsPendingSeek`: no polls but the test's own (the rig now takes a `pollInterval`); the song is started at 30 s, loaded, seeked to 60 s, and settled twice. **Red before** (a `Seek` to 30 s sent after the one to 60 s, and the position left at 30 s).
+- Red run: `build/logs/r10/red.log` (2 tests, 3 cases, 10 issues; all 3 cases red). With the first fix alone, its test passed (`fix1-green.log`); after both, `NextPreparationTests`: 33 tests, all passed (`green.log`).
+
+### Test figures, this pass
+
+Logs: `build/logs/r10/` and the audit folder named below. All from the code at fd43c53f. Other work was running on the machine (load average up to 577 on 8 cores during the red run, 175 to 380 for the UPnP run).
+
+- **UPnP and Sonos** (`swift test --filter VespertineUPnPTests`, debug): **passed**, 187 tests in 33 suites, 0 failed (185 before, plus the 2 new tests, 3 cases) (`upnp.log`).
+- **The rest of the audit** (`audit-rest.sh`, `scripts/audit.sh` without its first step, the same script as in the last passes; from 13:12, `build/audit-rest-20261123-131256/`): still running when this was written (interim).
+
 ## The seventh review's findings (2026-11-23, 11:55 onwards)
 
 A seventh review (Codex, run fbdae0) found two P2s in `RendererPlayback.swift`, both there before this branch's review passes. Signed commits d9750e53 (P2 1) and 69447320 (P2 2), each with its test written first and seen failing, and this RESULT commit; nothing pushed.
@@ -20,7 +38,7 @@ A seventh review (Codex, run fbdae0) found two P2s in `RendererPlayback.swift`, 
 - `pendingSeekNotCarriedToNextSong`: the first song is started at 1 s and is kept from playing until its next song has been handed to the player. Then it plays, the seek is refused once, and the poll after it is held while the player goes on. **Red before** (a `Seek` was sent to the next song). New test hooks: `GatedTransport.holdsStatusAfterFailedSeek`, `FakeRenderer.playOnDevice`.
 - Red run: `build/logs/r9/red.log` (2 tests, 3 cases, 8 issues; all 3 cases red). After both fixes, `NextPreparationTests`: 31 tests, all passed (`green.log`).
 
-Not changed (unverified, no test): a change of settings while a song plays restarts it the same way (`apply`, an unconditional `play(…, announce: false)` on the worker). A `.settings` command already queued when Stop is pressed, or when a song is chosen, looks open to the same overtaking. The review didn't name it.
+Not changed then (closed in the eighth pass, above): a change of settings while a song plays restarts it the same way (`apply`, an unconditional `play(…, announce: false)` on the worker). A `.settings` command already queued when Stop is pressed, or when a song is chosen, looks open to the same overtaking. The review didn't name it.
 
 ### Test figures, this pass
 
