@@ -9,7 +9,31 @@ Branch `feat/sonos-and-output-routes`, local commits only, not pushed; `git log 
 - **No silent downgrade**: every output row says what the loaded song would be played as ("Will play 24-bit / 48 kHz FLAC, stereo (source 24/96)", copper when samples change); while playing, the badge (RESAMPLED / FOLDED TO STEREO / DSD AS PCM · 24/48 SENT) and a "Player limit" line in the signal path. Same planner for DACs, HDMI, Bluetooth, AirPlay and other network players.
 - **Sonos volume** slider (room or group), the room's details (speaker setup, Music Playback Ambient/Full, read only), plain error for "couldn't fetch" (firewall), `vespertine-probe sonos`, and docs/output-routes.md.
 
-## This pass: the fourth review's findings (2026-11-23, 08:35 onwards)
+## This pass: the fifth review's finding (2026-11-23, 09:00 onwards)
+
+A fifth review (Codex, run 481a9a) found one P2 left in the fourth pass's fix 2. Signed commit 79fe6586 (fix and tests) and this RESULT commit; nothing pushed.
+
+**P2, a poll queued before a Stop or a song chosen could still override it.** The poll noted `generation` when it began. A poll already queued on the worker ahead of the command could begin after `stop()` or `play()` had moved the generation on, while the old song was still loaded (the command's own turn comes after the poll). It took the new generation as its own, passed the `ifStill` check, and put the stale next song right after the Stop, or over the song chosen. Now the poll takes the generation the loaded song was started for (`currentGeneration`), read together with that song, so a command queued behind it always wins. The song-end path (fix 2's "same pattern") uses the same value.
+
+Writing the test turned up a second effect of the same ordering. The queued poll, finding the old song stopped, paused the song just chosen. It judged the song's end by the snapshot, where the selection had already set the position to 0, so it took the stop for a stop on the player and set `wantsPlaying` to false; the chosen song then loaded paused. Now what a poll finds is applied to the snapshot under the generation lock, and only while its play is still the current one.
+
+Tests, written first: the worker is held in a poll waiting for the player's answer, a second poll is queued behind it (new test hook `queuePollForTests`), and then Stop or another song is chosen.
+- `pollQueuedBeforeCommandWins` (2 cases): the player is on the stale next song. **Red before the fix, both cases** (7 issues: after Stop the queue's next song started and playback was still on; the chosen song never started, the queue's next song played instead).
+- `endedPollQueuedBeforeCommandWins` (2 cases): the player stopped at the song's end. **Red before, the selection case** (the chosen song never started, left paused). The Stop case passed before too: the song-end path already did nothing once `stop()` had set `wantsPlaying` to false, so it guards behaviour rather than showing a bug.
+- After the fix, both new tests and `commandDuringStalePollWins` passed (6 cases). The red runs were read from the terminal and not saved to a log.
+
+Not changed (unverified): the other things such a poll does to the old song (announcing it, following the player to its next song, a pending seek, the start timeout) are still not tied to its play. Those are put right by the command queued behind the poll. The start timeout would fail the old song after a song was chosen and could leave the chosen one paused; no test covers that.
+
+### Test figures, this pass
+
+Logs: `build/logs/r5/`. Other work was running on the machine.
+
+- **UPnP and Sonos** (`swift test --filter VespertineUPnPTests`, debug): **passed**, 172 tests in 33 suites, 0 failed (170 before, plus the 2 new tests, 4 cases) (`upnp.log`).
+- **App tests** (`xcodebuild test`, Debug, macOS, `-derivedDataPath build/DD`): **passed**, 284 tests in 61 suites, 0 failed (`** TEST SUCCEEDED **`; no app code changed) (`app-tests.log`).
+
+Not run this pass: the engine group, the release-mode tests and the rest of `scripts/audit.sh`.
+
+## The fourth review's findings (2026-11-23, 08:35 onwards)
 
 A fourth independent review (Codex) agreed the cache fix (third review, item 1) and the xHE-AAC fix (item 3) are right, and said the fix for a failed clear of the next song (item 2) was incomplete, with three findings. Each has a test written first and seen failing, then the fix. Signed commits 655f9413, 7f3dc007, e5cf73c9, and a docs/RESULT commit; nothing pushed.
 
@@ -22,7 +46,7 @@ Not changed: OpenHome's `replaceNext` still ignores a failed `DeleteId` of the o
 
 docs/output-routes.md now says the old song is kept until Vespertine has seen which song Sonos is on, and that a Stop or a song chosen wins.
 
-### Test figures, this pass
+### Test figures, the fourth pass
 
 On this machine, 2026-11-23 from 08:35, other work running throughout (load average 13 to 22 on 8 cores). Logs: `build/logs/r4/`.
 
