@@ -85,6 +85,8 @@ final class FakeRenderer: @unchecked Sendable {
     func setPosition(_ s: Int) { lock.withLock { seconds = s } }
     /// Stop pressed on the player itself: it stops where it is.
     func stopOnDevice() { lock.withLock { state = "Stopped" } }
+    /// The player starts playing the song it holds by itself (one that `ignoresPlay` kept waiting gets going after all).
+    func playOnDevice() { lock.withLock { state = "Playing" } }
     /// The next call of `action` fails with UPnP error `code`.
     func fail(_ action: String, code: Int, times: Int = 1) { lock.withLock { failures[action] = (code, times) } }
     /// `action` answers again.

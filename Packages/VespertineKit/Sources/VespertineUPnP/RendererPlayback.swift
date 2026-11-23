@@ -1095,6 +1095,9 @@ public final class RendererPlayback: @unchecked Sendable {
                     s.snapshot.duration = next.duration ?? 0; s.snapshot.position = 0; s.stoppedPolls = 0
                     s.reportsPosition = false; s.heard = 0; s.lastPlayingPoll = nil
                     s.awaitingStartSince = s.wantsPlaying ? now() : nil
+                    // A seek still pending was for the song that ended (started part-way in), not this one: it starts
+                    // from its beginning.
+                    s.pendingSeek = nil; s.pendingSeekTries = 0
                 }
                 return s.current
             }) else { return }

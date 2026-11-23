@@ -87,10 +87,14 @@ private final class GatedTransport: RendererTransport, @unchecked Sendable {
     func seek(to seconds: TimeInterval) async throws {
         if failsSeek.withLock({ $0 }) {
             seekFailed.withLock { $0 += 1 }
+            // The status request after this failed seek waits, once set.
+            if holdsStatusAfterFailedSeek.withLock({ s in defer { s = false }; return s }) { statusHeld.withLock { $0 = true } }
             throw UPnPError.fault(code: 710, description: "Seek mode not supported")
         }
         try await inner.seek(to: seconds)
     }
+    /// Set: once a seek has failed, `statusHeld` is set (then this is cleared).
+    let holdsStatusAfterFailedSeek = Locked(false)
     /// While set, every seek fails (a player that won't seek yet); `seekFailed` counts the failures.
     let failsSeek = Locked(false)
     let seekFailed = Locked(0)
@@ -861,7 +865,7 @@ struct NextPreparationTests {
         #expect(!rig.playback.wantsPlaying)
     }
 
-    // MARK: After the seventh review (2026-11-23): a seek queued before a command
+    // MARK: After the seventh review (2026-11-23): a seek queued before a command, and a pending seek after the player moves on
 
     @Test("A seek in a processed stream, queued before a song chosen or a Stop: the song chosen plays, or the Stop holds; the old song isn't started again",
           arguments: [false, true])
@@ -902,6 +906,36 @@ struct NextPreparationTests {
             #expect(rig.playback.snapshot.item == nil)
             #expect(!rig.playback.isEngaged)
         }
+    }
+
+    @Test("A song started part-way in whose seek failed, and the player goes on to the next song by itself: the next song isn't seeked to the old position")
+    func pendingSeekNotCarriedToNextSong() async throws {
+        let ready = PlayableItem(url: try makeFLAC(from: try makeWAV(seconds: 2, seed: 7)))
+        let rig = try await Rig.make(second: ready)
+        defer { rig.close() }
+        // The first song is started at 1 s and holds back from playing until the next song has been handed to the player.
+        rig.fake.ignoresPlay = true
+        rig.transport.failsSeek.withLock { $0 = true }
+        rig.transport.holdsStatusAfterFailedSeek.withLock { $0 = true }
+        rig.playback.play(rig.first, at: 1)
+        #expect(await within(5) { rig.fake.nextURI != nil }, "the next song wasn't handed over")
+        await rig.playback.settleForTests()
+        #expect(rig.transport.seekFailed.withLock { $0 } == 0)
+        // It plays: the pending seek fails once, and the poll after it is held.
+        rig.fake.ignoresPlay = false
+        rig.fake.playOnDevice()
+        #expect(await within(3) { rig.transport.statusWaiting.withLock { $0 } > 0 }, "the pending seek wasn't tried")
+        #expect(rig.transport.seekFailed.withLock { $0 } == 1)
+        // The player would take a seek now, and goes on to the next song by itself.
+        rig.transport.failsSeek.withLock { $0 = false }
+        let before = rig.fake.actions.count
+        rig.fake.advance()
+        rig.transport.statusHeld.withLock { $0 = false }
+        #expect(await rig.events.wait(for: "started \(ready.url.lastPathComponent)", timeout: 5), "the next song wasn't followed")
+        try await Task.sleep(for: .milliseconds(300))
+        await rig.playback.settleForTests()
+        #expect(!rig.fake.actions.dropFirst(before).contains("Seek"), "the next song was seeked to the old song's position")
+        #expect(!rig.events.all.contains { $0.hasPrefix("notice") })
     }
 
     @Test("The player goes on to the old next song between a poll's answer and the clear's success: it is still recognised and put right")
