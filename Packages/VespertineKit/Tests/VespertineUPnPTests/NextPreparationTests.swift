@@ -400,4 +400,39 @@ struct NextPreparationTests {
         }
         #expect(!rig.events.all.contains("started \(ready.url.lastPathComponent)"), "the song no longer next was announced")
     }
+
+    @Test("A stop, or a song chosen, while the poll that finds the player on the old next song waits for its answer, wins over putting it right",
+          arguments: [false, true])
+    func commandDuringStalePollWins(select: Bool) async throws {
+        let ready = PlayableItem(url: try makeFLAC(from: try makeWAV(seconds: 2, seed: 7)))
+        let chosen = PlayableItem(url: try makeFLAC(from: try makeWAV(seconds: 2, seed: 9)))
+        let rig = try await Rig.make(second: ready)
+        defer { rig.close() }
+        let old = try await playerRefusedClear(rig, queue: [rig.first, rig.third])
+        // The next poll is held on its way to the player; the player goes on to the old next song meanwhile.
+        rig.transport.statusHeld.withLock { $0 = true }
+        #expect(await within(2) { rig.transport.statusWaiting.withLock { $0 } > 0 })
+        rig.fake.advance()
+        #expect(rig.fake.currentURI == old)
+        if select { rig.playback.play(chosen) } else { rig.playback.stop() }
+        rig.transport.statusHeld.withLock { $0 = false }
+        if select {
+            #expect(await rig.events.wait(for: "started \(chosen.url.lastPathComponent)", timeout: 5), "the song chosen didn't play")
+            #expect(rig.playback.snapshot.item?.id == chosen.id)
+        } else {
+            #expect(await within(3) { rig.fake.transportState == "Stopped" })
+            #expect(!rig.playback.wantsPlaying)
+        }
+        // Long enough for a put-right that overtook the command to have started the queue's next song.
+        try await Task.sleep(for: .milliseconds(1500))
+        await rig.playback.settleForTests()
+        #expect(!rig.events.all.contains("started \(rig.third.url.lastPathComponent)"), "the put-right overrode the listener's command")
+        if select {
+            #expect(rig.playback.snapshot.item?.id == chosen.id)
+        } else {
+            #expect(rig.playback.snapshot.state == .stopped)
+            #expect(rig.fake.transportState == "Stopped")
+        }
+        #expect(rig.playback.heldNextURIsForTests.allSatisfy { $0 != old })
+    }
 }

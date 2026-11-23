@@ -243,20 +243,46 @@ public final class RendererPlayback: @unchecked Sendable {
     public func play(_ item: PlayableItem, at seconds: TimeInterval) { play(item, at: seconds, announce: true) }
 
     private func play(_ item: PlayableItem, at seconds: TimeInterval, announce: Bool) {
-        let g = generation.withLock { $0 += 1; return $0 }
+        play(item, at: seconds, announce: announce, ifStill: nil)
+    }
+
+    /// `ifStill`: played only while that is still the current play (a song put right by a poll that began then); a stop or
+    /// a song asked for since wins. The check, the new generation and what the snapshot says are done under the generation
+    /// lock, as `stop()` does them, so no command comes in between. Returns whether it plays.
+    @discardableResult
+    private func play(_ item: PlayableItem, at seconds: TimeInterval, announce: Bool, ifStill expected: Int?) -> Bool {
+        let g = generation.withLock { g -> Int? in
+            guard expected.map({ $0 == g }) ?? true else { return nil }
+            g += 1
+            state.withLock {
+                // A restart of the song at a position (a seek in a processed stream, a change of settings) keeps what the
+                // listener asked for: a paused song stays paused.
+                if announce { $0.wantsPlaying = true }
+                $0.snapshot.state = $0.wantsPlaying ? .playing : .paused
+                $0.snapshot.item = item
+                $0.snapshot.position = seconds
+                if announce { $0.snapshot.signalPath = nil }
+            }
+            return g
+        }
+        guard let g else { return false }
         // Whatever was being prepared to follow the song playing doesn't follow this one.
         cancelNextPreparation()
-        state.withLock {
-            // A restart of the song at a position (a seek in a processed stream, a change of settings) keeps what the
-            // listener asked for: a paused song stays paused.
-            if announce { $0.wantsPlaying = true }
-            $0.snapshot.state = $0.wantsPlaying ? .playing : .paused
-            $0.snapshot.item = item
-            $0.snapshot.position = seconds
-            if announce { $0.snapshot.signalPath = nil }
-        }
         refreshActivity()
         enqueue.yield(.play(item, at: seconds, announce: announce, generation: g))
+        return true
+    }
+
+    /// The queue's end reached, as found by a poll that began during play `expected`: stopped only while that is still the
+    /// current play (checked under the generation lock, as `play` does). Returns whether it was.
+    private func endQueue(ifStill expected: Int) -> Bool {
+        let ended = generation.withLock { g -> Bool in
+            guard g == expected else { return false }
+            state.withLock { s in s.snapshot.state = .stopped; s.wantsPlaying = false; s.anchor = nil }
+            return true
+        }
+        if ended { refreshActivity() }
+        return ended
     }
 
     private func refreshActivity() {
@@ -279,9 +305,10 @@ public final class RendererPlayback: @unchecked Sendable {
     }
     public func seek(to seconds: TimeInterval) { state.withLock { $0.snapshot.position = seconds; $0.anchor = nil }; enqueue.yield(.seek(seconds)) }
     public func stop() {
-        generation.withLock { $0 += 1 }
+        // Under the generation lock, so a song put right by a poll (`play(_:at:announce:ifStill:)`) is either before it or
+        // finds it.
+        generation.withLock { g in g += 1; state.withLock { $0.wantsPlaying = false; $0.snapshot.state = .stopped } }
         cancelNextPreparation()
-        state.withLock { $0.wantsPlaying = false; $0.snapshot.state = .stopped }
         refreshActivity()
         enqueue.yield(.stop)
     }
@@ -356,6 +383,10 @@ public final class RendererPlayback: @unchecked Sendable {
 
     /// The addresses of the songs Vespertine still keeps (their token and their copy) as the player's next song.
     var heldNextURIsForTests: [String] { state.withLock { [$0.next, $0.staleNext].compactMap { $0?.mediaURL.absoluteString } } }
+
+    /// How many times the song at this address was let go of (once is right; never is a leak, twice a double release).
+    private let releases = Locked<[String: Int]>([:])
+    func releasesForTests(_ uri: String) -> Int { releases.withLock { $0[uri] ?? 0 } }
 
     /// Vespertine means the player to be playing (not paused or stopped by the listener).
     var wantsPlaying: Bool { state.withLock { $0.wantsPlaying } }
@@ -479,6 +510,7 @@ public final class RendererPlayback: @unchecked Sendable {
 
     private func release(_ entry: Entry) {
         let url = entry.mediaURL, media = media
+        releases.withLock { $0[url.absoluteString, default: 0] += 1 }
         // A processed stream nobody heard (a song skipped while it was being prepared) goes at once: its encoder would
         // otherwise write the whole song for nothing.
         if entry.processedFile != nil, !entry.announced {
@@ -838,7 +870,7 @@ public final class RendererPlayback: @unchecked Sendable {
         let at = now()
         let next = state.withLock { s -> Entry?? in
             guard s.staleNext != nil, s.staleClearTries < Self.staleClearAttempts,
-                  s.staleTriedAt.map({ at.timeIntervalSince($0) >= Self.staleClearSpacing }) ?? true else { return .none }
+                  s.staleTriedAt.map({ at.timeIntervalSince($0) >= staleClearSpacing }) ?? true else { return .none }
             s.staleClearTries += 1
             s.staleTriedAt = at
             return .some(s.next)
@@ -854,7 +886,8 @@ public final class RendererPlayback: @unchecked Sendable {
     /// Tries of a stale clear (one a second), then only watched for: a renderer that always refuses an empty NextURI isn't
     /// asked for ever.
     static let staleClearAttempts = 10
-    static let staleClearSpacing: TimeInterval = 1
+    /// A test spaces them closer.
+    var staleClearSpacing: TimeInterval = 1
 
     /// "Transition not available": the renderer is between two states and takes the same command a moment later.
     static func isTransient(_ error: Error) -> Bool {
@@ -888,24 +921,30 @@ public final class RendererPlayback: @unchecked Sendable {
     /// The player went on to a next song it couldn't be told to drop (`staleNext`): `ended` played to its end, and what
     /// follows it in the queue now is what plays; at the queue's end the player is stopped. The stale song is let go of then,
     /// and never announced.
-    private func putRight(after ended: Entry) async {
+    /// `polled`: the play the poll that found it began in. A stop or a song chosen while that poll waited for the player's
+    /// answer wins: nothing is put right then (the command itself replaces or stops what the player plays, and lets go of
+    /// the stale song).
+    private func putRight(after ended: Entry, polled: Int) async {
+        let following = nextItemProvider?(ended.item)
+        if let following {
+            // The start loads the right song in its place (and lets go of the one that ended).
+            guard play(following, at: 0, announce: true, ifStill: polled) else { return }
+        } else {
+            guard endQueue(ifStill: polled) else { return }
+        }
         log.notice("Renderer \(self.renderer.name, privacy: .public) went on to a song no longer next; playing the queue's")
         // Let go of at once, so the polls put this right once only (were the right song then to fail, they'd start it again
         // at every poll).
         let stale = state.withLock { s -> Entry? in defer { s.staleNext = nil; s.staleClearTries = 0 }; return s.staleNext }
-        defer { stale.map(release) }
-        if let following = nextItemProvider?(ended.item) {
-            // The start loads the right song in its place (and lets go of the one that ended).
-            play(following, at: 0, announce: true)
-            return
-        }
+        stale.map(release)
+        guard following == nil else { return }
         try? await transport.stop()
-        state.withLock { s in s.snapshot.state = .stopped; s.wantsPlaying = false; s.anchor = nil }
-        refreshActivity()
         emit(.queueEnded)
     }
 
     private func poll() async {
+        // The play this poll begins in: what it finds is acted on only while that is still the current one.
+        let polled = generation.withLock { $0 }
         let status: RendererStatus
         do { status = try await transport.status() } catch {
             // Gone once it has failed to answer for a while, not at a moment's trouble on the network: it may well be
@@ -939,7 +978,7 @@ public final class RendererPlayback: @unchecked Sendable {
         // that ended, or stops at the queue's end. Else the clear is tried again.
         if let stale = state.withLock({ $0.staleNext }) {
             if status.currentURI == stale.mediaURL {
-                await putRight(after: current)
+                await putRight(after: current, polled: polled)
                 return
             }
             await retryStaleClear()
@@ -1044,11 +1083,10 @@ public final class RendererPlayback: @unchecked Sendable {
         case .ended:
             // The renderer didn't go on by itself (it holds no next song, wasn't told in time, or doesn't join songs):
             // Vespertine starts the next one, and a song that can't be played fails there, as it does on the engine.
+            // A stop or a song chosen while this poll waited for the player's answer wins.
             if let following = nextItemProvider?(current.item) {
-                play(following, at: 0, announce: true)
-            } else {
-                state.withLock { $0.snapshot.state = .stopped; $0.wantsPlaying = false }
-                refreshActivity()
+                play(following, at: 0, announce: true, ifStill: polled)
+            } else if endQueue(ifStill: polled) {
                 emit(.queueEnded)
             }
         }
