@@ -18,11 +18,60 @@ private final class StuckStreamMaker: ProcessedStreamMaking, @unchecked Sendable
     let directory = FileManager.default.temporaryDirectory.appendingPathComponent("vespertine-upnp-stuck-\(UUID().uuidString)")
     var files: [GrowingFile] { lock.withLock { made } }
 
+    /// How long making a stream takes before its file exists (an encoder slow to open), whatever happens meanwhile.
+    var openDelay: TimeInterval = 0
+    private var _begun = 0
+    /// Streams asked for, including one still being opened.
+    var begun: Int { lock.withLock { _begun } }
+
     func makeStream(item: PlayableItem, url: URL, settings: RendererSettings, startSeconds: TimeInterval) throws -> (GrowingFile, SourceFormat) {
+        lock.withLock { _begun += 1 }
+        if openDelay > 0 { Thread.sleep(forTimeInterval: openDelay) }
         let file = try GrowingFile(url: directory.appendingPathComponent(UUID().uuidString + ".flac"))
         lock.withLock { made.append(file) }
         return (file, SourceFormat(encoding: .pcm, codec: "FLAC", sampleRate: 48_000, bitDepth: 24, channels: 2))
     }
+}
+
+/// A transport whose `load` waits while `held` (a renderer slow to take a song), counting the loads asked for.
+private final class GatedTransport: RendererTransport, @unchecked Sendable {
+    let inner: any RendererTransport
+    let held = Locked(false)
+    let loadsAsked = Locked(0)
+    init(_ inner: any RendererTransport) { self.inner = inner }
+    var gapless: Bool { inner.gapless }
+    func load(current: RendererTrack, next: RendererTrack?) async throws {
+        loadsAsked.withLock { $0 += 1 }
+        while held.withLock({ $0 }) { try? await Task.sleep(for: .milliseconds(10)) }
+        try await inner.load(current: current, next: next)
+    }
+    func replaceNext(_ next: RendererTrack?) async throws { try await inner.replaceNext(next) }
+    func play() async throws { try await inner.play() }
+    func pause() async throws { try await inner.pause() }
+    func stop() async throws { try await inner.stop() }
+    func seek(to seconds: TimeInterval) async throws { try await inner.seek(to: seconds) }
+    func status() async throws -> RendererStatus { try await inner.status() }
+}
+
+/// A stream's song whose download never finishes (a slow server that is still sending): its reads wait until the test ends
+/// them, whatever the cache does meanwhile, the way a read the network never returns from does.
+private final class EndlessRemoteReader: RemoteCacheReader, @unchecked Sendable {
+    let release = DispatchSemaphore(value: 0)
+    private let lock = NSLock()
+    private var reads = 0, cancels = 0
+    var readsBegun: Int { lock.withLock { reads } }
+    /// The cache gave the copy up.
+    var cancelled: Bool { lock.withLock { cancels > 0 } }
+    var size: Int64 { 8 << 20 }
+    var fileExtension: String { "flac" }
+    /// Never silent: a slow link that is still sending isn't given up on as gone.
+    var quietFor: TimeInterval? { 0 }
+    func read(at offset: Int64, count: Int) throws -> Data {
+        lock.withLock { reads += 1 }
+        _ = release.wait(timeout: .now() + 60)
+        throw POSIXError(.ECANCELED)
+    }
+    func cancel() { lock.withLock { cancels += 1 } }
 }
 
 private struct Rig {
@@ -31,10 +80,14 @@ private struct Rig {
     let playback: RendererPlayback
     let maker: StuckStreamMaker
     let events: EventLog
+    let transport: GatedTransport
     /// Plays as the file (24/48 FLAC), then one that must be converted for Sonos (96 kHz), then another file.
     let first: PlayableItem, stuck: PlayableItem, third: PlayableItem
+    /// The queue, which a test may change (then `playback.queueChanged()`).
+    let queue: Locked<[PlayableItem]>
 
-    static func make() async throws -> Rig {
+    /// `second`: the song after the first one, in place of the one converted for Sonos.
+    static func make(second: PlayableItem? = nil) async throws -> Rig {
         let fake = try await FakeRenderer(kind: .av(setNext: true), udn: "uuid:RINCON_BAR01400_MR")
         fake.sonosRoom = "Living Room"
         fake.sink = "http-get:*:audio/flac:*,http-get:*:audio/mp4:*,http-get:*:audio/wav:*,http-get:*:audio/mpeg:*"
@@ -42,17 +95,22 @@ private struct Rig {
         try await media.start()
         let device = try await RendererDevice.load(location: fake.location)
         let maker = StuckStreamMaker()
-        let playback = RendererPlayback(renderer: device, transport: try device.makeTransport(), media: media, processed: maker, pollInterval: 0.05)
+        let transport = GatedTransport(try device.makeTransport())
+        let playback = RendererPlayback(renderer: device, transport: transport, media: media, processed: maker, pollInterval: 0.05)
         // Long enough that a worker held by it would fail every check below; short enough not to hold the run up for long.
         playback.wholeFileWait = 30
         let first = PlayableItem(url: try makeFLAC(from: try makeWAV(seconds: 2, seed: 3)))
-        let stuck = PlayableItem(url: try makeWAV(seconds: 1, rate: 96_000, seed: 4))
+        let stuck = try second ?? PlayableItem(url: try makeWAV(seconds: 1, rate: 96_000, seed: 4))
         let third = PlayableItem(url: try makeFLAC(from: try makeWAV(seconds: 2, seed: 5)))
-        let queue = [first, stuck, third]
-        playback.nextItemProvider = { item in queue.firstIndex { $0.id == item.id }.flatMap { $0 + 1 < queue.count ? queue[$0 + 1] : nil } }
+        let queue = Locked([first, stuck, third])
+        playback.nextItemProvider = { item in
+            let q = queue.withLock { $0 }
+            return q.firstIndex { $0.id == item.id }.flatMap { $0 + 1 < q.count ? q[$0 + 1] : nil }
+        }
         let events = EventLog()
         playback.eventHandler = { events.add($0) }
-        return Rig(fake: fake, media: media, playback: playback, maker: maker, events: events, first: first, stuck: stuck, third: third)
+        return Rig(fake: fake, media: media, playback: playback, maker: maker, events: events, transport: transport,
+                   first: first, stuck: stuck, third: third, queue: queue)
     }
 
     /// The first song plays, and the stuck one is being prepared as the next.
@@ -136,5 +194,98 @@ struct NextPreparationTests {
         #expect(await within(3) { h.fake.nextURI != nil })
         await h.playback.settleForTests()
         #expect(h.fake.actions.contains("SetNextAVTransportURI"))
+    }
+
+    // MARK: The second review (2026-11-23)
+
+    /// Registers a scheme whose songs never finish downloading; the reader is handed back to look at.
+    private func endlessRemoteItem() -> (PlayableItem, EndlessRemoteReader) {
+        let reader = EndlessRemoteReader()
+        let scheme = "x-endless-\(UUID().uuidString.prefix(8).lowercased())"
+        NetworkPlaybackCache.registerRemoteReader(scheme: scheme) { _ in reader }
+        let url = URL(string: "\(scheme)://track/1")!
+        return (PlayableItem(url: url, cacheKey: url.absoluteString), reader)
+    }
+
+    @Test("A next song still downloading is given up by a skip: the song skipped to, a local file, plays at once")
+    func remoteDownloadFreesTheQueue() async throws {
+        let (remote, reader) = endlessRemoteItem()
+        defer { reader.release.signal() }
+        let rig = try await Rig.make(second: remote)
+        defer { rig.close() }
+        rig.playback.play(rig.first)
+        #expect(await rig.events.wait(for: "started \(rig.first.url.lastPathComponent)"))
+        #expect(await within(5) { reader.readsBegun > 0 })
+        rig.playback.play(rig.third)
+        #expect(await rig.events.wait(for: "started \(rig.third.url.lastPathComponent)", timeout: 3))
+        #expect(await within(2) { reader.cancelled })
+    }
+
+    @Test("A stop gives up a next song still downloading at once, and stopAndWait doesn't wait on it")
+    func remoteDownloadStop() async throws {
+        let (remote, reader) = endlessRemoteItem()
+        defer { reader.release.signal() }
+        let rig = try await Rig.make(second: remote)
+        defer { rig.close() }
+        rig.playback.play(rig.first)
+        #expect(await rig.events.wait(for: "started \(rig.first.url.lastPathComponent)"))
+        #expect(await within(5) { reader.readsBegun > 0 })
+        let began = Date()
+        rig.playback.stopAndWait(timeout: 10)
+        #expect(Date().timeIntervalSince(began) < 2)
+        #expect(await within(2) { reader.cancelled })
+    }
+
+    @Test("A stop while the first song is being loaded: the next song planned once it is loaded is given up",
+          arguments: [false, true])
+    func stopDuringLoad(shutdown: Bool) async throws {
+        let rig = try await Rig.make()
+        defer { rig.close() }
+        rig.transport.held.withLock { $0 = true }
+        rig.playback.play(rig.first)
+        #expect(await within(5) { rig.transport.loadsAsked.withLock { $0 } > 0 })
+        if shutdown { rig.playback.shutdown() } else { rig.playback.stop() }
+        rig.transport.held.withLock { $0 = false }
+        // Long enough for a next song planned after the load to have begun its stream.
+        try await Task.sleep(for: .milliseconds(1500))
+        let abandoned = rig.maker.files.allSatisfy { $0.isAbandoned }
+        #expect(abandoned, "a stream is still being written for nobody")
+    }
+
+    @Test("stopAndWait waits for a next song still being prepared to be given up")
+    func stopAndWaitWaitsForPreparation() async throws {
+        let rig = try await Rig.make()
+        defer { rig.close() }
+        rig.maker.openDelay = 0.4
+        rig.playback.play(rig.first)
+        #expect(await rig.events.wait(for: "started \(rig.first.url.lastPathComponent)"))
+        #expect(await within(5) { rig.maker.begun > 0 })
+        rig.playback.stopAndWait(timeout: 5)
+        let files = rig.maker.files
+        #expect(files.count == 1)
+        #expect(files.allSatisfy { $0.isAbandoned })
+    }
+
+    @Test("A queue edit takes the old next song off the player at once, before the new one is ready; the song ending meanwhile doesn't go on to it",
+          arguments: [false, true])
+    func queueEditClearsNext(insert: Bool) async throws {
+        let ready = PlayableItem(url: try makeFLAC(from: try makeWAV(seconds: 2, seed: 7)))
+        let rig = try await Rig.make(second: ready)
+        defer { rig.close() }
+        rig.playback.play(rig.first)
+        #expect(await rig.events.wait(for: "started \(rig.first.url.lastPathComponent)"))
+        #expect(await within(5) { rig.fake.nextURI != nil })
+        await rig.playback.settleForTests()
+        let old = try #require(rig.fake.nextURI)
+        // The new next song is one converted for Sonos whose stream is never finished.
+        let slow = PlayableItem(url: try makeWAV(seconds: 1, rate: 96_000, seed: 8))
+        rig.queue.withLock { $0 = insert ? [rig.first, slow, ready, rig.third] : [rig.first, slow, rig.third] }
+        rig.playback.queueChanged()
+        #expect(await within(2) { rig.fake.nextURI == nil }, "the player still holds the song no longer next")
+        #expect(await within(5) { !rig.maker.files.isEmpty })
+        // The first song ends while the new next one is still being prepared.
+        rig.fake.advance()
+        try await Task.sleep(for: .milliseconds(300))
+        #expect(rig.fake.currentURI != old, "the player went on to the song no longer next")
     }
 }

@@ -114,6 +114,9 @@ public final class RendererPlayback: @unchecked Sendable {
         /// renderer that reports no position.
         var heard: TimeInterval = 0
         var lastPlayingPoll: Date?
+        /// The play (`generation`) the song playing was started for: a next song is planned for that play only, so one
+        /// planned after a stop or a skip that came while the song was being loaded is never published.
+        var currentGeneration = 0
     }
     private let state = Locked(State())
 
@@ -178,6 +181,8 @@ public final class RendererPlayback: @unchecked Sendable {
         }
     }
     private let preparingNext = Locked<NextPreparation?>(nil)
+    /// Every next song's preparation still running, given up or not: `stopAndWait` waits for them too.
+    private let livePreparations = DispatchGroup()
 
     /// `pollInterval` 0: the renderer is asked for its state only when `settleForTests` says so (a test that steps the
     /// polls itself).
@@ -304,9 +309,13 @@ public final class RendererPlayback: @unchecked Sendable {
         preparation.take().map(release)
     }
 
+    /// Stops, lets go of the renderer, and waits (up to `timeout` in all) for the worker's last command and for any next song
+    /// still being prepared to have been given up (its encoder stopped, its download cancelled).
     public func stopAndWait(timeout: TimeInterval) {
+        let deadline = DispatchTime.now() + timeout
         shutdown()
-        _ = workerDone.wait(timeout: .now() + timeout)
+        _ = workerDone.wait(timeout: deadline)
+        _ = livePreparations.wait(timeout: deadline)
     }
 
     /// A song is loaded on the renderer and it is answering: the renderer is there, whatever a search on the network says.
@@ -369,6 +378,9 @@ public final class RendererPlayback: @unchecked Sendable {
             case .resume: await retrying(.play, resync: true) { try await self.transport.play() }
             case .seek(let seconds): await retrying(.seek, resync: false) { try await self.seek(seconds) }
             case .stop:
+                // A next song planned after `stop()` was called (by a start that was still loading its song then) is given
+                // up here too.
+                cancelNextPreparation()
                 try? await transport.stop()
                 let old = state.withLock { s -> [Entry] in
                     defer { s.current = nil; s.next = nil; s.anchor = nil; s.snapshot = EngineSnapshot() }
@@ -489,8 +501,12 @@ public final class RendererPlayback: @unchecked Sendable {
         if cancelled() { throw CancellationError() }
         let resolved = urlResolver?(item) ?? item.url
         // A stream is copied whole first: the renderer pulls a file, and the decoder reads one.
-        let staged = resolved.isFileURL ? nil : try StagedRemoteFile.stage(item)
+        // Given up while it downloads (a skip, a stop, the output let go of): the download is cancelled and the shared
+        // preparation queue is free again within moments, for the song that is wanted now.
+        let staged = resolved.isFileURL ? nil : try StagedRemoteFile.stage(item, cancelled: cancelled)
         let url = staged?.url ?? resolved
+        // Given up while it was copied: nothing is probed, and no encoder made.
+        if cancelled() { throw CancellationError() }
         let described = try? SourceDescription.describe(item, url: url)
         let settings = state.withLock { $0.settings }
         let limits = renderer.limits
@@ -513,6 +529,7 @@ public final class RendererPlayback: @unchecked Sendable {
         case .processed(let reasons):
             guard let processed else { throw RendererPlaybackError.unplayable(String(localized: "Processed streams aren't available.")) }
             processing = reasons
+            if cancelled() { throw CancellationError() }
             // A player with limits gets a stream made to them, even when only the listener's own processing made one needed
             // (a Sonos S1 takes 16 bits, whatever the reason the song is processed).
             let (growing, format) = if let fitted, let limits {
@@ -607,6 +624,7 @@ public final class RendererPlayback: @unchecked Sendable {
         let old = state.withLock { s -> [Entry] in
             defer {
                 s.current = current
+                s.currentGeneration = g
                 s.next = next
                 s.anchor = nil
                 s.failedPolls = 0
@@ -685,12 +703,27 @@ public final class RendererPlayback: @unchecked Sendable {
             if preparingNext.withLock({ $0.map { $0.item.id != wanted?.id } ?? false }) { cancelNextPreparation() }
             return
         }
-        let g = generation.withLock { $0 }
+        // The play the song playing belongs to: after a stop or a skip it is no longer the current play, and nothing is
+        // planned for it.
+        let g = state.withLock { $0.currentGeneration }
         // Already being prepared, to follow this very song.
         if !force, let wanted, let preparing = preparingNext.withLock({ $0 }), preparing.item.id == wanted.id, preparing.after == current.mediaURL,
            preparing.generation == g, !preparing.isCancelled { return }
         cancelNextPreparation()
+        // The song the player holds as the next one is no longer next (the queue was edited): it is taken off the player at
+        // once, not when the new one is ready; a song that ends meanwhile then doesn't go on to it, and Vespertine starts
+        // the right one itself.
+        var cleared = false
+        if !force, have != nil {
+            cleared = true
+            do { try await setNext(nil) } catch {
+                log.error("Renderer \(self.renderer.name, privacy: .public), clearing the next song: \(String(describing: error), privacy: .public)")
+            }
+            let old = state.withLock { s -> Entry? in defer { s.next = nil }; return s.next }
+            old.map(release)
+        }
         guard let wanted else {
+            guard !cleared else { return }
             // Nothing after this song: the renderer is told so at once (no preparing to wait for).
             do { try await setNext(nil) } catch {
                 let old = state.withLock { s -> Entry? in defer { s.next = nil }; return s.next }
@@ -702,9 +735,19 @@ public final class RendererPlayback: @unchecked Sendable {
             return
         }
         let preparation = NextPreparation(item: wanted, after: current.mediaURL, generation: g)
-        preparingNext.withLock { $0 = preparation }
-        let log = self.log, name = renderer.name
+        // Published only while its play is still the current one and the output is still held, checked together with
+        // publishing: a stop or a shutdown moves the generation (or sets `shutDown`) before it gives up what is published,
+        // so it either finds this preparation and gives it up, or this preparation finds it and isn't published at all.
+        let published = preparingNext.withLock { slot -> Bool in
+            guard generation.withLock({ $0 }) == g, !state.withLock({ $0.shutDown }) else { return false }
+            slot = preparation
+            return true
+        }
+        guard published else { return }
+        let log = self.log, name = renderer.name, live = livePreparations
+        live.enter()
         preparation.task = Task.detached { [weak self] in
+            defer { live.leave() }
             guard let self else { return }
             do {
                 preparation.keep(try await self.entry(for: wanted, at: 0, cancelled: { preparation.isCancelled }))
