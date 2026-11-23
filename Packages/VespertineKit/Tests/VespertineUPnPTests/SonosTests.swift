@@ -41,6 +41,13 @@ struct StreamNegotiationTests {
         (source(44_100, bits: 16, channels: 1), "audio/flac", true, 44_100, 16, 1, []),
         (source(44_100, bits: nil, codec: "MP3", encoding: .lossy), "audio/mpeg", true, 44_100, nil, 2, []),
         (source(48_000, bits: nil, codec: "AAC", encoding: .lossy), "audio/mp4", true, 48_000, nil, 2, []),
+        (source(44_100, bits: nil, codec: "Vorbis", encoding: .lossy), "audio/ogg", true, 44_100, nil, 2, []),
+        // A file type Sonos reads holding a codec it doesn't: decoded and sent as FLAC, the codec named (not the file type).
+        (source(48_000, bits: nil, codec: "Dolby Digital", encoding: .lossy), "audio/mp4", false, 48_000, 24, 2, [.repacked(from: "Dolby Digital")]),
+        (source(48_000, bits: nil, codec: "Dolby Digital Plus", encoding: .lossy), "audio/mp4", false, 48_000, 24, 2, [.repacked(from: "Dolby Digital Plus")]),
+        (source(48_000, bits: nil, codec: "xHE-AAC", encoding: .lossy), "audio/mp4", false, 48_000, 24, 2, [.repacked(from: "xHE-AAC")]),
+        (source(44_100, bits: nil, codec: "MP3", encoding: .lossy), "audio/mp4", false, 44_100, 24, 2, [.repacked(from: "MP3")]),
+        (source(44_100, bits: 16, codec: "FLAC"), "audio/ogg", false, 44_100, 24, 2, [.repacked(from: "FLAC")]),
         // Above 48 kHz: resampled, to the rate that divides the song's own.
         (source(96_000), "audio/flac", false, 48_000, 24, 2, [.resampled(from: 96_000, to: 48_000)]),
         (source(192_000), "audio/flac", false, 48_000, 24, 2, [.resampled(from: 192_000, to: 48_000)]),
@@ -60,7 +67,7 @@ struct StreamNegotiationTests {
         (source(44_100, codec: "AIFF"), "audio/aiff", false, 44_100, 24, 2, [.repacked(from: "AIFF")]),
         (source(44_100, bits: 16, codec: "APE"), "audio/x-ape", false, 44_100, 24, 2, [.repacked(from: "APE")]),
         (source(44_100, bits: 16, codec: "WavPack"), "audio/x-wavpack", false, 44_100, 24, 2, [.repacked(from: "WavPack")]),
-        (source(48_000, bits: nil, codec: "Opus", encoding: .lossy), "audio/ogg", false, 48_000, 24, 2, [.repacked(from: "Ogg")]),
+        (source(48_000, bits: nil, codec: "Opus", encoding: .lossy), "audio/ogg", false, 48_000, 24, 2, [.repacked(from: "Opus")]),
         // A track of a CUE sheet or a disc image has no file of its own to hand over.
         (source(44_100, bits: 16), nil, false, 44_100, 24, 2, [.repacked(from: "FLAC")]),
         // 32-bit: sent as 24-bit.

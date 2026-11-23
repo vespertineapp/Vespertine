@@ -48,7 +48,8 @@ Sonos speakers are network players: Vespertine finds them by SSDP, serves the so
 |---|---|
 | FLAC or Apple Lossless, up to 24-bit / 48 kHz, mono or stereo | The file itself, byte for byte |
 | WAV or AIFF, 16-bit, up to 48 kHz | The file itself |
-| MP3, AAC, Ogg Vorbis | The file itself |
+| MP3, AAC (in M4A), Ogg Vorbis | The file itself |
+| Another codec in a file type Sonos reads (Dolby Digital or Dolby Digital Plus in M4A, xHE-AAC, Opus or FLAC in Ogg) | 24-bit FLAC, decoded; the codec is named |
 | 88.2, 176.4 or 352.8 kHz | 24-bit FLAC at 44.1 kHz |
 | 96, 192 or 384 kHz | 24-bit FLAC at 48 kHz |
 | DSD (DSF, DSDIFF, SACD image, WavPack DSD) | 24-bit FLAC at 44.1 kHz |

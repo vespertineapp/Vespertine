@@ -13,18 +13,16 @@ public struct StreamLimits: Sendable, Hashable {
     /// The highest PCM rate it plays.
     public var maxSampleRate: Double
     public var maxChannels: Int
-    /// The file types it plays as they are (normalised MIME types), each with the deepest word it takes in that type.
-    /// Lossy types are listed with 0: a lossy file has no word length.
-    public var originals: [String: Int]
-    /// Codecs it doesn't decode even inside a file type it reads (Opus in Ogg).
-    public var unreadCodecs: [String] = []
+    /// The file types it plays as they are (normalised MIME types), each with the codecs it decodes inside that type and the
+    /// deepest word it takes for each. A lossy codec is listed with 0: it has no word length. A codec not listed for the type
+    /// (Dolby Digital Plus in an M4A, Opus in an Ogg) isn't sent as the file, whatever the type.
+    public var originals: [String: [String: Int]]
     /// It wants a file whose length it is told: a processed stream is finished before it is offered, not sent as it grows.
     public var wholeFiles: Bool
     /// What the limits are called in a sentence: "Sonos".
     public var playerKind: String
 
-    public init(maxSampleRate: Double, maxChannels: Int, originals: [String: Int], wholeFiles: Bool, playerKind: String, unreadCodecs: [String] = []) {
-        self.unreadCodecs = unreadCodecs
+    public init(maxSampleRate: Double, maxChannels: Int, originals: [String: [String: Int]], wholeFiles: Bool, playerKind: String) {
         self.maxSampleRate = maxSampleRate
         self.maxChannels = maxChannels
         self.originals = originals
@@ -32,12 +30,19 @@ public struct StreamLimits: Sendable, Hashable {
         self.playerKind = playerKind
     }
 
+    /// The deepest word `codec` is taken at inside `mime` (0: a lossy codec); nil when the player doesn't play it as a file.
+    public func deepest(codec: String, in mime: String) -> Int? {
+        guard let codecs = originals[MediaType.normalise(mime)] else { return nil }
+        return codecs.first { $0.key.caseInsensitiveCompare(codec) == .orderedSame }?.value
+    }
+
     /// Sonos S2, from Sonos's own list for a music library: mono or stereo, up to 48 kHz; FLAC and Apple Lossless up to
-    /// 24-bit, WAV and AIFF 16-bit; MP3, AAC and Ogg Vorbis (docs/output-routes.md has the sources).
+    /// 24-bit, WAV and AIFF 16-bit; MP3, AAC (in M4A) and Ogg Vorbis (docs/output-routes.md has the sources).
     public static let sonos = StreamLimits(maxSampleRate: 48_000, maxChannels: 2,
-                                           originals: ["audio/flac": 24, "audio/mp4": 24, "audio/wav": 16, "audio/aiff": 16,
-                                                       "audio/mpeg": 0, "audio/ogg": 0],
-                                           wholeFiles: true, playerKind: "Sonos", unreadCodecs: ["Opus"])
+                                           originals: ["audio/flac": ["FLAC": 24], "audio/mp4": ["ALAC": 24, "AAC": 0],
+                                                       "audio/wav": ["WAV": 16, "LPCM": 16, "PCM": 16], "audio/aiff": ["AIFF": 16, "LPCM": 16, "PCM": 16],
+                                                       "audio/mpeg": ["MP3": 0], "audio/ogg": ["Vorbis": 0]],
+                                           wholeFiles: true, playerKind: "Sonos")
 }
 
 /// One thing that happens to a song on its way to a player that can't take it as it is.
@@ -136,11 +141,13 @@ public enum StreamNegotiation {
         if let bits = source.bitDepth, bits > 24 { changes.append(.wordLength(from: bits, to: 24)) }
         if changes.isEmpty {
             let type = mime.map(MediaType.normalise)
-            let readable = !limits.unreadCodecs.contains { source.codec.localizedCaseInsensitiveContains($0) }
-            if let type, readable, let deepest = limits.originals[type], source.encoding == .lossy || (source.bitDepth ?? 0) <= deepest {
+            if let type, let deepest = limits.deepest(codec: source.codec, in: type),
+               deepest == 0 ? source.encoding == .lossy : source.encoding == .pcm && (source.bitDepth ?? 0) <= deepest {
                 return StreamPlan(original: true, sampleRate: source.sampleRate, bitDepth: source.bitDepth, channels: source.channels, changes: [])
             }
-            changes.append(.repacked(from: type.map(MediaType.shortName) ?? source.codec))
+            // A type it reads holding a codec it doesn't is named by the codec ("Dolby Digital Plus"), not by the type.
+            let readsType = type.map { limits.originals[$0] != nil } ?? false
+            changes.append(.repacked(from: readsType ? source.codec : type.map(MediaType.shortName) ?? source.codec))
         }
         return StreamPlan(original: false, sampleRate: rate, bitDepth: 24, channels: channels, changes: changes)
     }
