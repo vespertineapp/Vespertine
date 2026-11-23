@@ -13,6 +13,8 @@ public struct StreamLimits: Sendable, Hashable {
     /// The highest PCM rate it plays.
     public var maxSampleRate: Double
     public var maxChannels: Int
+    /// The deepest word a processed stream is made at for it (24; 16 for Sonos S1).
+    public var maxBitDepth: Int = 24
     /// The file types it plays as they are (normalised MIME types), each with the codecs it decodes inside that type and the
     /// deepest word it takes for each. A lossy codec is listed with 0: it has no word length. A codec not listed for the type
     /// (Dolby Digital Plus in an M4A, Opus in an Ogg) isn't sent as the file, whatever the type.
@@ -22,7 +24,8 @@ public struct StreamLimits: Sendable, Hashable {
     /// What the limits are called in a sentence: "Sonos".
     public var playerKind: String
 
-    public init(maxSampleRate: Double, maxChannels: Int, originals: [String: [String: Int]], wholeFiles: Bool, playerKind: String) {
+    public init(maxSampleRate: Double, maxChannels: Int, maxBitDepth: Int = 24, originals: [String: [String: Int]], wholeFiles: Bool, playerKind: String) {
+        self.maxBitDepth = maxBitDepth
         self.maxSampleRate = maxSampleRate
         self.maxChannels = maxChannels
         self.originals = originals
@@ -43,6 +46,20 @@ public struct StreamLimits: Sendable, Hashable {
                                                        "audio/wav": ["WAV": 16, "LPCM": 16, "PCM": 16], "audio/aiff": ["AIFF": 16, "LPCM": 16, "PCM": 16],
                                                        "audio/mpeg": ["MP3": 0], "audio/ogg": ["Vorbis": 0]],
                                            wholeFiles: true, playerKind: "Sonos")
+
+    /// Sonos S1, from the same list: as S2, but FLAC and Apple Lossless up to 16-bit, so a processed stream is 16-bit FLAC.
+    public static let sonosS1 = StreamLimits(maxSampleRate: 48_000, maxChannels: 2, maxBitDepth: 16,
+                                             originals: ["audio/flac": ["FLAC": 16], "audio/mp4": ["ALAC": 16, "AAC": 0],
+                                                         "audio/wav": ["WAV": 16, "LPCM": 16, "PCM": 16], "audio/aiff": ["AIFF": 16, "LPCM": 16, "PCM": 16],
+                                                         "audio/mpeg": ["MP3": 0], "audio/ogg": ["Vorbis": 0]],
+                                             wholeFiles: true, playerKind: "Sonos S1")
+
+    /// A Sonos that doesn't say whether it runs S1 or S2: S1's limits, which both play, named only "Sonos".
+    public static let sonosUnknown: StreamLimits = {
+        var limits = sonosS1
+        limits.playerKind = "Sonos"
+        return limits
+    }()
 }
 
 /// One thing that happens to a song on its way to a player that can't take it as it is.
@@ -138,7 +155,7 @@ public enum StreamNegotiation {
         if !dsd, abs(rate - pcmRate) > 0.5 { changes.append(.resampled(from: pcmRate, to: rate)) }
         let channels = min(max(1, source.channels), limits.maxChannels)
         if channels < source.channels { changes.append(.downmixed(from: source.channels, to: channels)) }
-        if let bits = source.bitDepth, bits > 24 { changes.append(.wordLength(from: bits, to: 24)) }
+        if let bits = source.bitDepth, bits > limits.maxBitDepth { changes.append(.wordLength(from: bits, to: limits.maxBitDepth)) }
         if changes.isEmpty {
             let type = mime.map(MediaType.normalise)
             if let type, let deepest = limits.deepest(codec: source.codec, in: type),
@@ -149,13 +166,15 @@ public enum StreamNegotiation {
             let readsType = type.map { limits.originals[$0] != nil } ?? false
             changes.append(.repacked(from: readsType ? source.codec : type.map(MediaType.shortName) ?? source.codec))
         }
-        return StreamPlan(original: false, sampleRate: rate, bitDepth: 24, channels: channels, changes: changes)
+        return StreamPlan(original: false, sampleRate: rate, bitDepth: limits.maxBitDepth, channels: channels, changes: changes)
     }
 }
 
 extension NetworkRender.Target {
-    /// The stream a plan that isn't the original asks for.
-    public init(_ plan: StreamPlan) {
-        self = .fixed(sampleRate: plan.sampleRate, channels: plan.channels)
+    /// The stream a plan asks for when the song is processed for a player with `limits`: the plan's rate and channels, at the
+    /// deepest word the player takes (a plan that was the original, processed only for the listener's own equalizer or
+    /// volume, is made at that depth too).
+    public init(_ plan: StreamPlan, limits: StreamLimits) {
+        self = .fixed(sampleRate: plan.sampleRate, channels: plan.channels, bitDepth: plan.original ? limits.maxBitDepth : plan.bitDepth ?? limits.maxBitDepth)
     }
 }

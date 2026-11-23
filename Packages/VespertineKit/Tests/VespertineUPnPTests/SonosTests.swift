@@ -423,7 +423,7 @@ struct SonosPlayerTests {
         let plan = StreamNegotiation.plan(source: try SourceDescription.describe(PlayableItem(url: wav), url: wav).format, mime: "audio/wav", limits: .sonos)
         #expect(plan.changes == [.repacked(from: "WAV")])
         let maker = ProcessedStreamMaker(directory: FileManager.default.temporaryDirectory.appendingPathComponent("vespertine-upnp-\(UUID().uuidString)"))
-        let (file, format) = try maker.makeStream(item: PlayableItem(url: wav), url: wav, settings: RendererSettings(), startSeconds: 0, target: .init(plan))
+        let (file, format) = try maker.makeStream(item: PlayableItem(url: wav), url: wav, settings: RendererSettings(), startSeconds: 0, target: .init(plan, limits: .sonos))
         for _ in 0..<500 where !file.isFinished { try await Task.sleep(for: .milliseconds(10)) }
         #expect(format.sampleRate == 48_000)
         #expect(try flacSamples(file.url) == (try wavSamples(wav)))
@@ -471,7 +471,7 @@ struct LimitedStreamTests {
         #expect(format.channels == 6)
         let plan = StreamNegotiation.plan(source: format, mime: "audio/wav", limits: .sonos)
         #expect(plan.changes == [.downmixed(from: 6, to: 2)])
-        let render = try NetworkRender(item: PlayableItem(url: wav), url: wav, equalizer: nil, roomCorrection: nil, digitalVolumeDB: nil, target: .init(plan))
+        let render = try NetworkRender(item: PlayableItem(url: wav), url: wav, equalizer: nil, roomCorrection: nil, digitalVolumeDB: nil, target: .init(plan, limits: .sonos))
         #expect(render.format.channels == 2)
         #expect(render.format.sampleRate == 48_000)
         #expect(render.format.bitDepth == 24)
@@ -492,7 +492,7 @@ struct LimitedStreamTests {
             #expect(format.channels == 6)
             let plan = StreamNegotiation.plan(source: format, mime: "audio/wav", limits: .sonos)
             #expect(plan.changes == [.downmixed(from: 6, to: 2)])
-            let render = try NetworkRender(item: PlayableItem(url: wav), url: wav, equalizer: nil, roomCorrection: nil, digitalVolumeDB: nil, target: .init(plan))
+            let render = try NetworkRender(item: PlayableItem(url: wav), url: wav, equalizer: nil, roomCorrection: nil, digitalVolumeDB: nil, target: .init(plan, limits: .sonos))
             #expect(render.format.channels == 2)
             outputs.append(renderAll(render))
         }
@@ -509,7 +509,7 @@ struct LimitedStreamTests {
         let wav = try makeSurroundWAV(channels: channels, named: false)
         let format = try SourceDescription.describe(PlayableItem(url: wav), url: wav).format
         let plan = StreamNegotiation.plan(source: format, mime: "audio/wav", limits: .sonos)
-        let render = try NetworkRender(item: PlayableItem(url: wav), url: wav, equalizer: nil, roomCorrection: nil, digitalVolumeDB: nil, target: .init(plan))
+        let render = try NetworkRender(item: PlayableItem(url: wav), url: wav, equalizer: nil, roomCorrection: nil, digitalVolumeDB: nil, target: .init(plan, limits: .sonos))
         let out = renderAll(render)
         #expect(abs(out.count / 2 - 24_000) <= 64)
         #expect((stride(from: 0, to: out.count, by: 2).map { abs(out[$0]) }.max() ?? 0) > 100_000)
@@ -522,7 +522,7 @@ struct LimitedStreamTests {
             let wav = try makeWAV(seconds: 0.5, rate: rate, seed: 1)
             let format = try SourceDescription.describe(PlayableItem(url: wav), url: wav).format
             let plan = StreamNegotiation.plan(source: format, mime: "audio/wav", limits: .sonos)
-            let render = try NetworkRender(item: PlayableItem(url: wav), url: wav, equalizer: nil, roomCorrection: nil, digitalVolumeDB: nil, target: .init(plan))
+            let render = try NetworkRender(item: PlayableItem(url: wav), url: wav, equalizer: nil, roomCorrection: nil, digitalVolumeDB: nil, target: .init(plan, limits: .sonos))
             #expect(render.format.sampleRate == sent)
             #expect(render.plan.resamples)
             #expect(abs(renderAll(render).count / 2 - Int(sent / 2)) <= 64)

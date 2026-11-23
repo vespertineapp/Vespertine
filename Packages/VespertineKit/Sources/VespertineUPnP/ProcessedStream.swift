@@ -13,12 +13,12 @@ import SFBAudioEngine
 import VespertineAudio
 
 public enum FLACStreamWriter {
-    /// The format the FLAC encoder takes for 24-bit samples: Int32 words, interleaved, the sample in the top 24 bits.
-    static func format(rate: Double, channels: Int) -> AVAudioFormat? {
+    /// The format the FLAC encoder takes for `bits`-bit samples (24 or 16): Int32 words, interleaved, the sample in the top bits.
+    static func format(rate: Double, channels: Int, bits: Int = 24) -> AVAudioFormat? {
         var asbd = AudioStreamBasicDescription(mSampleRate: rate, mFormatID: kAudioFormatLinearPCM,
                                                mFormatFlags: kAudioFormatFlagsNativeEndian | kAudioFormatFlagIsSignedInteger | kAudioFormatFlagIsAlignedHigh,
                                                mBytesPerPacket: UInt32(4 * channels), mFramesPerPacket: 1, mBytesPerFrame: UInt32(4 * channels),
-                                               mChannelsPerFrame: UInt32(channels), mBitsPerChannel: 24, mReserved: 0)
+                                               mChannelsPerFrame: UInt32(channels), mBitsPerChannel: UInt32(bits), mReserved: 0)
         let layout: AVAudioChannelLayout? = channels > 2 ? AVAudioChannelLayout(layoutTag: kAudioChannelLayoutTag_DiscreteInOrder | UInt32(channels)) : nil
         if let layout { return AVAudioFormat(streamDescription: &asbd, channelLayout: layout) }
         return AVAudioFormat(streamDescription: &asbd)
@@ -26,8 +26,8 @@ public enum FLACStreamWriter {
 
     /// Encodes everything `render` gives into a FLAC file at `url`; throws what went wrong.
     static func encode(_ render: NetworkRender, to url: URL, isCancelled: () -> Bool) throws {
-        let rate = render.format.sampleRate, channels = render.format.channels
-        guard let format = format(rate: rate, channels: channels) else { throw RendererPlaybackError.unplayable("FLAC format") }
+        let rate = render.format.sampleRate, channels = render.format.channels, bits = render.format.bitDepth == 16 ? 16 : 24
+        guard let format = format(rate: rate, channels: channels, bits: bits) else { throw RendererPlaybackError.unplayable("FLAC format") }
         let encoder = try AudioEncoder(url: url, encoderName: .FLAC)
         encoder.settings = [.flacCompressionLevel: 5]
         try encoder.setSourceFormat(format)
@@ -41,7 +41,8 @@ public enum FLACStreamWriter {
         while !isCancelled() {
             let samples = render.next(maxFrames: Int(frames))
             if samples.isEmpty { break }
-            for i in samples.indices { words[i] = samples[i] << 8 }
+            let shift = Int32(32 - bits)
+            for i in samples.indices { words[i] = samples[i] << shift }
             buffer.frameLength = AVAudioFrameCount(samples.count / channels)
             try encoder.encode(from: buffer)
         }

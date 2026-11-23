@@ -42,6 +42,9 @@ final class FakeRenderer: @unchecked Sendable {
     /// and it answers for how its system is arranged (`zoneGroupState`) and for its volume.
     var sonosRoom: String?
     var sonosModel = "Sonos Playbar"
+    /// The speaker's software, as its description states it: `swGen` 2 and a display version of 12 or later are S2, `swGen`
+    /// 1 and 11.x are S1. Empty: a description that says neither.
+    var sonosSoftware: [(String, String)] = [("swGen", "2"), ("displayVersion", "16.1")]
     /// What GetZoneGroupState answers.
     var zoneGroupState = ""
     /// The Music Playback setting of a room with surrounds: "0" ambient, "1" full; nil for a room without.
@@ -249,7 +252,8 @@ final class FakeRenderer: @unchecked Sendable {
             return "<?xml version=\"1.0\"?><root xmlns=\"urn:schemas-upnp-org:device-1-0\"><device>"
                 + "<deviceType>urn:schemas-upnp-org:device:ZonePlayer:1</deviceType><friendlyName>127.0.0.1 - \(sonosModel)</friendlyName>"
                 + "<manufacturer>Sonos, Inc.</manufacturer><modelNumber>S9</modelNumber><modelName>\(sonosModel)</modelName>"
-                + "<roomName>\(room)</roomName><displayName>Playbar</displayName><UDN>\(speaker)</UDN>"
+                + "<roomName>\(room)</roomName><displayName>Playbar</displayName>"
+                + sonosSoftware.map { "<\($0.0)>\($0.1)</\($0.0)>" }.joined() + "<UDN>\(speaker)</UDN>"
                 + "<serviceList>\(service("urn:schemas-upnp-org:service:ZoneGroupTopology:1", "ZoneGroupTopology"))</serviceList><deviceList>"
                 + "<device><deviceType>urn:schemas-upnp-org:device:MediaServer:1</deviceType><friendlyName>127.0.0.1 - \(sonosModel) Media Server</friendlyName>"
                 + "<manufacturer>Sonos, Inc.</manufacturer><modelName>\(sonosModel)</modelName><UDN>\(speaker)_MS</UDN>"

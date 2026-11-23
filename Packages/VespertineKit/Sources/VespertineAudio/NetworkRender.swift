@@ -19,9 +19,10 @@ public final class NetworkRender: @unchecked Sendable {
         case airPlay
         /// AirPlay to a receiver that takes another format: the same, at `sampleRate` and `bitDepth` (16 or 24).
         case airPlayStream(sampleRate: Int, bitDepth: Int)
-        /// A renderer that takes less than the source has (a Sonos: 48 kHz, two channels): 24 bits at exactly `sampleRate`,
-        /// at most `channels` channels, resampled, folded down and DSD→PCM by the engine's own converter.
-        case fixed(sampleRate: Double, channels: Int)
+        /// A renderer that takes less than the source has (a Sonos: 48 kHz, two channels): `bitDepth` bits (24, or 16 for a
+        /// Sonos S1) at exactly `sampleRate`, at most `channels` channels, resampled, folded down and DSD→PCM by the engine's
+        /// own converter.
+        case fixed(sampleRate: Double, channels: Int, bitDepth: Int = 24)
 
         /// The one rate and word length of an AirPlay target; nil for a renderer's stream.
         var airPlay: (rate: Double, bits: Int)? {
@@ -43,6 +44,10 @@ public final class NetworkRender: @unchecked Sendable {
     public var decoderName: String { probed.decoderName }
     /// The chain itself adds TPDF dither at the target's word length (gain, equalizer or room correction change the samples).
     public let chainDithers: Bool
+    /// `next` adds TPDF dither itself: a stream shorter than 24 bits whose samples the chain didn't dither and that aren't
+    /// already whole values at that length (a deeper source, a resampled, folded or DSD one, a lossy one).
+    let quantiserDithers: Bool
+    private var dither = TPDFDither(seed: UInt64.random(in: 1...UInt64.max))
     private let probed: ProbedSource
     private let decoding: Decoding
     private let ring: OpaquePointer
@@ -63,9 +68,9 @@ public final class NetworkRender: @unchecked Sendable {
         let source = probed.format
         let airPlay = target.airPlay
         let isAirPlay = airPlay != nil
-        let bits = airPlay?.bits ?? 24
-        var fixed: (rate: Double, channels: Int)?
-        if case .fixed(let sampleRate, let most) = target { fixed = (sampleRate, max(1, most)) }
+        var fixed: (rate: Double, channels: Int, bits: Int)?
+        if case .fixed(let sampleRate, let most, let depth) = target { fixed = (sampleRate, max(1, most), depth == 16 ? 16 : 24) }
+        let bits = airPlay?.bits ?? fixed?.bits ?? 24
         let channels = isAirPlay ? min(2, max(1, source.channels)) : min(max(1, source.channels), fixed?.channels ?? .max)
         let rates = airPlay.map { [$0.rate] } ?? fixed.map { [$0.rate] } ?? Self.rates
         // AirPlay is always a stereo stream (a mono song is carried on both); a renderer's stream keeps a mono song mono.
@@ -117,6 +122,9 @@ public final class NetworkRender: @unchecked Sendable {
         RoomCorrectionPlayback.install(room, on: context, sampleRate: rate, channelCount: plan.channels)
         RoomCorrectionPlayback.installFilters(room?.impulseTaps(sampleRate: rate, channelCount: plan.channels), on: context)
         chainDithers = db != 0 || !sections.isEmpty || room != nil
+        // Only a renderer's own stream is quantised here (AirPlay's frames do their own); a 24-bit one never needs it.
+        let requantised = source.encoding != .pcm || (source.bitDepth ?? 32) > bits || plan.resamples || plan.channels < source.channels
+        quantiserDithers = !isAirPlay && bits < 24 && !chainDithers && requantised
     }
 
     deinit {
@@ -124,13 +132,16 @@ public final class NetworkRender: @unchecked Sendable {
         nrt_ring_destroy(ring)
     }
 
-    /// Up to `maxFrames` interleaved frames, each sample a 24-bit value (−8388608…8388607) in an Int32; empty at the end.
+    /// Up to `maxFrames` interleaved frames, each sample a value of the stream's word length in an Int32 (24-bit:
+    /// −8388608…8388607; 16-bit: −32768…32767), with TPDF dither where `quantiserDithers`; empty at the end.
     public func next(maxFrames: Int = 4096) -> [Int32] {
         let rendered = nextFloats(maxFrames: maxFrames)
+        let full = Double(Int64(1) << Int64((format.bitDepth ?? 24) - 1))
         var out = [Int32](repeating: 0, count: rendered.count)
         for i in rendered.indices {
-            let v = (Double(rendered[i]) * 8_388_608).rounded()
-            out[i] = Int32(min(max(v, -8_388_608), 8_388_607))
+            let x = Double(rendered[i]) * full
+            let v = (quantiserDithers ? x + dither.next() : x).rounded()
+            out[i] = Int32(min(max(v, -full), full - 1))
         }
         return out
     }
@@ -153,4 +164,17 @@ public final class NetworkRender: @unchecked Sendable {
         scratch.withUnsafeMutableBufferPointer { nrt_context_render_interleaved(context, $0.baseAddress!, UInt32(n), UInt32(channels)) }
         return Array(scratch.prefix(n * channels))
     }
+}
+
+/// TPDF dither of ±1 LSB (the sum of two uniform ±½), from a small fast generator (xorshift64*).
+struct TPDFDither {
+    private var state: UInt64
+    init(seed: UInt64) { state = seed == 0 ? 0x9E37_79B9_7F4A_7C15 : seed }
+    private mutating func unit() -> Double {
+        state ^= state >> 12
+        state ^= state << 25
+        state ^= state >> 27
+        return Double((state &* 2_685_821_657_736_338_717) >> 11) / Double(1 << 53)
+    }
+    mutating func next() -> Double { unit() + unit() - 1 }
 }

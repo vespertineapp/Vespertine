@@ -459,8 +459,10 @@ public final class RendererPlayback: @unchecked Sendable {
         case .processed(let reasons):
             guard let processed else { throw RendererPlaybackError.unplayable(String(localized: "Processed streams aren't available.")) }
             processing = reasons
-            let (growing, format) = if let fitted, !fitted.original {
-                try processed.makeStream(item: item, url: url, settings: settings, startSeconds: seconds, target: .init(fitted))
+            // A player with limits gets a stream made to them, even when only the listener's own processing made one needed
+            // (a Sonos S1 takes 16 bits, whatever the reason the song is processed).
+            let (growing, format) = if let fitted, let limits {
+                try processed.makeStream(item: item, url: url, settings: settings, startSeconds: seconds, target: .init(fitted, limits: limits))
             } else {
                 try processed.makeStream(item: item, url: url, settings: settings, startSeconds: seconds)
             }
@@ -488,7 +490,7 @@ public final class RendererPlayback: @unchecked Sendable {
         if let limits, let fitted, file != nil { warnings += fitted.changes.filter(\.changesSamples).map { $0.message(player: limits.playerKind) } }
         let stage = SignalPath.RendererStage(name: renderer.name, protocolName: renderer.kind.protocolName, processing: processing,
                                              sentCodec: file == nil ? source.codec : "FLAC", sentSampleRate: sent?.sampleRate ?? source.sampleRate,
-                                             sentBitDepth: file == nil ? source.bitDepth : 24, sentChannels: sent?.channels ?? source.channels,
+                                             sentBitDepth: file == nil ? source.bitDepth : sent?.bitDepth ?? 24, sentChannels: sent?.channels ?? source.channels,
                                              gapless: transport.gapless, warnings: warnings)
         let volume: SignalPath.VolumeStage = settings.activeVolumeDB.map { .digital(dB: $0) } ?? .fixed
         let path = SignalPath.renderer(stage, source: source, decoderName: described?.decoderName ?? "", volume: volume,

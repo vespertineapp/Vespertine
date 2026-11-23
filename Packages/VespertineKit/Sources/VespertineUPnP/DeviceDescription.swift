@@ -67,9 +67,15 @@ public struct DeviceDescription: Sendable, Hashable {
     public var modelDescription: String?
     public var location: URL
     public var services: [UPnPService]
+    /// A Sonos speaker's software as its description states it: `swGen` ("1" for S1, "2" for S2) and the version the Sonos
+    /// app shows ("11.15", "16.1"). Nil for other players, and where the speaker doesn't say.
+    public var softwareGeneration: String?
+    public var displayVersion: String?
 
     public init(udn: String, friendlyName: String, manufacturer: String = "", modelName: String = "", modelNumber: String? = nil,
-                modelDescription: String? = nil, location: URL, services: [UPnPService]) {
+                modelDescription: String? = nil, location: URL, services: [UPnPService], softwareGeneration: String? = nil, displayVersion: String? = nil) {
+        self.softwareGeneration = softwareGeneration
+        self.displayVersion = displayVersion
         self.udn = udn
         self.friendlyName = friendlyName
         self.manufacturer = manufacturer
@@ -125,6 +131,9 @@ public struct DeviceDescription: Sendable, Hashable {
             if let room = root.fields["roomName"], !room.isEmpty { description.friendlyName = room }
             if let model = root.fields["modelName"], !model.isEmpty { description.modelName = model }
             if let number = root.fields["modelNumber"], !number.isEmpty { description.modelNumber = number }
+            // S1 or S2, which decides how deep a word it takes (16 or 24 bits).
+            description.softwareGeneration = root.fields["swGen"].flatMap { $0.isEmpty ? nil : $0 }
+            description.displayVersion = root.fields["displayVersion"].flatMap { $0.isEmpty ? nil : $0 }
             for s in root.services {
                 guard let type = s["serviceType"], ServiceKind.zoneGroupTopology.matches(type), let control = resolve(s["controlURL"]),
                       let scpd = resolve(s["SCPDURL"]) else { continue }

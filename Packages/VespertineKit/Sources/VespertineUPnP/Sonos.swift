@@ -9,6 +9,28 @@
 
 import Foundation
 
+/// Which Sonos software a speaker runs. S2 takes FLAC and Apple Lossless up to 24-bit from a music library, S1 up to 16-bit.
+public enum SonosGeneration: Sendable, Hashable {
+    case s1, s2
+    /// It doesn't say: treated as S1, whose limits every Sonos plays.
+    case unknown
+
+    /// From a description's `swGen` ("1", "2"), else its display version (S1 ends at 11.x; S2 began at 12.0).
+    public init(swGen: String?, displayVersion: String?) {
+        switch swGen?.trimmingCharacters(in: .whitespaces) {
+        case "1": self = .s1; return
+        case "2": self = .s2; return
+        default: break
+        }
+        let major = displayVersion?.trimmingCharacters(in: .whitespaces).split(separator: ".").first.flatMap { Int($0) }
+        switch major {
+        case let m? where m >= 12: self = .s2
+        case let m? where m >= 1: self = .s1
+        default: self = .unknown
+        }
+    }
+}
+
 /// How a Sonos system is arranged right now.
 public struct SonosTopology: Sendable, Hashable {
     public struct Member: Sendable, Hashable {
@@ -161,7 +183,20 @@ extension RendererDevice {
     public var isSonos: Bool { SonosTopology.uuid(udn: description.udn) != nil }
 
     /// What it takes beyond what its format list says; nil for a player that states its own limits (or none).
-    public var limits: StreamLimits? { isSonos ? .sonos : nil }
+    /// A Sonos is held to S2's limits only when it says it runs S2; S1, or not saying, gets S1's (16-bit), which both play.
+    public var limits: StreamLimits? {
+        guard isSonos else { return nil }
+        switch sonosGeneration {
+        case .s2: return .sonos
+        case .s1: return .sonosS1
+        case .unknown: return .sonosUnknown
+        }
+    }
+
+    /// S1 or S2, as the speaker's description says; `.unknown` for a speaker that doesn't say (and for other players).
+    public var sonosGeneration: SonosGeneration {
+        isSonos ? SonosGeneration(swGen: description.softwareGeneration, displayVersion: description.displayVersion) : .unknown
+    }
 }
 
 // MARK: - Volume
