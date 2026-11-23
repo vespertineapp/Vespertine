@@ -1,46 +1,35 @@
 # Sonos and output routes: result
 
-Branch `feat/sonos-and-output-routes`, local commits only (the four commits before this one were made unsigned, this one is signed; not pushed). Nothing here has been heard on a real Sonos; Sonos-specific behaviour is verified against a pretend Sonos on 127.0.0.1 and against Sonos's documentation and the SoCo library's source. The checklist at the end is the first real test.
+Branch `feat/sonos-and-output-routes`, local commits only, not pushed; `git log --format=%G?` shows a good signature on every commit since `main`. Target: 1.2.4 (build 77). Nothing here has been heard on a real Sonos; Sonos-specific behaviour is verified against a pretend Sonos on 127.0.0.1 and against Sonos's documentation and the SoCo library's source. The checklist at the end is the first real test.
 
 ## What the branch adds
 
 - **Sonos rooms as outputs**, behind Settings › Playback › Network Players (Sonos and UPnP, beta), off by default (no search, no port until switched on). One row per room or group; surrounds, Sub and the second speaker of a pair aren't listed.
-- **Sonos's limits applied by one table** (`StreamLimits.sonos`): the file itself when it fits; otherwise 24-bit FLAC at 48 or 44.1 kHz (whichever divides the source rate), folded to stereo, DSD as PCM. Written whole before Sonos is told, so it can seek.
+- **Sonos's limits applied by one table** (`StreamLimits.sonos`, `.sonosS1`): the file itself when it fits (per codec within a file type); otherwise FLAC at 48 or 44.1 kHz (whichever divides the source rate), 24-bit on S2 and 16-bit on S1 (or a speaker that doesn't say), folded to stereo, DSD as PCM. Written whole before Sonos is told, so it can seek.
 - **No silent downgrade**: every output row says what the loaded song would be played as ("Will play 24-bit / 48 kHz FLAC, stereo (source 24/96)", copper when samples change); while playing, the badge (RESAMPLED / FOLDED TO STEREO / DSD AS PCM · 24/48 SENT) and a "Player limit" line in the signal path. Same planner for DACs, HDMI, Bluetooth, AirPlay and other network players.
 - **Sonos volume** slider (room or group), the room's details (speaker setup, Music Playback Ambient/Full, read only), plain error for "couldn't fetch" (firewall), `vespertine-probe sonos`, and docs/output-routes.md.
 
-## This pass (2026-11-23)
+## This pass: the review's findings (2026-11-23, later)
 
-1. **Translations**: the 47 new strings are in the String Catalog in all 44 languages; `scripts/check-localizations.py` passes. Four keys take integers, so they are `%lld` in the catalog, not `%@` (the check can't tell). The Sonos app's own setting names (Music Playback, Ambient, Full) are translated in the ordinary way; I couldn't check them against Sonos's own translated screens.
-2. **6-channel WAV with no channel mask**: was silent when folded to stereo. Now it is taken as L R C LFE Ls Rs (the WAVE_FORMAT_EXTENSIBLE default) and folds sample for sample like the same file with the 5.1 mask; 3, 4, 7 and 8 unnamed channels fold to stereo in WAV order with sound in both channels. Cause: Apple's converter mixes by the *buffer's* layout ("unknown, 6 channels"), whatever its own input format says, so the decoder's buffer is handed over through a second buffer over the same memory carrying the 5.1 layout (`OutputSession.namedForFold`, `EngineDecoding`). This applies to every stereo or mono output, not only network streams. Tests: `LimitedStreamTests`.
-3. **Screens** (docs/screens-sonos/): the Debug app was run with Network Players on, a test library, and the tests' pretend Sonos (a Playbar room, 5.1, Ambient) plus a plain OpenHome player. Shots: the output list with a 24/96 song and with a 5.1 song loaded, the Sonos notes, both songs playing (badge, Player limit line), and the volume slider. I read every shot. Two layout fixes: the detail labels were too narrow ("Surrounds for music" wrapped onto two lines), and the Sonos slider ran into Vespertine's own "100% · LOCKED" volume, so the two read as one control; there is now a divider between them. Two QA launch arguments make this repeatable: `-VespertineRendererDemo <description URLs>` (debug builds only: discovery finds exactly those players and sends nothing on the network) and `-VespertineOpenSheet outputs`.
-4. **Tests and builds**: below.
+An independent review said not to ship yet. Each finding below was fixed with a failing test written first (seen failing, then passing). All commits of this pass are signed; nothing is pushed.
 
-## Test and build figures (this machine, after the last change)
+1. **P1, the next song blocked the player's commands.** Preparing the next song (for a Sonos, up to two minutes waiting for a hi-res conversion to be written whole) ran on the serial command worker, so pause, play, seek, stop, skip and the status polls waited behind it. Worse than reported: the status poll that says a song has *started* waited too, so the first song wasn't even announced. Now the next song is prepared beside the worker and handed back to it when ready; it is handed to the player only if it still follows the song playing, for the same play, and is still the queue's next. A stop, a skip, letting go of the output, or a queue change gives it up at once (its wait ends within 20 ms, its encoder stops). A stop or skip also cuts short the wait of the *current* song's preparation. Tests: `NextPreparationTests` (a pretend Sonos and a stream that is never finished: polls, pause, play and seek get through within 2 s; stop, skip and shutdown abandon the stream; a next song ready in time is still handed over). One existing OpenHome test now waits for the next song to be handed over instead of expecting it at the instant the first song starts. Not changed: while the *first* song itself is being prepared, a pause is carried out once it is loaded.
+2. **P2, every Sonos got S2's limits.** A speaker's description is now read for `swGen` (1 or 2), else its display version (S1 ends at 11.x, S2 began at 12.0). S1, and a speaker that says neither, get S1's limits: FLAC and Apple Lossless up to 16-bit, everything deeper sent as 16-bit FLAC with TPDF dither (the change named: "Sonos S1 takes up to 16-bit, so this 24-bit song is sent as 16-bit."). The processed stream, the FLAC encoder, the signal path and the DIDL metadata carry 16 bits; a 16-bit song made into a 16-bit stream keeps its samples exactly. The output list, the room's details and its notes say "UP TO 16/48" for such a room (three new strings; their 44 translations are the 24-bit ones with the number changed). `vespertine-probe sonos` prints what the speaker states. Tests: `SonosGenerationTests`, `SonosOutputTests`.
+3. **P2, any lossy codec in an allowed file type went as the file.** Acceptance is now per codec within a type: FLAC; ALAC and AAC in M4A; MP3; Vorbis in Ogg; 16-bit PCM in WAV and AIFF. Dolby Digital, Dolby Digital Plus or xHE-AAC in an M4A, and Opus or FLAC in Ogg, are decoded and sent as FLAC, the codec named. Tests: rows added to the Sonos table.
+4. **P2, the forecast ignored what the player advertises.** The output list's line for a network player is now made from `RendererMode.decide` itself, with the player's format list, its limits and the listener's chain. A player that takes neither the file nor FLAC shows why ("The player doesn't take FLAC, so this song can't be sent to it processed.", in copper) instead of "Will play…"; one that lists FLAC but not the file's type is forecast FLAC; a rate or channel limit it states is named under the line. Tests: `RouteForecastDecisionTests`, `SonosOutputTests`.
+5. **P2, a Sonos volume change could reach a speaker after it was let go of.** The pending send is cancelled when the room is let go of or replaced, when playback leaves network players, and when Network Players is switched off. Tests: `SonosVolumeSendTests`.
+6. **P2, version.** `project.yml` is 1.2.4, build 77; the Xcode project was regenerated with XcodeGen (it is not tracked in git). No test: a test pinned to a version number would break at every release.
 
-**App tests** (`xcodebuild test`, Debug, macOS): **passed**, 276 tests in 59 suites, 0 failed (`** TEST SUCCEEDED **`).
+## Test figures (this machine, after the last change)
 
-**Engine package tests** (`swift test` in `Packages/VespertineKit`, whole suite, run on its own with the app tests not running): 1483 tests in 234 suites, **5 failed** (8 issues), the rest passed; the separate 211-test group (AirPlay 2) passed. The 5 that failed in that run:
-
-1. "Stop while the next song at another rate waits on its share" (`RateJoinStopTests`)
-2. "A seek while the next song is fetched lands and plays from there" (`LookAheadYieldTests`)
-3. "With a scan in flight, the song's copy goes over the link…" (`NetworkPriorityTests`)
-4. "The compressed frames macOS is handed are byte-identical with the meters…" (`BedMeterTests`)
-5. "Streams that arrive without a notice are found by re-checking" (`DeviceHotplugTests`)
-
-None of the five test files, and none of the code they exercise for this branch, was touched by this branch. **I could not confirm they are "the same 5" as before:** the earlier full run on this branch (build/logs/kit-tests.log, 03:00) failed a different five (one name in common: the scan-in-flight test and the meters test; the others were a flush-notice test, a play/pause/play test and a "scans start nothing" test). What I found instead:
-
-- Run again on their own, on a quiet machine, the same suites (39 tests in 7 suites) **pass, on this branch and on a clean copy of `main` (1.2.3)**.
-- The failures show waits of 400 to 960 seconds, so they look like timing trouble when the whole suite runs on a loaded machine, not like a change in behaviour. That is a reading, not proven: I did not run the whole suite on `main`, which would be the proper like-for-like check (about 20 minutes).
-- I fixed nothing in them, as asked. No test touched by this branch (Sonos, UPnP, output routes, `LimitedStreamTests`, the 6-channel fold) failed.
-
-Not run this pass: the release-mode engine tests, the analysis package tests, the sanitizer checks and the Release build (`scripts/audit.sh` does these). The Release build did succeed in the earlier pass (build/logs/release-build.log), before the last small changes.
+FIGURES_HERE
 
 ## Not verified: needs a real Sonos
 
 - That a real Sonos answers the search and the arrangement call, accepts the metadata, and can fetch from the Mac (macOS asks for local-network access once; the firewall must let Vespertine accept connections).
 - **Gapless**: the next song is handed over ahead of time; whether Sonos joins them without a gap is unknown (fallback: a gap of about a second).
 - A song that takes over two minutes to prepare is offered while still being written; Sonos may refuse a stream without a length.
+- **S1 or S2 on a real speaker**: that `swGen` 2 means S2 comes from one community report of real speakers' descriptions, not a Sonos document, and the display-version rule is Sonos's own numbering (S2 is 12.0 and later). Not checked on a real S1 speaker. Run `vespertine-probe sonos` and look at the "software:" line.
 - iOS: the iPhone/iPad app shares none of this code; its view of the Mac's new output line wasn't looked at.
 
 ## Known gaps
