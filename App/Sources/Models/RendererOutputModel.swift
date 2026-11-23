@@ -33,7 +33,7 @@ final class RendererOutputModel {
     /// A renderer that is never listed: this Mac's own receiver (Receive from Other Apps), which would only play to itself.
     @ObservationIgnored var hiddenUDN: String? { didSet { if hiddenUDN != oldValue { renderers.removeAll { $0.description.udn == hiddenUDN } } } }
 
-    init(service: RendererService = RendererService()) {
+    init(service: RendererService = RendererOutputModel.defaultService()) {
         self.service = service
         service.discovery.onChange = { [weak self] list in
             Task { @MainActor in
@@ -45,6 +45,18 @@ final class RendererOutputModel {
                 if changed { self.onChange?() }
             }
         }
+    }
+
+    /// The real service; in a debug build given `-VespertineRendererDemo <description URL>[,…]`, one whose discovery finds exactly
+    /// those players (the tests' pretend Sonos, say) and sends no search on the network, for screenshots.
+    static func defaultService() -> RendererService {
+        #if DEBUG
+        if let list = LaunchArguments().string(forKey: "VespertineRendererDemo") {
+            let locations = list.split(separator: ",").compactMap { URL(string: String($0)) }
+            return RendererService(discovery: RendererDiscovery(searcher: DemoRendererSearch(locations: locations)))
+        }
+        #endif
+        return RendererService()
     }
 
     func start() {
@@ -199,3 +211,17 @@ extension AppSettings {
         if !unlocked { setAppVolumeLevel(1, for: uid) }
     }
 }
+
+#if DEBUG
+/// `-VespertineRendererDemo`: answers every search with the given descriptions, as if each player had replied from its own host.
+private struct DemoRendererSearch: SSDPSearching {
+    let locations: [URL]
+
+    func search(targets: [String], mx: Int, wait: TimeInterval) async -> [SSDPResponse] {
+        locations.map { location in
+            let udn = "uuid:demo-\(location.host ?? "")-\(location.port ?? 0)"
+            return SSDPResponse(location: location, st: targets.first ?? "", usn: udn, udn: udn, responder: location.host)
+        }
+    }
+}
+#endif

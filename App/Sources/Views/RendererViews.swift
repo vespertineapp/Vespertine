@@ -147,7 +147,7 @@ struct RendererDetails: View {
 
     private func row(_ title: String, _ value: String) -> some View {
         HStack(alignment: .firstTextBaseline) {
-            Text(title).font(Typeface.ui(11)).foregroundStyle(Palette.text3).frame(width: 96, alignment: .leading)
+            Text(title).font(Typeface.ui(11)).foregroundStyle(Palette.text3).frame(width: 112, alignment: .leading)
             Text(verbatim: value.isEmpty ? Self.blank : value).font(Typeface.mono(10.5)).foregroundStyle(Palette.text2)
                 .fixedSize(horizontal: false, vertical: true)
         }
@@ -200,6 +200,8 @@ struct SonosVolumeControl: View {
                     .frame(width: 72)
                 Text(verbatim: "SONOS").font(Typeface.mono(9.5)).fixedSize().foregroundStyle(Palette.text3)
                     .help(String(localized: "The room's own volume, as in the Sonos app; the samples sent are untouched")).accessibilityHidden(true)
+                // Set apart from Vespertine's own volume beside it (locked at 100%), so the two don't read as one control.
+                Rectangle().fill(Palette.hairlineStrong).frame(width: 1, height: 14).padding(.horizontal, 2).accessibilityHidden(true)
             }
         }
         .task(id: renderer) { model.renderers?.watchVolume(of: renderer) }
