@@ -131,7 +131,7 @@ public final class RendererPlayback: @unchecked Sendable {
     /// A renderer that hasn't started a song this long after being told to has failed to play it.
     let startTimeout: TimeInterval
     /// How long a player that wants whole files waits for a processed stream to be written before it is offered as it grows.
-    var wholeFileWait: TimeInterval = 30
+    var wholeFileWait: TimeInterval = 120
     /// Status polls failing for this long (and at least three times) mean the renderer is gone.
     let lostAfter: TimeInterval
     /// The time, for everything judged by how long it has been (a renderer that has stopped answering, a song that hasn't
