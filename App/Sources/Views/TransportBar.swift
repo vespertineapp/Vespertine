@@ -296,7 +296,7 @@ struct DevicePicker: View {
                         .opacity(row.isReady ? 1 : 0.6)
                 }
             }
-            // Network players (Network Players (UPnP, beta), behind their Settings switch).
+            // Network players (Network Players (Sonos and UPnP, beta), behind their Settings switch).
             if let renderers = model.renderers {
                 Hairline().padding(.vertical, 8)
                 SectionLabel(text: String(localized: "Network players", comment: "Header of the network renderers in the output list")).padding(.horizontal, 8).padding(.bottom, 4)

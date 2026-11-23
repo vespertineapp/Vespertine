@@ -1,5 +1,5 @@
 //
-// Vespertine: network players (UPnP AV / OpenHome renderers) as outputs, behind Settings › Playback › Network Players (UPnP, beta), off by
+// Vespertine: network players (UPnP AV / OpenHome renderers) as outputs, behind Settings › Playback › Network Players (Sonos and UPnP, beta), off by
 // default. The model exists only while the switch is on; until then nothing is searched for and no port is open.
 // SPDX-License-Identifier: GPL-3.0-or-later
 //

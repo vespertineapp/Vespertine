@@ -1,5 +1,5 @@
 //
-// Vespertine: network players (Network Players (UPnP, beta)): the Settings switch, the player's details under the output list,
+// Vespertine: network players (Network Players (Sonos and UPnP, beta)): the Settings switch, the player's details under the output list,
 // its volume lock, and its signal path. None of it shows while the switch is off. Renderer names are shown as they are.
 // SPDX-License-Identifier: GPL-3.0-or-later
 //
