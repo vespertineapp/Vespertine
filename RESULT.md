@@ -21,7 +21,12 @@ Also: docs/output-routes.md describes items 1 and 2.
 
 ### Test figures, this pass
 
-(filled in below as the runs finish)
+On this machine, 2026-11-23 from 07:45. The machine was busy with other work throughout: load averages of 15 to 18 on 8 cores before anything of mine started.
+
+- **The new tests, before and after**: all four package tests failed before their fixes and passed after (`build/logs/r3/red-1-3.log`, `green-1-3.log`); the app test likewise (`red-app-tageditor.log`, `green-app-tageditor.log`).
+- **UPnP and Sonos** (`VespertineUPnPTests`, debug): **164 passed**, 0 failed (162 before this pass, plus the 2 new tests; the "moves on" test runs 2 cases). Run once after the three fixes, and again after the follow-up commit 7dd60ab6 (`upnp.log`, `upnp-final.log`).
+- **Library group, and the cache and stream suites fix 1 touches** (`VespertineLibraryTests`, `NetworkPlaybackCacheTests`, `RemoteReaderRegistryTests`, `RemoteEarlyStartTests`, `StagedHandoffTests`, debug): 274 + 38 passed, 0 failed (`library-cache.log`).
+- **App tests** (`xcodebuild test`, Debug, macOS, `-derivedDataPath build/DD` as in the earlier passes): **passed**, 284 tests in 61 suites, 0 failed (`** TEST SUCCEEDED **`; 283 in 60 before, plus `TagEditorFormatTests`). Log: `build/logs/r3/app-tests.log`. They ran at a1f8bc30. The follow-up 7dd60ab6 changed only the renderer's recovery path, and the UPnP group was run again after it; the app tests were not.
 
 ## The second review's findings (2026-11-23)
 
