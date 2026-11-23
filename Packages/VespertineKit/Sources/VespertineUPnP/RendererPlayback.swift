@@ -129,6 +129,10 @@ public final class RendererPlayback: @unchecked Sendable {
         /// The play (`generation`) the song playing was started for: a next song is planned for that play only, so one
         /// planned after a stop or a skip that came while the song was being loaded is never published.
         var currentGeneration = 0
+        /// Every stop and every song chosen counts up (not a restart of the same song at a position, which also moves
+        /// `generation` on): an event about a song is delivered only while no stop or other song has come since it was
+        /// decided (`emit(_:forSelection:)`).
+        var selection = 0
     }
     private let state = Locked(State())
 
@@ -261,7 +265,7 @@ public final class RendererPlayback: @unchecked Sendable {
             state.withLock {
                 // A restart of the song at a position (a seek in a processed stream, a change of settings) keeps what the
                 // listener asked for: a paused song stays paused.
-                if announce { $0.wantsPlaying = true }
+                if announce { $0.wantsPlaying = true; $0.selection += 1 }
                 $0.snapshot.state = $0.wantsPlaying ? .playing : .paused
                 $0.snapshot.item = item
                 $0.snapshot.position = seconds
@@ -278,14 +282,14 @@ public final class RendererPlayback: @unchecked Sendable {
     }
 
     /// The queue's end reached, as found by a poll that began during play `expected`: stopped only while that is still the
-    /// current play (checked under the generation lock, as `play` does). Returns whether it was.
-    private func endQueue(ifStill expected: Int) -> Bool {
-        let ended = generation.withLock { g -> Bool in
-            guard g == expected else { return false }
-            state.withLock { s in s.snapshot.state = .stopped; s.wantsPlaying = false; s.anchor = nil }
-            return true
+    /// current play (checked under the generation lock, as `play` does). Returns the selection it was stopped in (to tag
+    /// `queueEnded` with), or nil when it wasn't.
+    private func endQueue(ifStill expected: Int) -> Int? {
+        let ended = generation.withLock { g -> Int? in
+            guard g == expected else { return nil }
+            return state.withLock { s in s.snapshot.state = .stopped; s.wantsPlaying = false; s.anchor = nil; return s.selection }
         }
-        if ended { refreshActivity() }
+        if ended != nil { refreshActivity() }
         return ended
     }
 
@@ -311,7 +315,7 @@ public final class RendererPlayback: @unchecked Sendable {
     public func stop() {
         // Under the generation lock, so a song put right by a poll (`play(_:at:announce:ifStill:)`) is either before it or
         // finds it.
-        generation.withLock { g in g += 1; state.withLock { $0.wantsPlaying = false; $0.snapshot.state = .stopped } }
+        generation.withLock { g in g += 1; state.withLock { $0.wantsPlaying = false; $0.snapshot.state = .stopped; $0.selection += 1 } }
         cancelNextPreparation()
         refreshActivity()
         enqueue.yield(.stop)
@@ -416,9 +420,15 @@ public final class RendererPlayback: @unchecked Sendable {
 
     // MARK: Worker
 
-    private func emit(_ event: EngineEvent) {
+    /// `selection`: the event is about a song of that selection (`State.selection`), and is dropped when a stop or another
+    /// song has come since. Checked again on the main actor, just before the handler: the app gives its commands there, so
+    /// one given while the event waited for its turn (or while the worker was still stopping the player) wins.
+    private func emit(_ event: EngineEvent, forSelection selection: Int? = nil) {
         guard let handler = eventHandler else { return }
-        Task { @MainActor in handler(event) }
+        Task { @MainActor in
+            if let selection, self.state.withLock({ $0.selection }) != selection { return }
+            handler(event)
+        }
     }
 
     private func run(_ command: Command) async {
@@ -957,19 +967,22 @@ public final class RendererPlayback: @unchecked Sendable {
     /// the stale song).
     private func putRight(after ended: Entry, polled: Int) async {
         let following = nextItemProvider?(ended.item)
+        var ended: Int?
         if let following {
             // The start loads the right song in its place (and lets go of the one that ended).
             guard play(following, at: 0, announce: true, ifStill: polled) else { return }
         } else {
-            guard endQueue(ifStill: polled) else { return }
+            guard let selection = endQueue(ifStill: polled) else { return }
+            ended = selection
         }
         log.notice("Renderer \(self.renderer.name, privacy: .public) went on to a song no longer next; playing the queue's")
         // Let go of at once, so the polls put this right once only (were the right song then to fail, they'd start it again
         // at every poll).
         releaseStale()
-        guard following == nil else { return }
+        guard let ended else { return }
         try? await transport.stop()
-        emit(.queueEnded)
+        // A song chosen while the player was being stopped isn't told the queue ended.
+        emit(.queueEnded, forSelection: ended)
     }
 
     /// Lets go of every stale next song (put right, or reconciled).
@@ -997,16 +1010,16 @@ public final class RendererPlayback: @unchecked Sendable {
             }
             // A stop or a song chosen since the status was asked for wins: the command queued behind this poll replaces or
             // stops the song (and a start resets the count of failed polls).
-            if lost, let old = ifStill(asked, { s -> [Entry] in
+            if lost, let (old, selection) = ifStill(asked, { s -> ([Entry], Int) in
                 defer {
                     s.current = nil; s.next = nil; s.staleNexts = []; s.anchor = nil; s.snapshot.state = .stopped; s.wantsPlaying = false
                     s.failedPolls = 0; s.failingSince = nil; s.awaitingStartSince = nil
                 }
-                return [s.current, s.next].compactMap { $0 } + s.staleNexts
+                return ([s.current, s.next].compactMap { $0 } + s.staleNexts, s.selection)
             }) {
                 old.forEach(release)
                 refreshActivity()
-                emit(.deviceLost(renderer.name))
+                emit(.deviceLost(renderer.name), forSelection: selection)
             }
             return
         }
@@ -1050,9 +1063,10 @@ public final class RendererPlayback: @unchecked Sendable {
         }
         if status.currentURI == current.mediaURL, !current.announced, status.state == .playing || status.state == .transitioning {
             // A song the listener has moved on from isn't announced as started.
-            guard ifStill(polled, { s -> Void in s.current?.announced = true; s.awaitingStartSince = nil }) != nil else { return }
+            guard let selection = ifStill(polled, { s -> Int in s.current?.announced = true; s.awaitingStartSince = nil; return s.selection }) else { return }
             current.announced = true
-            if current.announces { emit(.trackStarted(current.item)) }
+            // Not delivered once a stop or another song has come (a restart of this song at a position doesn't count).
+            if current.announces { emit(.trackStarted(current.item), forSelection: selection) }
         }
         // The song after the one it moved on to is prepared and sent now, while this one plays.
         if advanced { await planNextQuietly() }
@@ -1074,14 +1088,16 @@ public final class RendererPlayback: @unchecked Sendable {
             let message = failureMessage(RendererPlaybackError.unplayable(String(localized: "it didn't start playing", comment: "The reason a network player couldn't play a song, inside “%1$@ couldn't play the song (%2$@).”: told to play, it never started. Lowercase, no full stop.")))
             // Failed only while its play is the current one, and in the same step: a song chosen meanwhile (queued behind
             // this poll) isn't left paused by the old song's failure, and the old song isn't reported as failed.
-            guard let old = ifStill(polled, { s -> [Entry] in
+            guard let (old, selection) = ifStill(polled, { s -> ([Entry], Int) in
                 defer { s.current = nil; s.next = nil; s.staleNexts = []; s.anchor = nil; Self.markFailed(&s, message) }
-                return [s.current, s.next].compactMap { $0 } + s.staleNexts
+                return ([s.current, s.next].compactMap { $0 } + s.staleNexts, s.selection)
             }) else { return }
             old.forEach(release)
             try? await transport.stop()
             refreshActivity()
-            emit(.failed(current.item, message))
+            // A Stop or Play again given while the player was being stopped, or before this reaches the main actor, wins:
+            // the listener isn't shown the old failure.
+            emit(.failed(current.item, message), forSelection: selection)
             return
         }
         enum Outcome { case nothing, ended, stoppedThere }
@@ -1144,8 +1160,8 @@ public final class RendererPlayback: @unchecked Sendable {
             // A stop or a song chosen while this poll waited for the player's answer wins.
             if let following = nextItemProvider?(current.item) {
                 play(following, at: 0, announce: true, ifStill: polled)
-            } else if endQueue(ifStill: polled) {
-                emit(.queueEnded)
+            } else if let selection = endQueue(ifStill: polled) {
+                emit(.queueEnded, forSelection: selection)
             }
         }
     }

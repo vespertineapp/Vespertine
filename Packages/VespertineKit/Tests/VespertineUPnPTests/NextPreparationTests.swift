@@ -62,7 +62,16 @@ private final class GatedTransport: RendererTransport, @unchecked Sendable {
     }
     func play() async throws { try await inner.play() }
     func pause() async throws { try await inner.pause() }
-    func stop() async throws { try await inner.stop() }
+    func stop() async throws {
+        if stopHeld.withLock({ $0 }) {
+            stopWaiting.withLock { $0 += 1 }
+            while stopHeld.withLock({ $0 }) { try? await Task.sleep(for: .milliseconds(5)) }
+        }
+        try await inner.stop()
+    }
+    /// While set, a stop waits before it reaches the player (a slow answer); `stopWaiting` counts the waits.
+    let stopHeld = Locked(false)
+    let stopWaiting = Locked(0)
     func seek(to seconds: TimeInterval) async throws { try await inner.seek(to: seconds) }
     /// While set, a status request waits before it reaches the player (a slow answer); `statusWaiting` counts the waits.
     let statusHeld = Locked(false)
@@ -615,7 +624,7 @@ struct NextPreparationTests {
         if select { #expect(rig.playback.snapshot.item?.id == chosen.id) } else { #expect(!rig.playback.wantsPlaying) }
     }
 
-    // MARK: After the sixth review (2026-11-23): a stale poll that finds the player lost
+    // MARK: After the sixth review (2026-11-23): a stale poll that finds the player lost, and events that arrive after a command
 
     @Test("A poll that fails for the last time before the player counts as lost, while a song chosen waits behind it: the chosen song plays (not paused), and nothing is lost")
     func lostPollQueuedBeforeSelection() async throws {
@@ -646,6 +655,98 @@ struct NextPreparationTests {
         #expect(rig.playback.snapshot.item?.id == chosen.id)
         #expect(rig.playback.snapshot.state == .playing)
         #expect(rig.playback.isEngaged)
+    }
+
+    @Test("The start timeout fails a song, and Stop or Play again comes while the player is being stopped: the old failure isn't reported",
+          arguments: [false, true])
+    func timeoutFailureOvertakenDuringStop(retry: Bool) async throws {
+        let ready = PlayableItem(url: try makeFLAC(from: try makeWAV(seconds: 2, seed: 7)))
+        let rig = try await Rig.make(second: ready, startTimeout: 0.5)
+        defer { rig.close() }
+        rig.fake.ignoresPlay = true
+        rig.transport.stopHeld.withLock { $0 = true }
+        rig.playback.play(rig.first)
+        // The poll past the timeout has failed the song and waits for the player to stop.
+        #expect(await within(3) { rig.transport.stopWaiting.withLock { $0 } > 0 })
+        #expect(rig.playback.snapshot.lastError != nil)
+        if retry {
+            rig.fake.ignoresPlay = false
+            rig.playback.play(rig.first)
+        } else {
+            rig.playback.stop()
+        }
+        rig.transport.stopHeld.withLock { $0 = false }
+        if retry {
+            #expect(await rig.events.wait(for: "started \(rig.first.url.lastPathComponent)", timeout: 5), "the song played again didn't start")
+        } else {
+            #expect(await within(3) { rig.fake.actions.filter { $0 == "Stop" }.count >= 2 })
+        }
+        try await Task.sleep(for: .milliseconds(300))
+        await rig.playback.settleForTests()
+        #expect(!rig.events.all.contains { $0.hasPrefix("failed") }, "the old song's failure was reported after the command")
+        #expect(rig.playback.snapshot.lastError == nil)
+        #expect(rig.playback.wantsPlaying == retry)
+    }
+
+    @Test("The start timeout fails a song, and Stop or Play again comes before the failure reaches the main actor: it isn't delivered",
+          arguments: [false, true])
+    func timeoutFailureOvertakenBeforeDelivery(retry: Bool) async throws {
+        let ready = PlayableItem(url: try makeFLAC(from: try makeWAV(seconds: 2, seed: 7)))
+        let rig = try await Rig.make(second: ready, startTimeout: 0.5)
+        defer { rig.close() }
+        rig.fake.ignoresPlay = true
+        rig.playback.play(rig.first)
+        #expect(await within(3) { rig.fake.actions.contains("Play") })
+        // The main actor is busy until the failure has been sent its way (the player stopped by the timeout); the command
+        // is given there, as the app gives it, before the failure is delivered.
+        let stops = rig.fake.actions.filter { $0 == "Stop" }.count
+        let seen = await MainActor.run { () -> Bool in
+            let deadline = Date().addingTimeInterval(3)
+            while rig.fake.actions.filter({ $0 == "Stop" }).count == stops, Date() < deadline { Thread.sleep(forTimeInterval: 0.01) }
+            Thread.sleep(forTimeInterval: 0.2)
+            let seen = rig.playback.snapshot.lastError != nil
+            if retry {
+                rig.fake.ignoresPlay = false
+                rig.playback.play(rig.first)
+            } else {
+                rig.playback.stop()
+            }
+            return seen
+        }
+        #expect(seen, "the start timeout didn't fail the song")
+        if retry {
+            #expect(await rig.events.wait(for: "started \(rig.first.url.lastPathComponent)", timeout: 5), "the song played again didn't start")
+        }
+        try await Task.sleep(for: .milliseconds(300))
+        await rig.playback.settleForTests()
+        #expect(!rig.events.all.contains { $0.hasPrefix("failed") }, "the old song's failure was delivered after the command")
+        #expect(rig.playback.wantsPlaying == retry)
+    }
+
+    @Test("A song is announced as started, and Stop comes before the announcement reaches the main actor: it isn't delivered")
+    func announcementOvertakenBeforeDelivery() async throws {
+        let ready = PlayableItem(url: try makeFLAC(from: try makeWAV(seconds: 2, seed: 7)))
+        let rig = try await Rig.make(second: ready)
+        defer { rig.close() }
+        let polls = rig.fake.actions.filter { $0 == "GetTransportInfo" }.count
+        let stopped = await MainActor.run { () -> Bool in
+            rig.playback.play(rig.first)
+            // The player plays, and a few polls have seen it (the first of them announced the song): Stop is pressed.
+            let deadline = Date().addingTimeInterval(3)
+            while rig.fake.transportState != "Playing", Date() < deadline { Thread.sleep(forTimeInterval: 0.01) }
+            let playing = rig.fake.actions.filter { $0 == "GetTransportInfo" }.count
+            while rig.fake.actions.filter({ $0 == "GetTransportInfo" }).count < max(polls, playing) + 3, Date() < deadline {
+                Thread.sleep(forTimeInterval: 0.01)
+            }
+            rig.playback.stop()
+            return rig.fake.transportState == "Playing"
+        }
+        #expect(stopped, "the player never played")
+        #expect(await within(3) { rig.fake.transportState == "Stopped" })
+        try await Task.sleep(for: .milliseconds(300))
+        await rig.playback.settleForTests()
+        #expect(!rig.events.all.contains("started \(rig.first.url.lastPathComponent)"), "the song was announced after Stop")
+        #expect(!rig.playback.wantsPlaying)
     }
 
     @Test("The player goes on to the old next song between a poll's answer and the clear's success: it is still recognised and put right")
