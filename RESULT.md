@@ -44,6 +44,16 @@ On this machine, 2026-11-23 from 07:45. The machine was busy with other work thr
 
 audit.sh's own app-test step (Debug, `build/AuditDD`) is the app run above (in `build/DD`, as in the earlier passes).
 
+**audit.sh's first step too, the whole package in debug mode** (`swift test`, run once at the end with nothing else of mine running, 08:18 to 08:31, 12 min 43 s; log `build/audit-20261123-080658-r3/debug-tests.log`). Every group passed except the engine group: UPnP and Sonos 164, library 274, AirPlay 2 211, and 151, 73, 37 and 31 in the other four. The engine group: 1484 tests, **5 failed** (8 issues), each after waiting 350 to 430 s:
+
+- "Stop while the next song at another rate waits on its share" (`RateJoinStopTests`): failed on `main` and in both earlier passes.
+- "Play pressed twice while the share is quiet…" (`ShareCloseTests`): failed on `main` and in the last pass ("the next song was copied" not reached).
+- "With a scan in flight, the song's copy goes over the link…" (`NetworkPriorityTests`): failed on `main` and in the first pass ("the scan never got going").
+- "The compressed frames macOS is handed are byte-identical…" (`BedMeterTests`): failed in the last pass.
+- **The new handoff test, `StagedHandoffTests`.** Its own precondition failed: under the whole run's load, the engine took more than the test's 60 s to begin waiting on the shared copy. The check that matters passed in the same run: the player gave up and the Mac still played (before the fix, that check is what failed, with "The operation was cancelled."). The 60 s limits were mine, set tighter than the engine's other tests, which wait without a short deadline (`Patience` stops at 600 s). Commit 933cdbdd removes them. That change came after this whole run, so the whole run was not repeated with it.
+
+Run alone right after: the handoff test with the change, 3 times, passed each time (`handoff-after-patience.log`); the four other failing suites, 26 tests, all passed (`engine-failing-alone.log`). None of those four tests, nor the code they exercise (share copies, rate changes, a scan's turn on the link, compressed pass-through to a device), was changed by this pass. The release-mode run of the same package, an hour earlier on a less loaded machine, passed all 1484.
+
 ## The second review's findings (2026-11-23)
 
 An independent re-review of 011bc0a5 said not to release yet. Each finding below has a test written first and seen failing (logs `build/logs/r2-red-*.log`), then the fix (`r2-green-*.log`). All commits signed; nothing pushed.
