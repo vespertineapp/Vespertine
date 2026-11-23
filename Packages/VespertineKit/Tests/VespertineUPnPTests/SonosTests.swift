@@ -396,6 +396,75 @@ struct SonosPlayerTests {
     }
 }
 
+/// A 16-bit WAV with `channels` channels, each a steady tone of its own, each with its speaker named.
+func makeSurroundWAV(channels: Int, rate: Int = 48_000, seconds: Double = 0.5) throws -> URL {
+    let frames = Int(Double(rate) * seconds)
+    var data = Data()
+    func le32(_ v: UInt32) { withUnsafeBytes(of: v.littleEndian) { data.append(contentsOf: $0) } }
+    func le16(_ v: UInt16) { withUnsafeBytes(of: v.littleEndian) { data.append(contentsOf: $0) } }
+    let dataSize = UInt32(frames * channels * 2)
+    // WAVE_FORMAT_EXTENSIBLE with a speaker for each channel (L R C LFE Ls Rs for six), as real surround files have.
+    let mask: UInt32 = channels == 1 ? 0x4 : channels == 2 ? 0x3 : channels == 6 ? 0x3F : (1 << UInt32(channels)) - 1
+    data.append(contentsOf: Array("RIFF".utf8)); le32(60 + dataSize); data.append(contentsOf: Array("WAVE".utf8))
+    data.append(contentsOf: Array("fmt ".utf8)); le32(40); le16(0xFFFE); le16(UInt16(channels)); le32(UInt32(rate)); le32(UInt32(rate * channels * 2))
+    le16(UInt16(channels * 2)); le16(16); le16(22); le16(16); le32(mask)
+    data.append(contentsOf: [0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71])
+    data.append(contentsOf: Array("data".utf8)); le32(dataSize)
+    for i in 0..<frames {
+        for c in 0..<channels {
+            let v = Int16(8000 * sin(2 * Double.pi * Double(200 * (c + 1)) * Double(i) / Double(rate)))
+            le16(UInt16(bitPattern: v))
+        }
+    }
+    let url = FileManager.default.temporaryDirectory.appendingPathComponent("vespertine-upnp-\(UUID().uuidString).wav")
+    try data.write(to: url)
+    return url
+}
+
+@Suite("The stream made for a player with limits")
+struct LimitedStreamTests {
+    @Test("A 5.1 song is folded to two channels, with sound in both")
+    func surroundToStereo() throws {
+        let wav = try makeSurroundWAV(channels: 6)
+        let format = try SourceDescription.describe(PlayableItem(url: wav), url: wav).format
+        #expect(format.channels == 6)
+        let plan = StreamNegotiation.plan(source: format, mime: "audio/wav", limits: .sonos)
+        #expect(plan.changes == [.downmixed(from: 6, to: 2)])
+        let render = try NetworkRender(item: PlayableItem(url: wav), url: wav, equalizer: nil, roomCorrection: nil, digitalVolumeDB: nil, target: .init(plan))
+        #expect(render.format.channels == 2)
+        #expect(render.format.sampleRate == 48_000)
+        #expect(render.format.bitDepth == 24)
+        let out = renderAll(render)
+        #expect(abs(out.count / 2 - 24_000) <= 64)
+        let left = stride(from: 0, to: out.count, by: 2).map { abs(out[$0]) }.max() ?? 0
+        let right = stride(from: 1, to: out.count, by: 2).map { abs(out[$0]) }.max() ?? 0
+        #expect(left > 100_000)
+        #expect(right > 100_000)
+    }
+
+    @Test("176.4 kHz comes out at 44.1 kHz and 192 kHz at 48 kHz, a quarter of the frames, at 24 bits")
+    func resampled() throws {
+        for (rate, sent) in [(176_400, 44_100.0), (192_000, 48_000.0)] {
+            let wav = try makeWAV(seconds: 0.5, rate: rate, seed: 1)
+            let format = try SourceDescription.describe(PlayableItem(url: wav), url: wav).format
+            let plan = StreamNegotiation.plan(source: format, mime: "audio/wav", limits: .sonos)
+            let render = try NetworkRender(item: PlayableItem(url: wav), url: wav, equalizer: nil, roomCorrection: nil, digitalVolumeDB: nil, target: .init(plan))
+            #expect(render.format.sampleRate == sent)
+            #expect(render.plan.resamples)
+            #expect(abs(renderAll(render).count / 2 - Int(sent / 2)) <= 64)
+        }
+    }
+
+    @Test("A mono song stays mono; a song already within the limits is rendered as it is")
+    func untouched() throws {
+        let wav = try makeSurroundWAV(channels: 1, rate: 44_100)
+        let render = try NetworkRender(item: PlayableItem(url: wav), url: wav, equalizer: nil, roomCorrection: nil, digitalVolumeDB: nil,
+                                       target: .fixed(sampleRate: 44_100, channels: 2))
+        #expect(render.format.channels == 1)
+        #expect(!render.plan.resamples)
+    }
+}
+
 /// The FLAC of a WAV written by `makeWAV`, beside it.
 func makeFLAC(from wav: URL) throws -> URL {
     let url = wav.deletingPathExtension().appendingPathExtension("flac")
