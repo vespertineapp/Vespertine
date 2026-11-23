@@ -9,7 +9,35 @@ Branch `feat/sonos-and-output-routes`, local commits only, not pushed; `git log 
 - **No silent downgrade**: every output row says what the loaded song would be played as ("Will play 24-bit / 48 kHz FLAC, stereo (source 24/96)", copper when samples change); while playing, the badge (RESAMPLED / FOLDED TO STEREO / DSD AS PCM · 24/48 SENT) and a "Player limit" line in the signal path. Same planner for DACs, HDMI, Bluetooth, AirPlay and other network players.
 - **Sonos volume** slider (room or group), the room's details (speaker setup, Music Playback Ambient/Full, read only), plain error for "couldn't fetch" (firewall), `vespertine-probe sonos`, and docs/output-routes.md.
 
-## This pass: the fifth review's finding (2026-11-23, 09:00 onwards)
+## This pass: the rest of what a stale poll did (2026-11-23, 09:18 onwards)
+
+Closes the gap the fifth pass left open (its "Not changed" note below). Signed commit 27536cca (fix and tests) and this RESULT commit; nothing pushed.
+
+**A poll queued before a Stop or a song chosen still acted on the old song in four more ways.** 79fe6586 tied the poll's put-right, song end and snapshot to the play of the song it inspects (`currentGeneration`). The same poll, beginning after the command had moved the generation on, still:
+- followed the player to the old song's next song (made it the current song, released the old one, planned the one after it) and announced that next song as started;
+- announced the old song itself as started, if this was the poll that first saw it play;
+- sent the old song's pending seek (a song started part-way in) to the player;
+- past the start timeout, failed the old song: the listener was told it couldn't be played, `wantsPlaying` went to false, and the song chosen then loaded paused and never started.
+
+Now each of these is done only while the inspected play is still the current one, checked under the generation lock together with the state change (a new helper, `ifStill(polled)`, the same rule as 79fe6586). The start timeout's failure (stopped, the error, `wantsPlaying` false) is applied in that same step, no longer in `fail()` afterwards, so a song chosen between the check and the failure can't be paused by it. A stale poll leaves the old song to the command queued behind it, which replaces or stops it and lets go of its entries.
+
+Tests, written first, using `queuePollForTests()` and a new test-transport switch that holds the first status request after a load:
+- `timedOutPollQueuedBeforeSelection`: the player takes the first song and never starts it; the first poll after the load is held past the start timeout (0.5 s), a second poll is queued, then a song is chosen. **Red before** (4 issues: the old song was reported failed, the chosen song never started, `wantsPlaying` false, the snapshot not playing).
+- `followPollQueuedBeforeCommand` (2 cases, Stop or a song chosen): the worker is held in a poll and the player goes on to the next song by itself. **Red before, both cases** (the old next song announced as started after the command).
+- `startedPollQueuedBeforeCommand` (2 cases): the first song is started at 1 s, the first poll after its load is held while the player plays. **Red before, both cases** (4 issues: the old song announced after the command, and a `Seek` sent to the player after it).
+- Red run saved: `build/logs/r6/red.log` (3 tests, 5 cases, 10 issues). After the fix: `NextPreparationTests` 21 tests, all passed (`green.log`).
+
+Not changed (unverified): a poll that fails (no answer) still counts towards the player being lost without regard to the play; lost, it clears the songs and sets `wantsPlaying` false, which could leave a song chosen just then paused. Not a song-bound action and not tested. The stale-clear retry and reconcile in a stale poll are also left as they were (the command queued behind lets go of the stale songs).
+
+### Test figures, this pass
+
+Logs: `build/logs/r6/`. Other work was running on the machine.
+
+- **UPnP and Sonos** (`swift test --filter VespertineUPnPTests`, debug): **passed**, 175 tests in 33 suites, 0 failed (172 before, plus the 3 new tests, 5 cases) (`upnp.log`).
+- **`scripts/audit.sh`, first step (whole package, debug)** (`audit-debug-tests.log`, 09:25 to 09:41, load average 23 to 68 on 8 cores from other work): 1484 engine tests in 235 suites with **2 failed**; every other group passed (UPnP and Sonos 175, library 274, AirPlay 2 211, and 151, 73, 37 and 31 in the other four). The two: `RateJoinStopTests` "Stop while the next song at another rate waits on its share" (skip case: "The share is mounted but isn't answering") and `AtmosRouteChangeTests` "A read that doesn't return…" ("the renderer never asked for a buffer"); both took 334 s, timing tests starved by the load. Neither touches the renderer code. Run again alone (`engine-failing2-alone.log`): **4 tests in 2 suites, passed**. `audit.sh` stops at a failed step, so the rest of it was run as its own lines (`audit-rest.sh`, the script minus its first step).
+AUDIT_REST
+
+## The fifth review's finding (2026-11-23, 09:00 onwards)
 
 A fifth review (Codex, run 481a9a) found one P2 left in the fourth pass's fix 2. Signed commit 79fe6586 (fix and tests) and this RESULT commit; nothing pushed.
 
@@ -22,9 +50,9 @@ Tests, written first: the worker is held in a poll waiting for the player's answ
 - `endedPollQueuedBeforeCommandWins` (2 cases): the player stopped at the song's end. **Red before, the selection case** (the chosen song never started, left paused). The Stop case passed before too: the song-end path already did nothing once `stop()` had set `wantsPlaying` to false, so it guards behaviour rather than showing a bug.
 - After the fix, both new tests and `commandDuringStalePollWins` passed (6 cases). The red runs were read from the terminal and not saved to a log.
 
-Not changed (unverified): the other things such a poll does to the old song (announcing it, following the player to its next song, a pending seek, the start timeout) are still not tied to its play. Those are put right by the command queued behind the poll. The start timeout would fail the old song after a song was chosen and could leave the chosen one paused; no test covers that.
+Not changed then (closed in the next pass, above): the other things such a poll does to the old song (announcing it, following the player to its next song, a pending seek, the start timeout) are still not tied to its play. Those are put right by the command queued behind the poll. The start timeout would fail the old song after a song was chosen and could leave the chosen one paused; no test covers that.
 
-### Test figures, this pass
+### Test figures, the fifth pass
 
 Logs: `build/logs/r5/`. Other work was running on the machine.
 
