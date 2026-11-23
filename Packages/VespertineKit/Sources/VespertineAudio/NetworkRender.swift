@@ -19,11 +19,14 @@ public final class NetworkRender: @unchecked Sendable {
         case airPlay
         /// AirPlay to a receiver that takes another format: the same, at `sampleRate` and `bitDepth` (16 or 24).
         case airPlayStream(sampleRate: Int, bitDepth: Int)
+        /// A renderer that takes less than the source has (a Sonos: 48 kHz, two channels): 24 bits at exactly `sampleRate`,
+        /// at most `channels` channels, resampled, folded down and DSD→PCM by the engine's own converter.
+        case fixed(sampleRate: Double, channels: Int)
 
         /// The one rate and word length of an AirPlay target; nil for a renderer's stream.
         var airPlay: (rate: Double, bits: Int)? {
             switch self {
-            case .sourceRate24: return nil
+            case .sourceRate24, .fixed: return nil
             case .airPlay: return (rate: 44_100, bits: 16)
             case .airPlayStream(let sampleRate, let bitDepth): return (rate: Double(sampleRate), bits: bitDepth == 24 ? 24 : 16)
             }
@@ -61,12 +64,16 @@ public final class NetworkRender: @unchecked Sendable {
         let airPlay = target.airPlay
         let isAirPlay = airPlay != nil
         let bits = airPlay?.bits ?? 24
-        let channels = isAirPlay ? min(2, max(1, source.channels)) : max(1, source.channels)
-        let rates = airPlay.map { [$0.rate] } ?? Self.rates
+        var fixed: (rate: Double, channels: Int)?
+        if case .fixed(let sampleRate, let most) = target { fixed = (sampleRate, max(1, most)) }
+        let channels = isAirPlay ? min(2, max(1, source.channels)) : min(max(1, source.channels), fixed?.channels ?? .max)
+        let rates = airPlay.map { [$0.rate] } ?? fixed.map { [$0.rate] } ?? Self.rates
+        // AirPlay is always a stereo stream (a mono song is carried on both); a renderer's stream keeps a mono song mono.
+        let outputs = isAirPlay ? 2 : channels
         let device = DeviceCapabilities(sampleRates: rates,
                                         physicalFormats: [PhysicalFormat(minRate: rates.min()!, maxRate: rates.max()!, bitDepth: bits, isInteger: true, isMixable: true,
-                                                                         channels: isAirPlay ? 2 : channels)],
-                                        outputChannels: isAirPlay ? 2 : channels, supportsDoP: false)
+                                                                         channels: outputs)],
+                                        outputChannels: outputs, supportsDoP: false)
         var plan = FormatPlanner.plan(source: source, device: device, policy: .matchSource)
         plan.integerSamples = false
         guard plan.mode == .pcm, let ring = nrt_ring_create(OutputSession.ringFrames(rate: plan.deviceSampleRate, channels: plan.channels, seconds: 4), UInt32(plan.channels)) else {

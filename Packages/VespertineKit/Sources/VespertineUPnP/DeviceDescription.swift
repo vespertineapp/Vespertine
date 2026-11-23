@@ -32,6 +32,10 @@ public enum ServiceKind: String, Sendable, CaseIterable {
     case ohTime = "urn:av-openhome-org:service:Time:"
     case ohInfo = "urn:av-openhome-org:service:Info:"
     case ohVolume = "urn:av-openhome-org:service:Volume:"
+    /// Sonos: how the system's speakers are arranged into rooms and groups.
+    case zoneGroupTopology = "urn:schemas-upnp-org:service:ZoneGroupTopology:"
+    /// Sonos: the volume of every room of a group at once.
+    case groupRenderingControl = "urn:schemas-upnp-org:service:GroupRenderingControl:"
 
     public func matches(_ type: String) -> Bool {
         type.hasPrefix(rawValue) && Int(type.dropFirst(rawValue.count)) != nil
@@ -48,6 +52,8 @@ public enum ServiceKind: String, Sendable, CaseIterable {
         case .ohTime: "Time"
         case .ohInfo: "Info"
         case .ohVolume: "Volume"
+        case .zoneGroupTopology: "ZoneGroupTopology"
+        case .groupRenderingControl: "GroupRenderingControl"
         }
     }
 }
@@ -108,10 +114,24 @@ public struct DeviceDescription: Sendable, Hashable {
             return UPnPService(type: type, id: s["serviceId"] ?? "", controlURL: control, eventURL: resolve(s["eventSubURL"]), scpdURL: scpd)
         }
         guard let udn = chosen.fields["UDN"], !udn.isEmpty else { throw ParseError.notADescription }
-        return DeviceDescription(udn: udn, friendlyName: chosen.fields["friendlyName"] ?? udn,
-                                 manufacturer: chosen.fields["manufacturer"] ?? "", modelName: chosen.fields["modelName"] ?? "",
-                                 modelNumber: chosen.fields["modelNumber"], modelDescription: chosen.fields["modelDescription"],
-                                 location: location, services: services)
+        var description = DeviceDescription(udn: udn, friendlyName: chosen.fields["friendlyName"] ?? udn,
+                                            manufacturer: chosen.fields["manufacturer"] ?? "", modelName: chosen.fields["modelName"] ?? "",
+                                            modelNumber: chosen.fields["modelNumber"], modelDescription: chosen.fields["modelDescription"],
+                                            location: location, services: services)
+        // A Sonos speaker's renderer is a device inside the speaker's own. The room's name and the speaker's model are on
+        // the outer one (the renderer calls itself "192.168.1.20 - Sonos Playbar Media Renderer"), and so is the service that
+        // says how the system is arranged.
+        if SonosTopology.uuid(udn: udn) != nil, let root = delegate.devices.last, root.fields["UDN"] != udn {
+            if let room = root.fields["roomName"], !room.isEmpty { description.friendlyName = room }
+            if let model = root.fields["modelName"], !model.isEmpty { description.modelName = model }
+            if let number = root.fields["modelNumber"], !number.isEmpty { description.modelNumber = number }
+            for s in root.services {
+                guard let type = s["serviceType"], ServiceKind.zoneGroupTopology.matches(type), let control = resolve(s["controlURL"]),
+                      let scpd = resolve(s["SCPDURL"]) else { continue }
+                description.services.append(UPnPService(type: type, id: s["serviceId"] ?? "", controlURL: control, eventURL: resolve(s["eventSubURL"]), scpdURL: scpd))
+            }
+        }
+        return description
     }
 }
 
