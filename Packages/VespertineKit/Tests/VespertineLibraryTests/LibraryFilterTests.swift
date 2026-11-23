@@ -31,6 +31,22 @@ struct LibraryFilterTests {
         #expect(FormatKind.of(codec: "Vorbis", lossless: false, dsd: false) == .otherLossy)
     }
 
+    @Test("xHE-AAC (named apart for network players) is filed under AAC, for songs and for albums")
+    func xheAACIsAAC() throws {
+        #expect(FormatKind.of(codec: "xHE-AAC", lossless: false, dsd: false) == .aac)
+        let song = FilterFacts(track: track("/m/x.m4a", codec: "xHE-AAC", rate: 48_000, bits: nil, lossless: false))
+        var f = LibraryFilter()
+        f[.format] = [FormatKind.aac.rawValue]
+        #expect(song.formats == [.aac] && f.matches(song))
+        let db = try LibraryDatabase.inMemory()
+        let source = try db.addSource(LibrarySource(path: "/m", mode: .reference))
+        var t = track("/m/X/1.m4a", codec: "xHE-AAC", rate: 48_000, bits: nil, lossless: false, album: "X")
+        t.sourceId = source.id
+        try db.writer.write { db in try t.insert(db) }
+        let album = try #require(try db.albums().first { $0.title == "X" })
+        #expect(album.facts.formats == [.aac])
+    }
+
     @Test("Choices in one facet widen the match; facets and chips narrow it")
     func orWithinAndAcross() {
         let jazz24 = FilterFacts(track: track("/m/1.flac", genre: "Jazz", year: 1959))
