@@ -87,11 +87,16 @@ public final class RendererPlayback: @unchecked Sendable {
         var announced = false
         /// Say so with `trackStarted` (not for a restart of the same song at a position).
         var announces = true
+        /// The settings it was made with (`State.settingsRevision` then): a next song made with older ones isn't played as
+        /// it is (`start`).
+        var settingsRevision = 0
     }
 
     private struct State {
         var snapshot = EngineSnapshot()
         var settings = RendererSettings()
+        /// Counts up at every change of `settings`.
+        var settingsRevision = 0
         var current: Entry?
         var next: Entry?
         /// Next songs the player held that are no longer next: it may still go on to them (a clear it didn't confirm), or
@@ -645,7 +650,7 @@ public final class RendererPlayback: @unchecked Sendable {
         // Given up while it was copied: nothing is probed, and no encoder made.
         if cancelled() { throw CancellationError() }
         let described = try? SourceDescription.describe(item, url: url)
-        let settings = state.withLock { $0.settings }
+        let (settings, settingsRevision) = state.withLock { ($0.settings, $0.settingsRevision) }
         let limits = renderer.limits
         let wholeFile = item.regionStartFrame == nil && item.regionFrameLength == nil && item.sacdArea == nil && item.dvd == nil
             && item.audioStream == nil && url.isFileURL
@@ -711,15 +716,17 @@ public final class RendererPlayback: @unchecked Sendable {
                                        equalizer: processing.contains(.equalizer) ? settings.activeEqualizer?.name : nil,
                                        roomCorrection: processing.contains(.roomCorrection) ? settings.activeRoomCorrection?.name : nil)
         return Entry(item: item, mediaURL: mediaURL, track: RendererTrack(uri: mediaURL, metadata: didl), path: path, processedFile: file, staged: staged,
-                     startOffset: file == nil ? 0 : seconds, duration: info.duration)
+                     startOffset: file == nil ? 0 : seconds, duration: info.duration, settingsRevision: settingsRevision)
     }
 
     private func start(_ item: PlayableItem, at seconds: TimeInterval, announce: Bool, generation g: Int) async throws {
         var current: Entry
         // The song already prepared as the next one (the listener skipped to it, or the renderer stopped before it) is
-        // used as it is: a stream copied whole isn't copied again.
+        // used as it is: a stream copied whole isn't copied again. Not when it was made with settings changed since (a
+        // change queued just before this play, whose restart and new next song this play overtook): it is made again,
+        // and the one prepared is let go of with the old songs once this one is loaded.
         let prepared = state.withLock { s -> Entry? in
-            guard seconds == 0, let next = s.next, next.item.id == item.id else { return nil }
+            guard seconds == 0, let next = s.next, next.item.id == item.id, next.settingsRevision == s.settingsRevision else { return nil }
             s.next = nil
             return next
         }
@@ -1020,7 +1027,10 @@ public final class RendererPlayback: @unchecked Sendable {
 
     /// The settings are kept at once, whatever happens to the song playing: a song started after this is made with them.
     private func apply(_ settings: RendererSettings) async throws {
-        let before = state.withLock { s -> RendererSettings in defer { s.settings = settings }; return s.settings }
+        let before = state.withLock { s -> RendererSettings in
+            defer { if s.settings != settings { s.settings = settings; s.settingsRevision += 1 } }
+            return s.settings
+        }
         // The song loaded, and the play it was loaded for, read together (as a poll does).
         guard before != settings, let (current, loadedFor) = state.withLock({ s in s.current.map { ($0, s.currentGeneration) } }) else { return }
         let url = current.staged?.url ?? urlResolver?(current.item) ?? current.item.url

@@ -1031,7 +1031,7 @@ struct NextPreparationTests {
         #expect(position >= 59.5 && position < 62, "position \(position)")
     }
 
-    // MARK: After the ninth review (2026-11-23): a refused resume put right after a song chosen
+    // MARK: After the ninth review (2026-11-23): a refused resume put right after a song chosen, and a next song prepared before a change of settings
 
     @Test("A resume the player refuses twice, and a song chosen while the status asked for to put it right is on its way: the song chosen plays (not paused by the old song's state), and the old refusal isn't reported")
     func staleResumeResyncAfterSelection() async throws {
@@ -1063,6 +1063,34 @@ struct NextPreparationTests {
         #expect(rig.playback.snapshot.state == .playing)
         #expect(rig.fake.transportState == "Playing", "the song chosen was paused on the player")
         #expect(!rig.events.all.contains { $0.hasPrefix("notice") }, "the refused resume of the old song was reported after the song chosen")
+    }
+
+    @Test("The next song prepared with the old settings, then a change of settings queued before it is chosen: it is made again with the new settings, not played as prepared")
+    func preparedNextRebuiltForNewSettings() async throws {
+        let rig = try await Rig.make()
+        defer { rig.close() }
+        // The song converted for Sonos is offered as its stream grows: prepared as the next song at once.
+        rig.playback.wholeFileWait = 0
+        rig.playback.play(rig.first)
+        #expect(await rig.events.wait(for: "started \(rig.first.url.lastPathComponent)"))
+        #expect(await within(5) { rig.fake.nextURI != nil }, "the next song wasn't handed over")
+        await rig.playback.settleForTests()
+        let prepared = try #require(rig.fake.nextURI)
+        #expect(rig.maker.settingsAsked(for: rig.stuck) == [RendererSettings()])
+        let loads = rig.fake.calls.filter { $0.action == "SetAVTransportURI" }.count
+        // The worker is held in a poll; the change of settings, then the song prepared as next chosen, are queued behind it.
+        let quieter = RendererSettings(digitalVolumeDB: -6)
+        rig.transport.statusHeld.withLock { $0 = true }
+        #expect(await within(2) { rig.transport.statusWaiting.withLock { $0 } > 0 })
+        rig.playback.queueSettingsForTests(quieter)
+        rig.playback.play(rig.stuck)
+        rig.transport.statusHeld.withLock { $0 = false }
+        #expect(await rig.events.wait(for: "started \(rig.stuck.url.lastPathComponent)", timeout: 5), "the song chosen didn't play")
+        await rig.playback.settleForTests()
+        #expect(rig.maker.settingsAsked(for: rig.stuck) == [RendererSettings(), quieter], "the song chosen wasn't made again with the new settings")
+        let loaded = rig.fake.calls.filter { $0.action == "SetAVTransportURI" }.dropFirst(loads).map { $0.arguments["CurrentURI"] ?? "" }
+        #expect(loaded.count == 1 && loaded.first != prepared, "the stream prepared with the old settings was loaded: \(loaded)")
+        #expect(rig.playback.snapshot.signalPath?.volume == .digital(dB: -6), "volume \(String(describing: rig.playback.snapshot.signalPath?.volume))")
     }
 
     @Test("The player goes on to the old next song between a poll's answer and the clear's success: it is still recognised and put right")
