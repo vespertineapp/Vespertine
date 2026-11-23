@@ -9,6 +9,31 @@ Branch `feat/sonos-and-output-routes`, local commits only, not pushed; `git log 
 - **No silent downgrade**: every output row says what the loaded song would be played as ("Will play 24-bit / 48 kHz FLAC, stereo (source 24/96)", copper when samples change); while playing, the badge (RESAMPLED / FOLDED TO STEREO / DSD AS PCM · 24/48 SENT) and a "Player limit" line in the signal path. Same planner for DACs, HDMI, Bluetooth, AirPlay and other network players.
 - **Sonos volume** slider (room or group), the room's details (speaker setup, Music Playback Ambient/Full, read only), plain error for "couldn't fetch" (firewall), `vespertine-probe sonos`, and docs/output-routes.md.
 
+## The two gaps the sixth pass left open (2026-11-23, 10:40 onwards)
+
+Closes the sixth pass's "Not changed (unverified)" note (below). Signed commits 6cb41f71 (`fail()`) and 58e969c0 (the seek notice), each with its tests written first, and this RESULT commit; nothing pushed.
+
+**`fail()` checked, then failed the song, outside the lock and untagged.** A start that couldn't prepare its song checked `overtaken()` and then marked it failed and emitted `.failed`, with nothing holding the generation between the two. A start whose load the player refused (the catch in `run()`) didn't check at all: a Stop given while the load was on its way was followed by the old error, and a song played again then loaded paused, since the failure set `wantsPlaying` to false after the new play had set it. Now `fail()` takes the play's generation and, under the generation lock in one step, checks that it is still the current play (and the output still held), marks the song failed and reads `State.selection`; `.failed` carries that selection and is checked again on the main actor, like the other events. The failure now names the song that failed (the item the start was for), not the song still loaded on the player, which the app's handler (`PlayerController`, "about a song skipped past") would have compared against the song it asked for.
+- `loadFailureOvertaken` (2 cases, Stop or Play again): the test transport holds the load, decided to fail, while the command is given. **Red before, both cases** (5 issues: the failure reported; for Play again the song never started, `wantsPlaying` false, paused).
+- `preparationFailureOvertakenBeforeDelivery` (2 cases): the stream maker fails; the main actor is kept busy until the song has been failed, then the command is given there. **Red before, both cases** (the failure delivered).
+
+**The seek given up wasn't tagged.** The notice that a pending seek (a song started part-way in) was given up after five refusals now carries the selection read in the same locked step that gives the seek up.
+- `seekGivenUpOvertakenBeforeDelivery`: the test transport refuses every seek; the main actor is kept busy until the fifth refusal, then Stop is pressed there. **Red before** (the notice delivered after Stop).
+- `seekGivenUpReported`: with nothing in between the notice is still given (passed before and after; it guards the tag dropping too much).
+- Red run: `build/logs/r8/red.log` (4 tests, 6 cases, 8 issues; 5 cases red). After the first fix only the seek test was red (`fail-green.log`); after both, `NextPreparationTests`: 29 tests, all passed (`green.log`).
+
+Not changed: the notices for a refused pause, play or seek given by the listener (`retrying`) stay untagged; they answer the listener's own command, not a song's progress.
+
+### Test figures, this pass
+
+Logs: `build/logs/r8/` and the audit folders named below. All from the code at 58e969c0. Other work was running on the machine the whole time (load average 56 to 210 on 8 cores).
+
+- **`scripts/audit.sh`, whole, first run** (10:49 to 11:09, `build/audit-20261123-104954/`, load average 150 to 210): it stopped at its first step (whole package, debug). Engine (`VespertineAudioTests`): 1484 tests in 235 suites, **8 failed** (11 issues), all timing tests starved by the load: `VisualizerTapTests` neverBlocksNeverTears ("elapsed < 20"), `NetworkPriorityTests` playbackPreemptsScan and scanPausesThenResumes (120 s time limit), `ShareCloseTests` pressWhileCloseWaits and skipWhileCloseWaits, `AtmosRouteChangeTests` otherRenderersIgnored and refedFromTheFlushTime ("fed"), `PlayPauseStateTests` pauseWhileSessionReplaced. Each took 70 to 620 s. Every other group passed: **UPnP and Sonos 183 tests in 33 suites** (179 before, plus the 4 new tests, 6 cases), library 274, AirPlay 2 211, and 151, 73, 37 and 31 in the other four. The 8 run again alone (`engine-failing-alone.log`, load about 85): **8 tests in 5 suites, passed**.
+- **`scripts/audit.sh`, whole, second run** (11:10 to 11:27, `build/audit-20261123-111005/`, load average 70 to 110): it stopped at the same step. Engine 1484 tests, **7 failed** (11 issues), all timing tests: `RateJoinStopTests` stopDuringRateJoin (skip case), `BedMeterTests` rendererInputUntouched ("run.exhausted"), and `ShareCloseTests` pressWhileCloseWaits and skipWhileCloseWaits, `NetworkPriorityTests` playbackPreemptsScan and scanPausesThenResumes, `AtmosRouteChangeTests` refedFromTheFlushTime again. Every other group passed, with the same counts as above. The 7 run again alone (`engine-failing2-alone.log`): **7 tests in 5 suites, passed**. None of the 11 distinct failing tests touches the renderer code. Two of them, `RateJoinStopTests` and `AtmosRouteChangeTests`, also failed under load in the earlier full audit (below).
+- **The rest of the audit** (`audit-rest.sh`, the script minus its first step, the same as in the earlier pass; 11:27 to 11:48, `build/audit-rest-20261123-112729/`, load average 57 to 81): **script exit 0, "All audit checks passed"**. **Release-mode package tests** (`swift test -c release`): engine **1484 tests in 235 suites, passed**; UPnP and Sonos **183**, library 274, AirPlay 2 211, and 151, 73, 37 and 31 in the other four: **every group passed, 0 failed**. Analysis package **72 tests in 8 suites, passed**. Sanitizer runs (address/undefined, thread), the DST audit (1800 random frames, 1712 rejected; crafted frames handled) and the static checks were clean. **App tests** (`xcodebuild test`, Debug) **284 tests in 61 suites, passed** (`** TEST SUCCEEDED **`). The Release universal build reported `** BUILD SUCCEEDED **`, and `git diff --check` was clean.
+
+So every step of `audit.sh` passed, except that the debug engine group never passed whole on this loaded machine. Its failing tests passed on their own runs and in release mode.
+
 ## The sixth review's findings (2026-11-23, about 10:00 to 10:45)
 
 A sixth review (Codex) found a P2 and a P3 in `RendererPlayback.swift`. Signed commits 335bba05 (P2) and d24ef998 (P3), each with its tests, and this RESULT commit; nothing pushed.
@@ -22,7 +47,7 @@ A sixth review (Codex) found a P2 and a P3 in `RendererPlayback.swift`. Signed c
 - `announcementOvertakenBeforeDelivery`: the same for a song's start and Stop. **Red before** (the song was announced after Stop).
 - Red runs: `build/logs/r7/red.log` (all 4 tests, 9 issues; the first version of the P3 tests waited up to 30 s on the stuck next song), and `p3-red.log` (the final P3 tests against the P2 commit: 5 issues in 5 cases). After both fixes, `NextPreparationTests`: 25 tests, all passed (`green.log`).
 
-Not changed (unverified): `fail()`, which a start uses when its song can't be prepared or loaded, still checks `overtaken()` and then marks the song failed and emits outside the generation lock, with no tag. A Stop in that narrow window could still be followed by the old error. Not tested. The seek-gave-up `.notice` isn't tagged either.
+Not changed then (closed in the pass above): `fail()`, which a start uses when its song can't be prepared or loaded, still checks `overtaken()` and then marks the song failed and emits outside the generation lock, with no tag. A Stop in that narrow window could still be followed by the old error. Not tested. The seek-gave-up `.notice` isn't tagged either.
 
 ### Test figures, the sixth pass
 
