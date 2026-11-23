@@ -724,11 +724,9 @@ public final class RendererPlayback: @unchecked Sendable {
     /// the one the queue wants; else let go of (and the right one planned).
     private func handOver(_ preparation: NextPreparation) async {
         let entry = preparation.take()
-        let mine = preparingNext.withLock { s -> Bool in
-            guard s === preparation else { return false }
-            s = nil
-            return true
-        }
+        // It stays the one being prepared until it is handed over (a test settling waits for that), then it isn't.
+        let mine = preparingNext.withLock { $0 === preparation }
+        defer { preparingNext.withLock { if $0 === preparation { $0 = nil } } }
         let current = state.withLock { $0.shutDown ? nil : $0.current }
         guard mine, !preparation.isCancelled, generation.withLock({ $0 }) == preparation.generation, let current,
               current.mediaURL == preparation.after else {
