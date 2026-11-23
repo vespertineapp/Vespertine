@@ -121,6 +121,8 @@ struct RendererPlaybackTests {
         let first = try #require(h.fake.currentURI)
         #expect(first.contains("/media/"))
         #expect(await h.fake.fetched(first) == (try Data(contentsOf: h.queue[0].url)))
+        // The next song is prepared off the command worker and handed over once ready.
+        await h.playback.settleForTests()
         #expect(h.fake.playlistURIs.count == 2)   // current + next only
         let snap = h.playback.snapshot
         #expect(snap.state == .playing)
