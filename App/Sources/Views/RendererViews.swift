@@ -42,12 +42,24 @@ enum RendererText {
     static func detail(_ renderer: RendererDevice) -> String {
         if renderer.isSonos {
             // What Sonos takes from a computer, and how the room is set up when it is more than one speaker.
-            let limit = String(localized: "UP TO 24/48 · STEREO", comment: "Output list: a Sonos room takes up to 24-bit / 48 kHz, two channels (short, uppercase)")
+            let limit = takes16Bit(renderer)
+                ? String(localized: "UP TO 16/48 · STEREO", comment: "Output list: a Sonos S1 room (or one that doesn't say whether it runs S1 or S2) takes up to 16-bit / 48 kHz, two channels (short, uppercase)")
+                : String(localized: "UP TO 24/48 · STEREO", comment: "Output list: a Sonos room takes up to 24-bit / 48 kHz, two channels (short, uppercase)")
             return renderer.sonos?.speakerSetup.map { "SONOS · \($0.localizedUppercase) · \(limit)" } ?? "SONOS · \(limit)"
         }
         return renderer.kind.gapless
             ? String(localized: "\(renderer.kind.protocolName.localizedUppercase) · GAPLESS", comment: "Output list: a network player's protocol (OPENHOME, UPNP AV), then GAPLESS (short, uppercase)")
             : String(localized: "\(renderer.kind.protocolName.localizedUppercase) · GAPLESS NOT GUARANTEED", comment: "Output list: a network player's protocol, then that it may leave gaps between songs (short, uppercase)")
+    }
+
+    /// A Sonos room held to S1's 16 bits: it runs S1, or doesn't say which it runs.
+    static func takes16Bit(_ renderer: RendererDevice) -> Bool { (renderer.limits?.maxBitDepth ?? 24) <= 16 }
+
+    /// The details' "Highest format" for a Sonos room.
+    static func highestFormat(_ renderer: RendererDevice) -> String {
+        takes16Bit(renderer)
+            ? String(localized: "16-bit / 48 kHz, 2 channels (Sonos's own limit)", comment: "A Sonos S1 room's details (or one that doesn't say whether it runs S1 or S2): the highest format it takes.")
+            : String(localized: "24-bit / 48 kHz, 2 channels (Sonos's own limit)")
     }
 
     /// The player advertises a volume of its own (UPnP RenderingControl or OpenHome Volume).
@@ -66,7 +78,9 @@ enum RendererText {
     /// What a Sonos room takes from Vespertine, and what it doesn't, in the order a listener would ask.
     static func sonosNotes(_ renderer: RendererDevice) -> [String] {
         var notes = [
-            String(localized: "Sonos plays two-channel music up to 24-bit / 48 kHz from a computer. FLAC and Apple Lossless within that go as the file itself; anything above is resampled to 48 or 44.1 kHz with the mastering-quality converter and sent as 24-bit FLAC, and the signal path says so."),
+            takes16Bit(renderer)
+                ? String(localized: "Sonos plays two-channel music up to 16-bit / 48 kHz from a computer. FLAC and Apple Lossless within that go as the file itself; anything above is resampled to 48 or 44.1 kHz with the mastering-quality converter and sent as 16-bit FLAC, and the signal path says so.", comment: "A Sonos S1 room (or one that doesn't say whether it runs S1 or S2): what it takes from Vespertine.")
+                : String(localized: "Sonos plays two-channel music up to 24-bit / 48 kHz from a computer. FLAC and Apple Lossless within that go as the file itself; anything above is resampled to 48 or 44.1 kHz with the mastering-quality converter and sent as 24-bit FLAC, and the signal path says so."),
             String(localized: "No surround and no Dolby Atmos this way: Sonos takes those only from a TV or from a streaming service in its own app. Surround songs are folded to stereo."),
         ]
         if renderer.sonos?.isHomeTheater == true {
@@ -107,7 +121,7 @@ struct RendererDetails: View {
                 row(String(localized: "Control"), renderer.kind.protocolName)
                 row(String(localized: "Services"), renderer.serviceNames.joined(separator: ", "))
                 row(String(localized: "Gapless"), renderer.kind.gapless ? String(localized: "Yes") : RendererText.gaplessNotGuaranteed)
-                row(String(localized: "Highest format"), renderer.isSonos ? String(localized: "24-bit / 48 kHz, 2 channels (Sonos's own limit)") : maxFormat)
+                row(String(localized: "Highest format"), renderer.isSonos ? RendererText.highestFormat(renderer) : maxFormat)
                 if let setup = renderer.sonos?.speakerSetup { row(String(localized: "Speakers"), setup) }
                 if let mode = model.renderers?.surroundMusic {
                     row(String(localized: "Surrounds for music", comment: "A Sonos home theater room: how its surround speakers play two-channel music."),

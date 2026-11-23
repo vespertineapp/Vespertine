@@ -82,6 +82,11 @@ if args.count >= 2, args[1] == "sonos" {
                   + (zone.map { "  room: \($0.roomName), leads its group: \($0.isCoordinator), speakers: \($0.speakerSetup ?? "one")" } ?? ""))
             if listed {
                 print("          formats it lists: \(device.capabilities.acceptedFormats.joined(separator: ", "))")
+                if device.isSonos {
+                    let d = device.description
+                    print("          software: \(device.sonosGeneration) (swGen \(d.softwareGeneration ?? "not stated"), version \(d.displayVersion ?? "not stated")); "
+                          + "held to up to \(device.limits?.maxBitDepth ?? 0)-bit / \(Int(device.limits?.maxSampleRate ?? 0)) Hz")
+                }
                 if let volume = device.makeVolume(client: client), let level = try? await volume.volume() { print("          volume now: \(level)") }
                 for file in files {
                     guard let described = try? SourceDescription.describe(PlayableItem(url: file), url: file) else { print("          \(file.lastPathComponent): can't be read"); continue }

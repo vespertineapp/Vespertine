@@ -12,10 +12,11 @@ import VespertineUPnP
 
 @Suite("Sonos in the output list") @MainActor
 struct SonosOutputTests {
-    private func room(_ zone: SonosZone?) -> RendererDevice {
+    /// A Playbar room; `swGen` "2" is S2, "1" S1, nil a speaker that doesn't say.
+    private func room(_ zone: SonosZone?, swGen: String? = "2") -> RendererDevice {
         let location = URL(string: "http://192.168.1.20:1400/xml/device_description.xml")!
         let description = DeviceDescription(udn: "uuid:RINCON_BAR01400_MR", friendlyName: "Living Room", manufacturer: "Sonos, Inc.", modelName: "Sonos Playbar",
-                                            location: location, services: [])
+                                            location: location, services: [], softwareGeneration: swGen)
         return RendererDevice(description: description, kind: .av(gapless: true), capabilities: .init(), sonos: zone)
     }
 
@@ -25,6 +26,20 @@ struct SonosOutputTests {
         let theater = SonosZone(uuid: "RINCON_BAR01400", roomName: "Living Room", groupRooms: ["Living Room"], surrounds: 2, hasSub: true)
         #expect(RendererText.detail(room(theater)) == "SONOS · 5.1 · UP TO 24/48 · STEREO")
         #expect(room(theater).name == "Living Room")
+    }
+
+    @Test("An S1 room, and one that doesn't say which it runs, is said to take up to 16-bit, everywhere it is described")
+    func s1() {
+        for swGen in ["1", nil] {
+            let s1 = room(nil, swGen: swGen)
+            #expect(RendererText.detail(s1) == "SONOS · UP TO 16/48 · STEREO")
+            #expect(RendererText.highestFormat(s1) == "16-bit / 48 kHz, 2 channels (Sonos's own limit)")
+            #expect(RendererText.sonosNotes(s1).first?.hasPrefix("Sonos plays two-channel music up to 16-bit / 48 kHz") == true)
+            #expect(RendererText.sonosNotes(s1).first?.contains("16-bit FLAC") == true)
+        }
+        let s2 = room(nil)
+        #expect(RendererText.highestFormat(s2) == "24-bit / 48 kHz, 2 channels (Sonos's own limit)")
+        #expect(RendererText.sonosNotes(s2).first?.contains("24-bit FLAC") == true)
     }
 
     @Test("A room with surrounds is told where the Sonos app decides how they play music; a plain room isn't")

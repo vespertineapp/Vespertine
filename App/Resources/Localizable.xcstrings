@@ -658154,6 +658154,275 @@
         }
       }
     },
+    "UP TO 16/48 · STEREO": {
+      "comment": "Output list: a Sonos S1 room (or one that doesn't say whether it runs S1 or S2) takes up to 16-bit / 48 kHz, two channels (short, uppercase)",
+      "localizations": {
+        "am": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "እስከ 16/48 · ስቴሪዮ"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "حتى 16/48 · ستيريو"
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16/48 পর্যন্ত · স্টেরিও"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AŽ 16/48 · STEREO"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OP TIL 16/48 · STEREO"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "BIS 16/48 · STEREO"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ΕΩΣ 16/48 · ΣΤΕΡΕΟ"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HASTA 16/48 · ESTÉREO"
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تا 16/48 · استریو"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ENINTÄÄN 16/48 · STEREO"
+          }
+        },
+        "fil": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HANGGANG 16/48 · STEREO"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "JUSQU’À 16/48 · STÉRÉO"
+          }
+        },
+        "gu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16/48 સુધી · સ્ટીરિયો"
+          }
+        },
+        "ha": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HAR ZUWA 16/48 · STEREO"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "עד 16/48 · סטריאו"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16/48 तक · स्टीरियो"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "LEGFELJEBB 16/48 · SZTEREÓ"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HINGGA 16/48 · STEREO"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "FINO A 16/48 · STEREO"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最大16/48 · ステレオ"
+          }
+        },
+        "kn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16/48 ವರೆಗೆ · ಸ್ಟೀರಿಯೋ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "최대 16/48 · 스테레오"
+          }
+        },
+        "ml": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16/48 വരെ · സ്റ്റീരിയോ"
+          }
+        },
+        "mr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16/48 पर्यंत · स्टिरिओ"
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SEHINGGA 16/48 · STEREO"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OPPTIL 16/48 · STEREO"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TOT 16/48 · STEREO"
+          }
+        },
+        "pa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16/48 ਤੱਕ · ਸਟੀਰੀਓ"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DO 16/48 · STEREO"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ATÉ 16/48 · ESTÉREO"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ATÉ 16/48 · ESTÉREO"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PÂNĂ LA 16/48 · STEREO"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "UPP TILL 16/48 · STEREO"
+          }
+        },
+        "sw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HADI 16/48 · STEREO"
+          }
+        },
+        "ta": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16/48 வரை · ஸ்டீரியோ"
+          }
+        },
+        "te": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16/48 వరకు · స్టీరియో"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "สูงสุด 16/48 · สเตอริโอ"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16/48’E KADAR · STEREO"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ДО 16/48 · СТЕРЕО"
+          }
+        },
+        "ur": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16/48 تک · اسٹیریو"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TỐI ĐA 16/48 · STEREO"
+          }
+        },
+        "zh-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最高 16/48 · 立體聲"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最高 16/48 · 立体声"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最高 16/48 · 立體聲"
+          }
+        }
+      }
+    },
     "24-bit / 48 kHz, 2 channels (Sonos's own limit)": {
       "localizations": {
         "am": {
@@ -658418,6 +658687,275 @@
           "stringUnit": {
             "state": "translated",
             "value": "24 位元 / 48 kHz，2 聲道（Sonos 本身的上限）"
+          }
+        }
+      }
+    },
+    "16-bit / 48 kHz, 2 channels (Sonos's own limit)": {
+      "comment": "A Sonos S1 room's details (or one that doesn't say whether it runs S1 or S2): the highest format it takes.",
+      "localizations": {
+        "am": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16-bit / 48 kHz፣ 2 ቻናሎች (የSonos የራሱ ገደብ)"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "‏16 بت / 48 kHz، قناتان (حد Sonos نفسه)"
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16-bit / 48 kHz, 2 চ্যানেল (Sonos-এর নিজস্ব সীমা)"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16 bitů / 48 kHz, 2 kanály (limit samotného Sonosu)"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16-bit / 48 kHz, 2 kanaler (Sonos’ egen grænse)"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16 Bit / 48 kHz, 2 Kanäle (Grenze von Sonos selbst)"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16 bit / 48 kHz, 2 κανάλια (όριο του ίδιου του Sonos)"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16 bits / 48 kHz, 2 canales (límite del propio Sonos)"
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "۱۶ بیت / 48 kHz، ۲ کانال (محدودیت خودِ Sonos)"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16-bittinen / 48 kHz, 2 kanavaa (Sonosin oma raja)"
+          }
+        },
+        "fil": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16-bit / 48 kHz, 2 channel (sariling limitasyon ng Sonos)"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16 bits / 48 kHz, 2 canaux (limite propre à Sonos)"
+          }
+        },
+        "gu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16-bit / 48 kHz, 2 ચેનલ (Sonosની પોતાની મર્યાદા)"
+          }
+        },
+        "ha": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bit 16 / 48 kHz, tasha 2 (iyakar Sonos kanta)"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "‏16 סיביות / 48 kHz, 2 ערוצים (המגבלה של Sonos עצמו)"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16-bit / 48 kHz, 2 चैनल (Sonos की अपनी सीमा)"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16 bit / 48 kHz, 2 csatorna (a Sonos saját korlátja)"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16-bit / 48 kHz, 2 kanal (batas Sonos sendiri)"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16 bit / 48 kHz, 2 canali (limite di Sonos stesso)"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16ビット / 48 kHz、2チャンネル（Sonos自体の上限）"
+          }
+        },
+        "kn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16-bit / 48 kHz, 2 ಚಾನಲ್‌ಗಳು (Sonos ನ ಸ್ವಂತ ಮಿತಿ)"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16비트 / 48 kHz, 2채널(Sonos 자체 한계)"
+          }
+        },
+        "ml": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16-bit / 48 kHz, 2 ചാനലുകൾ (Sonos-ന്റെ സ്വന്തം പരിധി)"
+          }
+        },
+        "mr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16-bit / 48 kHz, 2 चॅनेल (Sonos ची स्वतःची मर्यादा)"
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16-bit / 48 kHz, 2 saluran (had Sonos sendiri)"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16-bit / 48 kHz, 2 kanaler (Sonos’ egen grense)"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16 bit / 48 kHz, 2 kanalen (limiet van Sonos zelf)"
+          }
+        },
+        "pa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16-bit / 48 kHz, 2 ਚੈਨਲ (Sonos ਦੀ ਆਪਣੀ ਸੀਮਾ)"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16 bity / 48 kHz, 2 kanały (limit samego Sonosa)"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16 bits / 48 kHz, 2 canais (limite do próprio Sonos)"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16 bits / 48 kHz, 2 canais (limite do próprio Sonos)"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16 biți / 48 kHz, 2 canale (limita proprie a Sonos)"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16 bitar / 48 kHz, 2 kanaler (Sonos egen gräns)"
+          }
+        },
+        "sw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Biti 16 / 48 kHz, chaneli 2 (kikomo cha Sonos chenyewe)"
+          }
+        },
+        "ta": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16-bit / 48 kHz, 2 சேனல்கள் (Sonos-இன் சொந்த வரம்பு)"
+          }
+        },
+        "te": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16-bit / 48 kHz, 2 ఛానెల్‌లు (Sonos స్వంత పరిమితి)"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16 บิต / 48 kHz, 2 แชนเนล (ขีดจำกัดของ Sonos เอง)"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16 bit / 48 kHz, 2 kanal (Sonos’un kendi sınırı)"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16 біт / 48 kHz, 2 канали (обмеження самого Sonos)"
+          }
+        },
+        "ur": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16-bit / 48 kHz، 2 چینلز (Sonos کی اپنی حد)"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16 bit / 48 kHz, 2 kênh (giới hạn của chính Sonos)"
+          }
+        },
+        "zh-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16 位元 / 48 kHz，2 聲道（Sonos 本身的上限）"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16 位 / 48 kHz，2 声道（Sonos 自身的上限）"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "16 位元 / 48 kHz，2 聲道（Sonos 本身的上限）"
           }
         }
       }
@@ -669700,6 +670238,275 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sonos 從電腦播放最高 24 位元 / 48 kHz 的雙聲道音樂。在此範圍內的 FLAC 與 Apple Lossless 以原始檔案傳送；超出的部分會用母帶級轉換器重新取樣為 48 或 44.1 kHz，並以 24 位元 FLAC 傳送，訊號路徑會註明這一點。"
+          }
+        }
+      }
+    },
+    "Sonos plays two-channel music up to 16-bit / 48 kHz from a computer. FLAC and Apple Lossless within that go as the file itself; anything above is resampled to 48 or 44.1 kHz with the mastering-quality converter and sent as 16-bit FLAC, and the signal path says so.": {
+      "comment": "A Sonos S1 room (or one that doesn't say whether it runs S1 or S2): what it takes from Vespertine.",
+      "localizations": {
+        "am": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonos ከኮምፒውተር እስከ 16-bit / 48 kHz የሆነ ባለሁለት ቻናል ሙዚቃ ያጫውታል። በዚያ ውስጥ ያሉ FLAC እና Apple Lossless ፋይሉ ራሱ ሆነው ይሄዳሉ፤ ከዚያ በላይ ያለው ሁሉ በማስተሪንግ ጥራት መቀየሪያ ወደ 48 ወይም 44.1 kHz እንደገና ናሙና ተደርጎ እንደ 16-bit FLAC ይላካል፣ የምልክት መንገዱም ይህንኑ ይናገራል።"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "يشغّل Sonos من الكمبيوتر موسيقى ثنائية القناة حتى 16 بت / 48 kHz. تُرسل ملفات FLAC وApple Lossless ضمن هذا الحد كما هي؛ وما فوقه يُعاد تشكيل عيناته إلى 48 أو 44.1 kHz بمحوّل بجودة المَسترة ويُرسل بصيغة FLAC بدقة 16 بت، ويذكر مسار الإشارة ذلك."
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonos কম্পিউটার থেকে 16-bit / 48 kHz পর্যন্ত দুই-চ্যানেলের মিউজিক চালায়। এর মধ্যে থাকা FLAC ও Apple Lossless ফাইল হুবহু যায়; এর উপরের সবকিছু মাস্টারিং-মানের কনভার্টার দিয়ে 48 বা 44.1 kHz-এ রিস্যাম্পল করে 16-bit FLAC হিসেবে পাঠানো হয়, এবং সিগন্যাল পাথ তা জানায়।"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonos přehrává z počítače dvoukanálovou hudbu do 16 bitů / 48 kHz. FLAC a Apple Lossless v těchto mezích jdou jako samotný soubor; cokoli nad to se převzorkuje na 48 nebo 44,1 kHz převodníkem v masteringové kvalitě a pošle jako 16bitový FLAC, a cesta signálu to uvádí."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonos afspiller tokanalsmusik op til 16-bit / 48 kHz fra en computer. FLAC og Apple Lossless inden for det går som selve filen; alt derover resamples til 48 eller 44,1 kHz med konverteren i masteringkvalitet og sendes som 16-bit FLAC, og signalvejen siger det."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonos spielt von einem Computer Zweikanalmusik bis 16 Bit / 48 kHz. FLAC und Apple Lossless innerhalb dieser Grenze gehen als die Datei selbst; alles darüber wird mit dem Konverter in Mastering-Qualität auf 48 oder 44,1 kHz umgerechnet und als 16-Bit-FLAC gesendet, und der Signalweg sagt das."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Το Sonos παίζει από υπολογιστή δικάναλη μουσική έως 16 bit / 48 kHz. Τα FLAC και Apple Lossless εντός αυτού του ορίου πηγαίνουν ως το ίδιο το αρχείο· ό,τι είναι πάνω από αυτό επαναδειγματοληπτείται στα 48 ή 44,1 kHz με τον μετατροπέα ποιότητας mastering και στέλνεται ως FLAC 16 bit, και η διαδρομή σήματος το αναφέρει."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonos reproduce desde un ordenador música de dos canales hasta 16 bits / 48 kHz. FLAC y Apple Lossless dentro de eso van como el propio archivo; lo que esté por encima se remuestrea a 48 o 44,1 kHz con el conversor de calidad de masterización y se envía como FLAC de 16 bits, y la ruta de señal lo indica."
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonos از رایانه موسیقی دوکاناله تا ۱۶ بیت / 48 kHz پخش می‌کند. FLAC و Apple Lossless در این محدوده خودِ فایل فرستاده می‌شوند؛ هر چیز بالاتر با مبدل با کیفیت مسترینگ به 48 یا 44.1 kHz بازنمونه‌برداری و به صورت FLAC ۱۶ بیتی فرستاده می‌شود و مسیر سیگنال این را می‌گوید."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonos toistaa tietokoneelta kaksikanavaista musiikkia enintään 16-bittisenä / 48 kHz. Näissä rajoissa olevat FLAC- ja Apple Lossless -tiedostot menevät sellaisinaan; kaikki tätä suurempi näytteistetään uudelleen 48 tai 44,1 kHz:iin masterointitason muuntimella ja lähetetään 16-bittisenä FLACina, ja signaalipolku kertoo sen."
+          }
+        },
+        "fil": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nagpe-play ang Sonos ng two-channel na musika hanggang 16-bit / 48 kHz mula sa computer. Ang FLAC at Apple Lossless na pasok doon ay ipinapadala bilang mismong file; ang anumang lampas doon ay nire-resample sa 48 o 44.1 kHz gamit ang mastering-quality na converter at ipinapadala bilang 16-bit FLAC, at sinasabi ito ng signal path."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonos lit depuis un ordinateur la musique deux canaux jusqu’à 16 bits / 48 kHz. Le FLAC et l’Apple Lossless dans ces limites partent tels quels ; tout ce qui dépasse est rééchantillonné à 48 ou 44,1 kHz avec le convertisseur de qualité mastering et envoyé en FLAC 16 bits, et le chemin du signal l’indique."
+          }
+        },
+        "gu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonos કમ્પ્યુટરમાંથી 16-bit / 48 kHz સુધીનું બે-ચેનલ મ્યુઝિક વગાડે છે. તેની અંદરના FLAC અને Apple Lossless ફાઇલ જેમ છે તેમ જાય છે; તેનાથી ઉપરનું બધું માસ્ટરિંગ-ગુણવત્તાના કન્વર્ટરથી 48 અથવા 44.1 kHz પર રીસૅમ્પલ કરીને 16-bit FLAC તરીકે મોકલાય છે, અને સિગ્નલ પાથ તે જણાવે છે."
+          }
+        },
+        "ha": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonos yana kunna waƙa mai tasha biyu har zuwa bit 16 / 48 kHz daga kwamfuta. FLAC da Apple Lossless da ke cikin wannan iyaka suna tafiya a matsayin fayil ɗin kansa; duk abin da ya fi haka ana sake samfurinsa zuwa 48 ko 44.1 kHz da mai juyawa mai ingancin mastering kuma a aika a matsayin FLAC bit 16, kuma hanyar siginar tana faɗin haka."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonos מנגן ממחשב מוזיקה דו־ערוצית עד 16 סיביות / 48 kHz. ‏FLAC ו־Apple Lossless בתוך הגבול הזה נשלחים כקובץ עצמו; כל מה שמעל עובר דגימה מחדש ל־48 או 44.1 kHz בממיר באיכות מאסטרינג ונשלח כ־FLAC ב־16 סיביות, ונתיב האות מציין זאת."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonos कंप्यूटर से 16-bit / 48 kHz तक का दो-चैनल संगीत चलाता है। इसके भीतर के FLAC और Apple Lossless फ़ाइल जैसी है वैसी जाती है; इससे ऊपर का सब कुछ मास्टरिंग-क्वालिटी कन्वर्टर से 48 या 44.1 kHz पर रीसैंपल करके 16-bit FLAC के रूप में भेजा जाता है, और सिग्नल पाथ यह बताता है।"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A Sonos számítógépről legfeljebb 16 bit / 48 kHz-es kétcsatornás zenét játszik le. Az ezen belüli FLAC és Apple Lossless változatlan fájlként megy; minden e fölött masteringminőségű konverterrel 48 vagy 44,1 kHz-re mintavételeződik át, és 16 bites FLAC-ként megy, és a jelút ezt jelzi."
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonos memutar musik dua kanal hingga 16-bit / 48 kHz dari komputer. FLAC dan Apple Lossless dalam batas itu dikirim sebagai file aslinya; apa pun di atasnya di-resample ke 48 atau 44,1 kHz dengan konverter berkualitas mastering dan dikirim sebagai FLAC 16-bit, dan jalur sinyal menyebutkannya."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonos riproduce da un computer musica a due canali fino a 16 bit / 48 kHz. FLAC e Apple Lossless entro questi limiti partono come il file stesso; tutto ciò che va oltre viene ricampionato a 48 o 44,1 kHz con il convertitore di qualità mastering e inviato come FLAC a 16 bit, e il percorso del segnale lo indica."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonosはコンピュータから最大16ビット / 48 kHzの2チャンネル音楽を再生します。その範囲内のFLACとApple Losslessはファイルそのままで送られ、それを超えるものはマスタリング品質のコンバータで48または44.1 kHzにリサンプリングして16ビットFLACで送信し、信号経路にそう表示されます。"
+          }
+        },
+        "kn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonos ಕಂಪ್ಯೂಟರ್‌ನಿಂದ 16-bit / 48 kHz ವರೆಗಿನ ಎರಡು-ಚಾನಲ್ ಸಂಗೀತವನ್ನು ಪ್ಲೇ ಮಾಡುತ್ತದೆ. ಅದರೊಳಗಿನ FLAC ಮತ್ತು Apple Lossless ಫೈಲ್ ಇದ್ದಂತೆಯೇ ಹೋಗುತ್ತವೆ; ಅದಕ್ಕಿಂತ ಮೇಲಿನದೆಲ್ಲವನ್ನೂ ಮಾಸ್ಟರಿಂಗ್-ಗುಣಮಟ್ಟದ ಕನ್ವರ್ಟರ್‌ನಿಂದ 48 ಅಥವಾ 44.1 kHz ಗೆ ರೀಸ್ಯಾಂಪಲ್ ಮಾಡಿ 16-bit FLAC ಆಗಿ ಕಳುಹಿಸಲಾಗುತ್ತದೆ, ಮತ್ತು ಸಿಗ್ನಲ್ ಪಾತ್ ಅದನ್ನು ಹೇಳುತ್ತದೆ."
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonos는 컴퓨터에서 최대 16비트 / 48 kHz의 2채널 음악을 재생합니다. 그 범위 안의 FLAC과 Apple Lossless는 파일 그대로 보내고, 그 이상은 마스터링 품질 변환기로 48 또는 44.1 kHz로 리샘플링해 16비트 FLAC으로 보내며, 신호 경로에 그렇게 표시됩니다."
+          }
+        },
+        "ml": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonos കമ്പ്യൂട്ടറിൽ നിന്ന് 16-bit / 48 kHz വരെയുള്ള രണ്ട്-ചാനൽ സംഗീതം പ്ലേ ചെയ്യുന്നു. അതിനുള്ളിലെ FLAC, Apple Lossless എന്നിവ ഫയൽ അതേപടി പോകുന്നു; അതിന് മുകളിലുള്ളതെല്ലാം മാസ്റ്ററിംഗ് നിലവാരമുള്ള കൺവെർട്ടർ ഉപയോഗിച്ച് 48 അല്ലെങ്കിൽ 44.1 kHz-ലേക്ക് റീസാമ്പിൾ ചെയ്ത് 16-bit FLAC ആയി അയയ്ക്കുന്നു, സിഗ്നൽ പാത അത് പറയുന്നു."
+          }
+        },
+        "mr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonos संगणकावरून 16-bit / 48 kHz पर्यंतचे दोन-चॅनेल संगीत वाजवते. त्यातील FLAC आणि Apple Lossless फाइल जशीच्या तशी जाते; त्याहून वरचे सर्व काही मास्टरिंग-दर्जाच्या कन्व्हर्टरने 48 किंवा 44.1 kHz वर रीसॅम्पल करून 16-bit FLAC म्हणून पाठवले जाते, आणि सिग्नल पाथ ते सांगतो."
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonos memainkan muzik dua saluran sehingga 16-bit / 48 kHz daripada komputer. FLAC dan Apple Lossless dalam had itu dihantar sebagai fail itu sendiri; apa-apa yang melebihinya disampel semula kepada 48 atau 44.1 kHz dengan penukar berkualiti mastering dan dihantar sebagai FLAC 16-bit, dan laluan isyarat menyatakannya."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonos spiller tokanalsmusikk opptil 16-bit / 48 kHz fra en datamaskin. FLAC og Apple Lossless innenfor det går som selve filen; alt over resamples til 48 eller 44,1 kHz med konverteren i masteringkvalitet og sendes som 16-bit FLAC, og signalveien sier det."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonos speelt vanaf een computer tweekanaalsmuziek tot 16 bit / 48 kHz. FLAC en Apple Lossless binnen die grens gaan als het bestand zelf; alles daarboven wordt met de converter van masteringkwaliteit geresampled naar 48 of 44,1 kHz en als 16-bit FLAC verzonden, en het signaalpad meldt dat."
+          }
+        },
+        "pa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonos ਕੰਪਿਊਟਰ ਤੋਂ 16-bit / 48 kHz ਤੱਕ ਦਾ ਦੋ-ਚੈਨਲ ਸੰਗੀਤ ਚਲਾਉਂਦਾ ਹੈ। ਇਸਦੇ ਅੰਦਰ ਦੇ FLAC ਅਤੇ Apple Lossless ਫ਼ਾਈਲ ਜਿਉਂ ਦੀ ਤਿਉਂ ਜਾਂਦੀ ਹੈ; ਇਸ ਤੋਂ ਉੱਪਰ ਦਾ ਸਭ ਕੁਝ ਮਾਸਟਰਿੰਗ-ਕੁਆਲਟੀ ਕਨਵਰਟਰ ਨਾਲ 48 ਜਾਂ 44.1 kHz ’ਤੇ ਰੀਸੈਂਪਲ ਕਰਕੇ 16-bit FLAC ਵਜੋਂ ਭੇਜਿਆ ਜਾਂਦਾ ਹੈ, ਅਤੇ ਸਿਗਨਲ ਪਾਥ ਇਹ ਦੱਸਦਾ ਹੈ।"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonos odtwarza z komputera muzykę dwukanałową do 16 bit / 48 kHz. FLAC i Apple Lossless w tych granicach idą jako sam plik; wszystko powyżej jest przepróbkowywane do 48 lub 44,1 kHz konwerterem jakości masteringowej i wysyłane jako 16-bitowy FLAC, a ścieżka sygnału to pokazuje."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Sonos toca de um computador música de dois canais até 16 bits / 48 kHz. FLAC e Apple Lossless dentro disso vão como o próprio arquivo; o que passar disso é reamostrado para 48 ou 44,1 kHz com o conversor de qualidade de masterização e enviado como FLAC de 16 bits, e o caminho do sinal informa isso."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Sonos reproduz a partir de um computador música de dois canais até 16 bits / 48 kHz. FLAC e Apple Lossless dentro desse limite seguem como o próprio ficheiro; o que estiver acima é reamostrado para 48 ou 44,1 kHz com o conversor de qualidade de masterização e enviado como FLAC de 16 bits, e o percurso do sinal indica-o."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonos redă de pe un computer muzică pe două canale până la 16 de biți / 48 kHz. FLAC și Apple Lossless în aceste limite pleacă drept fișierul însuși; orice depășește este reeșantionat la 48 sau 44,1 kHz cu convertorul de calitate mastering și trimis ca FLAC pe 16 de biți, iar calea semnalului spune asta."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonos spelar tvåkanalsmusik upp till 16 bitar / 48 kHz från en dator. FLAC och Apple Lossless inom det går som själva filen; allt över omsamplas till 48 eller 44,1 kHz med omvandlaren i masteringkvalitet och skickas som 16-bitars FLAC, och signalvägen säger det."
+          }
+        },
+        "sw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonos hucheza muziki wa chaneli mbili hadi biti 16 / 48 kHz kutoka kwa kompyuta. FLAC na Apple Lossless zilizo ndani ya kikomo hicho hutumwa kama faili lenyewe; chochote kilicho juu yake hubadilishwa kiwango hadi 48 au 44.1 kHz kwa kigeuzi cha ubora wa mastering na kutumwa kama FLAC ya biti 16, na njia ya ishara inasema hivyo."
+          }
+        },
+        "ta": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonos கணினியிலிருந்து 16-bit / 48 kHz வரையிலான இரு-சேனல் இசையை இயக்கும். அதற்குள் உள்ள FLAC மற்றும் Apple Lossless கோப்பு உள்ளபடியே செல்லும்; அதற்கு மேல் உள்ள அனைத்தும் மாஸ்டரிங் தர கன்வெர்ட்டரால் 48 அல்லது 44.1 kHz ஆக ரீசாம்பிள் செய்யப்பட்டு 16-bit FLAC ஆக அனுப்பப்படும், சிக்னல் பாதை அதைக் காட்டும்."
+          }
+        },
+        "te": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonos కంప్యూటర్ నుండి 16-bit / 48 kHz వరకు ఉన్న రెండు-ఛానెల్ సంగీతాన్ని ప్లే చేస్తుంది. దానిలోపు ఉన్న FLAC మరియు Apple Lossless ఫైల్ ఉన్నది ఉన్నట్లుగానే వెళ్తాయి; దానికంటే ఎక్కువ ఉన్నదంతా మాస్టరింగ్-నాణ్యత కన్వర్టర్‌తో 48 లేదా 44.1 kHz కి రీశాంపుల్ చేసి 16-bit FLAC గా పంపబడుతుంది, సిగ్నల్ పాత్ అదే చెబుతుంది."
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonos เล่นเพลงสองแชนเนลจากคอมพิวเตอร์ได้สูงสุด 16 บิต / 48 kHz ไฟล์ FLAC และ Apple Lossless ที่อยู่ในขอบเขตนี้จะส่งไปทั้งไฟล์ตามเดิม ส่วนที่สูงกว่านั้นจะถูกรีแซมเปิลเป็น 48 หรือ 44.1 kHz ด้วยตัวแปลงคุณภาพระดับมาสเตอริงแล้วส่งเป็น FLAC 16 บิต และเส้นทางสัญญาณจะแจ้งไว้"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonos bir bilgisayardan en fazla 16 bit / 48 kHz iki kanallı müzik çalar. Bu sınırdaki FLAC ve Apple Lossless dosyanın kendisi olarak gider; üstündeki her şey mastering kalitesindeki dönüştürücüyle 48 veya 44,1 kHz’e yeniden örneklenir ve 16 bit FLAC olarak gönderilir, sinyal yolu da bunu söyler."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonos відтворює з комп’ютера двоканальну музику до 16 біт / 48 kHz. FLAC і Apple Lossless у цих межах ідуть як сам файл; усе, що вище, передискретизовано до 48 або 44,1 kHz перетворювачем якості мастерингу й надіслано як 16-бітний FLAC, і шлях сигналу про це повідомляє."
+          }
+        },
+        "ur": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonos کمپیوٹر سے 16-bit / 48 kHz تک کی دو چینل والی موسیقی چلاتا ہے۔ اس کے اندر کی FLAC اور Apple Lossless فائل جوں کی توں جاتی ہے؛ اس سے اوپر کی ہر چیز ماسٹرنگ معیار کے کنورٹر سے 48 یا 44.1 kHz پر ری سیمپل کر کے 16-bit FLAC کے طور پر بھیجی جاتی ہے، اور سگنل پاتھ یہ بتاتا ہے۔"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonos phát nhạc hai kênh tối đa 16 bit / 48 kHz từ máy tính. FLAC và Apple Lossless trong giới hạn đó được gửi nguyên tệp; mọi thứ cao hơn được lấy mẫu lại thành 48 hoặc 44,1 kHz bằng bộ chuyển đổi chất lượng mastering và gửi dưới dạng FLAC 16 bit, và đường tín hiệu cho biết điều đó."
+          }
+        },
+        "zh-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonos 從電腦播放最高 16 位元 / 48 kHz 的雙聲道音樂。在此範圍內的 FLAC 及 Apple Lossless 以原始檔案傳送；超出的部分會用母帶級轉換器重新取樣為 48 或 44.1 kHz，並以 16 位元 FLAC 傳送，訊號路徑會註明這一點。"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonos 从电脑播放最高 16 位 / 48 kHz 的双声道音乐。在此范围内的 FLAC 和 Apple Lossless 按原文件发送；超出的部分会用母带级转换器重采样为 48 或 44.1 kHz，并以 16 位 FLAC 发送，信号路径会注明这一点。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sonos 從電腦播放最高 16 位元 / 48 kHz 的雙聲道音樂。在此範圍內的 FLAC 與 Apple Lossless 以原始檔案傳送；超出的部分會用母帶級轉換器重新取樣為 48 或 44.1 kHz，並以 16 位元 FLAC 傳送，訊號路徑會註明這一點。"
           }
         }
       }

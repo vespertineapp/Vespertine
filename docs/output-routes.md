@@ -9,7 +9,7 @@ The rule everywhere: nothing is taken away without saying so. A change shows in 
 | USB or Thunderbolt DAC | Whatever the DAC lists (PCM to 768 kHz, DSD as DoP) | The file's own samples at the file's own rate, bit-perfect | Every channel, on a multichannel DAC | No (plays the bed) |
 | HDMI to an AV receiver | 8 channels of 24-bit / 192 kHz PCM; Dolby Digital (Plus) as a bitstream | PCM channel for channel, or the Dolby frames untouched | Yes, discrete | Yes, from Dolby Digital Plus files, two ways (below) |
 | HDMI or eARC to a TV or sound bar | What the TV passes on, often less than it accepts | The same as a receiver | If the TV passes it | If the TV passes Dolby Digital Plus |
-| Sonos room (network) | Stereo, 24-bit / 48 kHz, FLAC or Apple Lossless | The file itself within that; else 24-bit FLAC at 48 or 44.1 kHz | No: folded to stereo | No |
+| Sonos room (network) | Stereo, 24-bit / 48 kHz on S2 (16-bit on S1), FLAC or Apple Lossless | The file itself within that; else FLAC at 48 or 44.1 kHz, 24-bit on S2, 16-bit on S1 | No: folded to stereo | No |
 | Other network players (UPnP AV, OpenHome) | Whatever the player lists | The file itself | If the player plays the file | No |
 | AirPlay (Vespertine's own sender) | Apple Lossless 16-bit / 44.1 kHz stereo; 24-bit / 48 kHz to an Apple TV 4K | The file's samples when they are in that format; else converted | No: folded to stereo | No |
 | AirPods and Beats | AAC over Bluetooth; lossless 24-bit / 48 kHz on AirPods Max over USB-C | PCM to macOS | Rendered with Spatial Audio | Rendered by macOS |
@@ -55,6 +55,8 @@ Sonos speakers are network players: Vespertine finds them by SSDP, serves the so
 | DSD (DSF, DSDIFF, SACD image, WavPack DSD) | 24-bit FLAC at 44.1 kHz |
 | 5.1, 7.1, Dolby Atmos, DTS, TrueHD | 24-bit FLAC, folded to stereo |
 | 24-bit WAV or AIFF, APE, WavPack, TAK, Opus, a track of a CUE sheet | 24-bit FLAC with the same samples |
+
+**S1 or S2.** Vespertine reads which software a speaker runs from its own description (`swGen`: 1 or 2; failing that, the version the Sonos app shows: S1 ends at 11.x, S2 began at 12.0). On S1 the table above holds with 16 bits in place of 24: a 24-bit file goes as 16-bit FLAC with TPDF dither (the word length change is named), a 16-bit file as it is. A speaker that says neither is treated as S1, whose limits every Sonos plays, and the output list then says "UP TO 16/48". That `swGen` 2 means S2 is from the community's reading of real speakers' descriptions, not a Sonos document; `vespertine-probe sonos` prints what a speaker states.
 
 The rate is always the highest Sonos takes that divides the song's own exactly (192 → 48, 176.4 → 44.1), so the resampler never works at a fractional ratio. The resampler is Apple's mastering-quality converter at its highest setting, the one the rest of the app uses. The stream is written whole before the room is told about it (encoding runs many times faster than the music plays), so Sonos gets a file with a length it can seek in; a song that takes more than two minutes to prepare is offered as it is written instead. Converting runs many times faster than real time, but the first song of a hi-res album still starts some seconds late; the songs after it are prepared while the one before plays.
 
