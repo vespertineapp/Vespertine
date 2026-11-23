@@ -40,7 +40,12 @@ struct RendererSettingsSection: View {
 enum RendererText {
     /// The output list's second line for a renderer.
     static func detail(_ renderer: RendererDevice) -> String {
-        renderer.kind.gapless
+        if renderer.isSonos {
+            // What Sonos takes from a computer, and how the room is set up when it is more than one speaker.
+            let limit = String(localized: "UP TO 24/48 · STEREO", comment: "Output list: a Sonos room takes up to 24-bit / 48 kHz, two channels (short, uppercase)")
+            return renderer.sonos?.speakerSetup.map { "SONOS · \($0.localizedUppercase) · \(limit)" } ?? "SONOS · \(limit)"
+        }
+        return renderer.kind.gapless
             ? String(localized: "\(renderer.kind.protocolName.localizedUppercase) · GAPLESS", comment: "Output list: a network player's protocol (OPENHOME, UPNP AV), then GAPLESS (short, uppercase)")
             : String(localized: "\(renderer.kind.protocolName.localizedUppercase) · GAPLESS NOT GUARANTEED", comment: "Output list: a network player's protocol, then that it may leave gaps between songs (short, uppercase)")
     }
@@ -56,6 +61,22 @@ enum RendererText {
 
     static var gaplessNotGuaranteed: String {
         String(localized: "Gapless: not guaranteed on this renderer", comment: "A network player without SetNextAVTransportURI: it may leave a gap between songs.")
+    }
+
+    /// What a Sonos room takes from Vespertine, and what it doesn't, in the order a listener would ask.
+    static func sonosNotes(_ renderer: RendererDevice) -> [String] {
+        var notes = [
+            String(localized: "Sonos plays two-channel music up to 24-bit / 48 kHz from a computer. FLAC and Apple Lossless within that go as the file itself; anything above is resampled to 48 or 44.1 kHz with the mastering-quality converter and sent as 24-bit FLAC, and the signal path says so."),
+            String(localized: "No surround and no Dolby Atmos this way: Sonos takes those only from a TV or from a streaming service in its own app. Surround songs are folded to stereo."),
+        ]
+        if renderer.sonos?.isHomeTheater == true {
+            notes.append(String(localized: "This room has surround speakers. For two-channel music they play what the Sonos app says under Settings › this room › Surround Audio › Music Playback: Ambient (quiet, the default) or Full (as loud as the front).", comment: "“Surround Audio”, “Music Playback”, “Ambient” and “Full” are the Sonos app's own words."))
+        }
+        if renderer.sonos?.isGroup == true {
+            notes.append(String(localized: "Several rooms are grouped: they all play, and the volume here moves the whole group."))
+        }
+        notes.append(String(localized: "The volume slider is the room's own volume, as in the Sonos app. It doesn't change the samples sent."))
+        return notes
     }
 
     /// Advice for any renderer, MPD-based ones named only as an example.
@@ -86,7 +107,8 @@ struct RendererDetails: View {
                 row(String(localized: "Control"), renderer.kind.protocolName)
                 row(String(localized: "Services"), renderer.serviceNames.joined(separator: ", "))
                 row(String(localized: "Gapless"), renderer.kind.gapless ? String(localized: "Yes") : RendererText.gaplessNotGuaranteed)
-                row(String(localized: "Highest format"), maxFormat)
+                row(String(localized: "Highest format"), renderer.isSonos ? String(localized: "24-bit / 48 kHz, 2 channels (Sonos's own limit)") : maxFormat)
+                if let setup = renderer.sonos?.speakerSetup { row(String(localized: "Speakers"), setup) }
                 if !renderer.capabilities.acceptedFormats.isEmpty {
                     row(String(localized: "Formats"), renderer.capabilities.acceptedFormats.joined(separator: ", "))
                 }
@@ -99,8 +121,8 @@ struct RendererDetails: View {
             }
             RendererEqualizerChoice(uid: renderer.uid)
             VStack(alignment: .leading, spacing: 4) {
-                Text("For the best result").font(Typeface.ui(12))
-                ForEach(RendererText.advice, id: \.self) { line in
+                Text(renderer.isSonos ? String(localized: "What Sonos plays") : String(localized: "For the best result")).font(Typeface.ui(12))
+                ForEach(renderer.isSonos ? RendererText.sonosNotes(renderer) : RendererText.advice, id: \.self) { line in
                     Text(verbatim: "· " + line).font(Typeface.ui(10.5)).foregroundStyle(Palette.text3).fixedSize(horizontal: false, vertical: true)
                 }
             }
@@ -156,6 +178,27 @@ struct RendererEqualizerChoice: View {
             }
         }
         .font(Typeface.ui(12))
+    }
+}
+
+/// A Sonos room's own volume (the whole group's when rooms are grouped): the level the Sonos app shows. The samples sent
+/// are not touched by it, so the lock beside it stays at 100%.
+struct SonosVolumeControl: View {
+    @Environment(AppModel.self) private var model
+    let renderer: RendererDevice
+
+    var body: some View {
+        HStack(spacing: 8) {
+            if let renderers = model.renderers, let level = renderers.playerVolume {
+                BrassSlider(value: Binding(get: { level }, set: { renderers.setPlayerVolume($0) }),
+                            tint: Palette.text2, showsThumb: false, accessibilityName: String(localized: "Sonos volume"))
+                    .frame(width: 72)
+                Text(verbatim: "SONOS").font(Typeface.mono(9.5)).fixedSize().foregroundStyle(Palette.text3)
+                    .help(String(localized: "The room's own volume, as in the Sonos app; the samples sent are untouched")).accessibilityHidden(true)
+            }
+        }
+        .task(id: renderer) { model.renderers?.watchVolume(of: renderer) }
+        .onDisappear { model.renderers?.watchVolume(of: nil) }
     }
 }
 
@@ -252,7 +295,10 @@ extension SignalPathView {
                 s.append(Step(title: "ReplayGain", detail: String(localized: "Loudness normalisation"),
                               value: "\(rg.formatted(.number.precision(.fractionLength(1)).sign(strategy: .always()))) dB", tone: .changed))
             }
-            s.append(Step(title: String(localized: "Sent as"), detail: String(localized: "24-bit FLAC at the source rate, lossless after processing"),
+            let fitted = r.processing.contains(.resampled) || r.processing.contains(.downmix) || r.processing.contains(.dsdToPCM)
+            s.append(Step(title: String(localized: "Sent as"),
+                          detail: fitted ? String(localized: "24-bit FLAC, made to fit what the player takes (see Player limit below)")
+                                         : String(localized: "24-bit FLAC at the source rate, lossless after processing"),
                           value: "FLAC \(sent)", tone: .changed))
         }
         s.append(Step(title: r.name, detail: "\(r.protocolName) · " + (r.gapless ? String(localized: "gapless") : RendererText.gaplessNotGuaranteedOnPlayer),

@@ -383,11 +383,24 @@ public final class RendererPlayback: @unchecked Sendable {
     }
 
     private func fail(_ item: PlayableItem?, _ error: Error) {
-        let reason = (error as? UPnPError)?.message ?? (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+        var reason = (error as? UPnPError)?.message ?? (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+        if let hint = Self.sonosHint(error, isSonos: renderer.isSonos) { reason += ". " + hint }
         let message = String(localized: "\(renderer.name) couldn't play the song (\(reason)).", comment: "%1$@ is a network player's name, %2$@ the reason.")
         state.withLock { $0.snapshot.state = .stopped; $0.snapshot.lastError = message; $0.wantsPlaying = false; $0.awaitingStartSince = nil }
         refreshActivity()
         emit(.failed(item, message))
+    }
+
+    /// What to check when a Sonos refuses a song with one of its two usual codes: 714 (it fetched something it can't play)
+    /// and 716 (it couldn't fetch the song from this Mac at all, which is nearly always the Mac's firewall).
+    static func sonosHint(_ error: Error, isSonos: Bool) -> String? {
+        guard isSonos, case .fault(let code, _)? = error as? UPnPError else { return nil }
+        switch code {
+        case 716: return String(localized: "Sonos couldn't fetch the song from this Mac: allow Vespertine incoming connections in System Settings › Network › Firewall, and check both are on the same network", comment: "Added to the reason a Sonos couldn't play a song. No full stop at the end.")
+        case 714: return String(localized: "Sonos fetched the song and couldn't play its format", comment: "Added to the reason a Sonos couldn't play a song. No full stop at the end.")
+        case 800: return String(localized: "this speaker now follows another room: open the output list again and choose the room that leads the group", comment: "Added to the reason a Sonos couldn't play a song. No full stop at the end.")
+        default: return nil
+        }
     }
 
     private func release(_ entry: Entry) {

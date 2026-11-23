@@ -287,7 +287,7 @@ struct DevicePicker: View {
             }
             ForEach(model.devices.devices) { d in
                 deviceRow(d.uid, name: d.name, detail: "\(d.profile.tag) · \(d.rangeSummary)", symbol: d.profile.symbol,
-                          selected: model.settings.selectedDeviceUID == d.uid)
+                          selected: model.settings.selectedDeviceUID == d.uid, forecast: model.forecast(for: d))
             }
             // Speaker groups (beta, behind their Settings switch): chosen like an output, ready when all of their outputs are connected.
             if let groups = model.speakerGroups {
@@ -312,7 +312,8 @@ struct DevicePicker: View {
                     .padding(.horizontal, 8)
                 }
                 ForEach(renderers.renderers) { r in
-                    deviceRow(r.uid, name: r.name, detail: RendererText.detail(r), symbol: "hifireceiver", selected: model.settings.selectedDeviceUID == r.uid)
+                    deviceRow(r.uid, name: r.name, detail: RendererText.detail(r), symbol: r.isSonos ? "hifispeaker.2" : "hifireceiver",
+                              selected: model.settings.selectedDeviceUID == r.uid, forecast: model.forecast(for: r))
                 }
             }
             // AirPlay receivers (AirPlay Players (beta), behind their Settings switch). Those Vespertine can't send to yet are listed,
@@ -334,7 +335,7 @@ struct DevicePicker: View {
                 ForEach(airPlay.devices) { d in
                     // One with a password is asked for it first (a sheet), unless it is saved.
                     deviceRow(d.uid, name: d.name, detail: AirPlayText.detail(d), symbol: "airplay.audio", selected: model.settings.selectedDeviceUID == d.uid,
-                              action: { airPlay.choose(d) { model.selectDevice($0) } })
+                              forecast: model.forecast(for: d), action: { airPlay.choose(d) { model.selectDevice($0) } })
                         .disabled(!d.isSupported)
                         .opacity(d.isSupported ? 1 : 0.5)
                 }
@@ -354,7 +355,10 @@ struct DevicePicker: View {
         .onAppear { model.renderers?.refresh() }
     }
 
-    private func deviceRow(_ uid: String?, name: String, detail: String, symbol: String, selected: Bool, action: (() -> Void)? = nil) -> some View {
+    /// `forecast`: what the song loaded now would be played as on this output, under the row's own two lines; in brass when
+    /// the file's own samples arrive, in copper (with why) when they don't.
+    private func deviceRow(_ uid: String?, name: String, detail: String, symbol: String, selected: Bool, forecast: RouteForecast? = nil,
+                           action: (() -> Void)? = nil) -> some View {
         Button { if let action { action() } else { model.selectDevice(uid) } } label: {
             HStack(spacing: 10) {
                 Image(systemName: symbol)
@@ -364,6 +368,13 @@ struct DevicePicker: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(name).font(Typeface.ui(12.5)).foregroundStyle(Palette.text)
                     Text(detail).font(Typeface.mono(9.5)).foregroundStyle(Palette.text3).lineLimit(1)
+                    if let forecast {
+                        Text(OutputForecastText.willPlay(forecast)).font(Typeface.ui(10.5))
+                            .foregroundStyle(forecast.unchanged ? Palette.text2 : Palette.copper).fixedSize(horizontal: false, vertical: true)
+                        ForEach(forecast.notes, id: \.self) { note in
+                            Text(verbatim: note).font(Typeface.ui(10)).foregroundStyle(Palette.text3).fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
                 }
                 Spacer()
                 if selected { Image(systemName: "checkmark").font(.system(size: 11, weight: .semibold)).foregroundStyle(Palette.brassHi) }
@@ -503,6 +514,7 @@ struct VolumeControl: View {
             if let receiver = model.chosenAirPlay {
                 AirPlayVolumeControl(device: receiver)
             } else if let renderer = model.chosenRenderer {
+                if renderer.isSonos { SonosVolumeControl(renderer: renderer) }
                 RendererVolumeControl(renderer: renderer)
             } else if device?.hasHardwareVolume == true, let v = model.devices.hardwareVolume {
                 BrassSlider(value: Binding(get: { Double(v) }, set: { model.devices.setHardwareVolume(Float($0)) }),

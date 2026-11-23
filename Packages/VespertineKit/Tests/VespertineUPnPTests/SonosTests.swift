@@ -383,6 +383,25 @@ struct SonosPlayerTests {
         #expect(await events.wait(for: "started \(second.lastPathComponent)"))
     }
 
+    @Test("A song Sonos refuses is reported with what to check: 716 is the Mac's firewall; other players get no such hint")
+    func refused() async throws {
+        let fake = try await playbar()
+        let media = MediaServer()
+        try await media.start()
+        defer { media.stop(); fake.stop() }
+        let device = try await RendererDevice.load(location: fake.location)
+        let playback = RendererPlayback(renderer: device, transport: try device.makeTransport(), media: media, pollInterval: 0.05)
+        defer { playback.shutdown() }
+        let events = EventLog()
+        playback.eventHandler = { events.add($0) }
+        fake.fail("SetAVTransportURI", code: 716, times: 5)
+        playback.play(PlayableItem(url: try makeFLAC(from: try makeWAV(seconds: 0.2, seed: 8))))
+        #expect(await events.wait(for: "failed"))
+        #expect(events.all.contains { $0.contains("UPnP error 716") && $0.contains("Firewall") })
+        #expect(RendererPlayback.sonosHint(UPnPError.fault(code: 716, description: ""), isSonos: false) == nil)
+        #expect(RendererPlayback.sonosHint(UPnPError.timeout, isSonos: true) == nil)
+    }
+
     @Test("A 24-bit WAV, which Sonos doesn't read, goes as FLAC with the very same samples")
     func repacked() async throws {
         let wav = try makeWAV(seconds: 0.5, seed: 9)
