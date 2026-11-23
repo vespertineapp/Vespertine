@@ -9,7 +9,21 @@ Branch `feat/sonos-and-output-routes`, local commits only, not pushed; `git log 
 - **No silent downgrade**: every output row says what the loaded song would be played as ("Will play 24-bit / 48 kHz FLAC, stereo (source 24/96)", copper when samples change); while playing, the badge (RESAMPLED / FOLDED TO STEREO / DSD AS PCM · 24/48 SENT) and a "Player limit" line in the signal path. Same planner for DACs, HDMI, Bluetooth, AirPlay and other network players.
 - **Sonos volume** slider (room or group), the room's details (speaker setup, Music Playback Ambient/Full, read only), plain error for "couldn't fetch" (firewall), `vespertine-probe sonos`, and docs/output-routes.md.
 
-## This pass: the second review's findings (2026-11-23)
+## This pass: the third review's findings (2026-11-23, 07:45 onwards)
+
+A third independent review of 3e6cd9b9 still said not to ship. Each of its three findings has a test written first and seen failing (`build/logs/r3/red-*.log`), then the fix (`green-*.log`). Signed commits 9bed9b51, 86835ab1, a1f8bc30 (and ee0d1fc0 for the docs); nothing pushed.
+
+1. **P1, switching from a network player to the Mac failed the song.** A streamed song is one shared copy in the playback cache. If the listener switched from a network player to the Mac while the current song was still downloading, the Mac's engine picked up that same copy, and then the player's preparation, being given up, cancelled the copy outright (`entry.cancel()` in `StagedRemoteFile.stage`). The Mac then failed with "The operation was cancelled." Now a preparation that gives up only lets go of its hold on the copy. The download is cancelled when nobody holds it any more, so it carries on for the Mac. Test (`StagedHandoffTests`, real engine): a slow stream that sends 256 KiB and then pauses. The player's preparation is waiting on it, the engine starts the same song and waits on the same copy, the player gives up, then the rest arrives. The Mac must play. Before the fix it failed with exactly "The operation was cancelled." A player that gives up a download nobody else holds still cancels it at once; the existing `remoteDownloadFreesTheQueue` and `remoteDownloadStop` tests check that, and still pass.
+2. **P2, a failed clear of the old next song let it go too early.** After a queue edit Vespertine tells the player to drop its old next song (an empty NextURI). If that call failed, Vespertine let the old song go anyway (its web address and its copy) while the player might still hold it and move on to it. Now the song is kept, as a stale next song, until a clear or a new next song is confirmed. The status polls send the clear again, once a second and ten times at most, so a player that always refuses an empty NextURI isn't asked for ever. If the player moves on to the stale song anyway, Vespertine recognises it, never announces it, and plays the song the queue has after the one that ended, or stops the player at the end of the queue. A failed hand-over of a new next song now keeps what the player held in the same way, instead of letting it go. Tests (a transport that refuses any change of the next song): the song stays held while the clear is refused, and is cleared and let go once the player answers again; a player that moves on to it is put right, both when the queue has a song after it and when it doesn't. All of them failed before the fix.
+3. **P2, xHE-AAC left the AAC filter.** The last pass named xHE-AAC separately so Sonos would get it as FLAC. As a side effect the library filed those songs under "Other lossy" instead of AAC, and the tag editor's footer said "tags" instead of "MP4 atoms", even with Network Players off. Both now treat "xHE-AAC" as AAC (`FormatKind.of`, and `TagEditorView.tagFormat(codec:)`, which was pulled out of the footer so it can be tested). The codec name stays "xHE-AAC" for the players. Tests: `LibraryFilterTests.xheAACIsAAC` (a song's facts, a filter set to AAC, an album's facts read from the database) and the app test `TagEditorFormatTests`. Both failed before the fix. For the app test, the one-line fix was taken out and put back to see it fail.
+
+Also: docs/output-routes.md describes items 1 and 2.
+
+### Test figures, this pass
+
+(filled in below as the runs finish)
+
+## The second review's findings (2026-11-23)
 
 An independent re-review of 011bc0a5 said not to release yet. Each finding below has a test written first and seen failing (logs `build/logs/r2-red-*.log`), then the fix (`r2-green-*.log`). All commits signed; nothing pushed.
 
