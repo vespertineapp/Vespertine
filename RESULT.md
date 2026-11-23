@@ -9,6 +9,31 @@ Branch `feat/sonos-and-output-routes`, local commits only, not pushed; `git log 
 - **No silent downgrade**: every output row says what the loaded song would be played as ("Will play 24-bit / 48 kHz FLAC, stereo (source 24/96)", copper when samples change); while playing, the badge (RESAMPLED / FOLDED TO STEREO / DSD AS PCM · 24/48 SENT) and a "Player limit" line in the signal path. Same planner for DACs, HDMI, Bluetooth, AirPlay and other network players.
 - **Sonos volume** slider (room or group), the room's details (speaker setup, Music Playback Ambient/Full, read only), plain error for "couldn't fetch" (firewall), `vespertine-probe sonos`, and docs/output-routes.md.
 
+## The ninth review's findings (2026-11-23, 13:55 onwards)
+
+A ninth review (Codex, run 8028b6) found two P2s in `RendererPlayback.swift` and two points of hygiene. Signed commits 2a1c2149 (P2 1), 4b4e15ce (P2 2) and 42b17abd (hygiene), each with its test written first and seen failing, and two RESULT commits (this interim one, and the final one with the audit figures); nothing pushed.
+
+**P2 1, a refused pause or resume was put right over a newer command.** A pause or resume the player refused twice asked it for its status and set `wantsPlaying` and the snapshot from the answer. With a song chosen (or a Stop, pause or resume given) while that status was on its way, the answer was still the old song's. If the old song was paused, the chosen song's start found `wantsPlaying` false and paused it on the player, and the old refusal was reported. Now pause and resume carry the intent they set (`State.intent`, which every pause, resume, stop and song chosen counts up). The second try isn't sent once a newer one has come. The resync, under the generation lock and then the state lock (as `play()` and `stop()` take them), applies the player's state and reports the refusal only while that intent is still the last one asked for, in the same step.
+- `staleResumeResyncAfterSelection`: Play is refused; the status asked for after the second refusal is held while a song is chosen, then answered with the old song, paused. **Red before** (5 issues: the chosen song never started, `wantsPlaying` false, the snapshot and the player paused, the notice delivered). New test hooks: `GatedTransport.failsPlay`, `holdsStatusAfterFailedPlay`.
+
+**P2 2, a song prepared as the next was played with the settings it was made with.** Since the eighth pass, a change of settings queued before a song chosen no longer restarts the old song, so it doesn't prepare the next song again either. When the song chosen was the one already prepared as the next, `start` took that entry as it was: a processed stream made with the old settings, so a -6 dB change was lost for that song. Now every change of settings counts up `State.settingsRevision`, and each entry records the revision it was made with, read together with the settings. `start` reuses the prepared next song only when it was made with the settings in force. Otherwise the song is made again, and the one prepared is let go of with the old songs once the new one is loaded.
+- `preparedNextRebuiltForNewSettings`: the converted song is prepared as the next with the default settings; the worker is held in a poll while a -6 dB change and then a play of that song are queued. **Red before** (3 issues: no stream made again, the old stream loaded, the volume stage not -6 dB).
+
+**Hygiene.** The public initialiser took a `pollInterval` of 0 (or less, or not a number) as "no poller", a mode meant for tests: an app passing one would never see a song start or end, or a renderer lost. It now keeps the interval between `minimumPollInterval` (50 ms) and `maximumPollInterval` (60 s), and a value that isn't a number gets the default (0.5 s). The no-poller mode moved to an internal initialiser (`polling: nil`), which the test rigs use. `queueSettingsForTests` (it skips the settings pause and moves `settingsGeneration` on) is now compiled in debug builds only (`#if DEBUG`), and so are the two tests that use it, `settingsRestartQueuedBeforeCommand` and `preparedNextRebuiltForNewSettings`: `swift test -c release` doesn't run them.
+- `pollIntervalClamped` (3 cases: 0, -1, NaN, through the public initialiser): **red before, all 3** (the song never announced: no poller). The checks of the interval kept (and of 2 s and infinity) were added with the fix, since the property didn't exist before.
+- Red run: `build/logs/r11/red.log` (3 tests, 5 cases, 11 issues; all 5 cases red). After each fix its test passed (`fix1-green.log`, `fix2-green.log`, `fix3-green.log`).
+
+Not changed: the other test hooks (`settleForTests`, `queuePollForTests`, `restartForTests`) are still compiled in release builds. They are internal, so outside the package they can only be reached through `@testable import`. A refused seek still isn't tagged; it checks its own target in `seek`. A player that goes on by itself to a next song made just before a change of settings plays it as it was made: the change makes the next song again, but the player may already have reached it.
+
+### Test figures, this pass
+
+Logs: `build/logs/r11/` and the audit folder named below. All from the code at 42b17abd.
+
+- **UPnP and Sonos** (`swift test --filter VespertineUPnPTests`, debug, 14:05 to 14:06, load average 15 to 18): **passed**, 190 tests in 33 suites, 0 failed (187 before, plus the 3 new tests, 5 cases) (`upnp.log`).
+- **The rest of the audit** (`audit-rest.sh`, started 14:06, `build/audit-rest-20261123-140647/`): still running at this interim commit.
+
+Not run this pass: `scripts/audit.sh`'s first step, the whole package in debug mode. Nothing here has been heard on a real Sonos.
+
 ## The eighth review's findings (2026-11-23, 12:50 onwards)
 
 An eighth review (Codex, run 8ec6f3) found two P2s in `RendererPlayback.swift`. The first is the gap the seventh pass left open (its "Not changed" note, below). Signed commits 13b4db2c (P2 1) and fd43c53f (P2 2), each with its test written first and seen failing, and two RESULT commits (8c8f6604, interim, and this one); nothing pushed.
