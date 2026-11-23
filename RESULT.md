@@ -9,6 +9,30 @@ Branch `feat/sonos-and-output-routes`, local commits only, not pushed; `git log 
 - **No silent downgrade**: every output row says what the loaded song would be played as ("Will play 24-bit / 48 kHz FLAC, stereo (source 24/96)", copper when samples change); while playing, the badge (RESAMPLED / FOLDED TO STEREO / DSD AS PCM · 24/48 SENT) and a "Player limit" line in the signal path. Same planner for DACs, HDMI, Bluetooth, AirPlay and other network players.
 - **Sonos volume** slider (room or group), the room's details (speaker setup, Music Playback Ambient/Full, read only), plain error for "couldn't fetch" (firewall), `vespertine-probe sonos`, and docs/output-routes.md.
 
+## The sixth review's findings (2026-11-23, about 10:00 to 10:45)
+
+A sixth review (Codex) found a P2 and a P3 in `RendererPlayback.swift`. Signed commits 335bba05 (P2) and d24ef998 (P3), each with its tests, and this RESULT commit; nothing pushed.
+
+**P2, a failing poll queued before a song chosen let the player go as lost.** This closes the "Not changed (unverified)" note in the pass below. When a poll failed for the last time before the player counted as lost, it cleared the songs and set `wantsPlaying` to false, whichever play it had been asked for. If that poll was queued ahead of a song chosen (`play()` had already moved the generation on), the chosen song loaded paused, and the player was reported lost even though it answered again. Now the poll notes the play of the song loaded (`currentGeneration`) before it asks for the status. It lets the player go as lost only while that is still the current play, checked under the generation lock in the same step as the clean-up (`ifStill`). The failed poll is still counted; the start that follows resets the count.
+- Test `lostPollQueuedBeforeSelection`: the test transport fails status requests (decided when each request begins) and holds one past `lostAfter` (1 s) while a song is chosen. **Red before** (4 issues: the chosen song never started, "lost" reported, `wantsPlaying` false, not playing).
+
+**P3, the start timeout's failure was reported after a Stop or Play again.** The timeout failed the old song under the lock, then waited for the player to stop before it emitted `.failed`. A Stop or Play pressed during that wait still had the old error delivered, and so did one pressed before the event's turn came on the main actor. Announcements (`trackStarted`) had the same gap. Now each event about a song carries the selection it was decided in. `State.selection` counts up at every stop and every song chosen, but not when the same song is restarted at a position (a seek in a processed stream, a change of settings), which also moves the generation on. The tag is read in the same locked step as the state change, and checked again on the main actor just before the handler runs, which is where the app gives its commands. Tagged: the start timeout's `.failed`, `trackStarted`, `deviceLost`, and `queueEnded` on both of its paths (the put-right path also waits for a Stop before it emits).
+- `timeoutFailureOvertakenDuringStop` (2 cases, Stop or Play again): the test transport holds the timeout's Stop while the command is given. **Red before, both cases** (the old failure was delivered).
+- `timeoutFailureOvertakenBeforeDelivery` (2 cases): the main actor is kept busy until the failure has been sent, then the command is given there. **Red before, both cases.**
+- `announcementOvertakenBeforeDelivery`: the same for a song's start and Stop. **Red before** (the song was announced after Stop).
+- Red runs: `build/logs/r7/red.log` (all 4 tests, 9 issues; the first version of the P3 tests waited up to 30 s on the stuck next song), and `p3-red.log` (the final P3 tests against the P2 commit: 5 issues in 5 cases). After both fixes, `NextPreparationTests`: 25 tests, all passed (`green.log`).
+
+Not changed (unverified): `fail()`, which a start uses when its song can't be prepared or loaded, still checks `overtaken()` and then marks the song failed and emits outside the generation lock, with no tag. A Stop in that narrow window could still be followed by the old error. Not tested. The seek-gave-up `.notice` isn't tagged either.
+
+### Test figures, the sixth pass
+
+Logs: `build/logs/r7/`. Other work was running on the machine (load average 115 to 130).
+
+- **UPnP and Sonos** (`swift test --filter VespertineUPnPTests`, debug): **passed**, 179 tests in 33 suites, 0 failed (175 before, plus the 4 new tests, 6 cases) (`upnp.log`).
+- **App tests** (`xcodebuild test`, Debug, macOS, as `scripts/audit.sh` runs it, `-derivedDataPath build/AuditDD`): **passed**, 284 tests in 61 suites, 0 failed (`** TEST SUCCEEDED **`; no app code changed) (`app-tests.log`).
+
+Not run this pass: the engine group, the release-mode tests and the rest of `scripts/audit.sh`.
+
 ## This pass: the rest of what a stale poll did (2026-11-23, 09:18 onwards)
 
 Closes the gap the fifth pass left open (its "Not changed" note below). Signed commit 27536cca (fix and tests) and this RESULT commit; nothing pushed.
@@ -27,7 +51,7 @@ Tests, written first, using `queuePollForTests()` and a new test-transport switc
 - `startedPollQueuedBeforeCommand` (2 cases): the first song is started at 1 s, the first poll after its load is held while the player plays. **Red before, both cases** (4 issues: the old song announced after the command, and a `Seek` sent to the player after it).
 - Red run saved: `build/logs/r6/red.log` (3 tests, 5 cases, 10 issues). After the fix: `NextPreparationTests` 21 tests, all passed (`green.log`).
 
-Not changed (unverified): a poll that fails (no answer) still counts towards the player being lost without regard to the play; lost, it clears the songs and sets `wantsPlaying` false, which could leave a song chosen just then paused. Not a song-bound action and not tested. The stale-clear retry and reconcile in a stale poll are also left as they were (the command queued behind lets go of the stale songs).
+Not changed then (closed in the sixth pass, above): a poll that fails (no answer) still counts towards the player being lost without regard to the play; lost, it clears the songs and sets `wantsPlaying` false, which could leave a song chosen just then paused. The stale-clear retry and reconcile in a stale poll are also left as they were (the command queued behind lets go of the stale songs).
 
 ### Test figures, this pass
 
