@@ -1068,6 +1068,47 @@ struct NextPreparationTests {
         #expect(!rig.events.all.contains { $0.hasPrefix("notice") }, "the refused resume of the old song was reported after the song chosen")
     }
 
+    // MARK: After the tenth review (2026-11-23): a refusal notice still on its way to the main actor when a newer command comes
+
+    @Test("A resume the player refuses twice, its notice still on its way to the main actor, then a newer command: the old refusal isn't reported",
+          arguments: ["pause", "resume", "stop", "play"])
+    func staleRefusalNoticeAfterNewerCommand(_ newer: String) async throws {
+        let ready = PlayableItem(url: try makeFLAC(from: try makeWAV(seconds: 2, seed: 7)))
+        let chosen = PlayableItem(url: try makeFLAC(from: try makeWAV(seconds: 2, seed: 9)))
+        let rig = try await Rig.make(second: ready)
+        defer { rig.close() }
+        rig.playback.play(rig.first)
+        #expect(await rig.events.wait(for: "started \(rig.first.url.lastPathComponent)"))
+        rig.playback.pause()
+        #expect(await within(2) { rig.fake.transportState == "Paused" })
+        await rig.playback.settleForTests()
+        let playback = rig.playback, transport = rig.transport
+        transport.failsPlay.withLock { $0 = true }
+        // The main actor is held from the resume until the worker has finished with it (both tries refused, the snapshot
+        // put right from the player's state, the notice queued for the main actor); the newer command is given then.
+        let settled = await MainActor.run { () -> Bool in
+            playback.resume()
+            let done = Locked(false)
+            Task.detached { await playback.settleForTests(); done.withLock { $0 = true } }
+            let deadline = Date().addingTimeInterval(10)
+            while !done.withLock({ $0 }), Date() < deadline { Thread.sleep(forTimeInterval: 0.005) }
+            transport.failsPlay.withLock { $0 = false }
+            switch newer {
+            case "pause": playback.pause()
+            case "resume": playback.resume()
+            case "stop": playback.stop()
+            default: playback.play(chosen)
+            }
+            return done.withLock { $0 }
+        }
+        #expect(settled, "the refused resume didn't finish")
+        #expect(rig.transport.playFailed.withLock { $0 } == 2)
+        await rig.playback.settleForTests()
+        try await Task.sleep(for: .milliseconds(200))
+        await MainActor.run {}
+        #expect(!rig.events.all.contains { $0.hasPrefix("notice") }, "the old refusal was reported after a newer \(newer): \(rig.events.all)")
+    }
+
     // queueSettingsForTests is in debug builds only (`swift test -c release` doesn't run this test).
     #if DEBUG
     @Test("The next song prepared with the old settings, then a change of settings queued before it is chosen: it is made again with the new settings, not played as prepared")

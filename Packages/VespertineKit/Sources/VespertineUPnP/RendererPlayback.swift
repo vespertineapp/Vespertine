@@ -488,10 +488,13 @@ public final class RendererPlayback: @unchecked Sendable {
     /// `selection`: the event is about a song of that selection (`State.selection`), and is dropped when a stop or another
     /// song has come since. Checked again on the main actor, just before the handler: the app gives its commands there, so
     /// one given while the event waited for its turn (or while the worker was still stopping the player) wins.
-    private func emit(_ event: EngineEvent, forSelection selection: Int? = nil) {
+    /// `intent`: the event is about a pause or resume that made `State.intent` that (a refusal), and is dropped when a pause,
+    /// resume, stop or song chosen has come since, checked on the main actor in the same way.
+    private func emit(_ event: EngineEvent, forSelection selection: Int? = nil, forIntent intent: Int? = nil) {
         guard let handler = eventHandler else { return }
         Task { @MainActor in
             if let selection, self.state.withLock({ $0.selection }) != selection { return }
+            if let intent, self.state.withLock({ $0.intent }) != intent { return }
             handler(event)
         }
     }
@@ -567,7 +570,9 @@ public final class RendererPlayback: @unchecked Sendable {
                 guard current else { return }
             }
             refreshActivity()
-            emit(.notice(what.message(player: renderer.name, reason: (error as? UPnPError)?.message ?? error.localizedDescription)))
+            // A newer pause, resume, stop or song chosen given before this reaches the main actor wins: the listener isn't
+            // shown the old refusal.
+            emit(.notice(what.message(player: renderer.name, reason: (error as? UPnPError)?.message ?? error.localizedDescription)), forIntent: intent)
         }
     }
 
