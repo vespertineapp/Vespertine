@@ -22,7 +22,30 @@ An independent review said not to ship yet. Each finding below was fixed with a 
 
 ## Test figures (this machine, after the last change)
 
-FIGURES_HERE
+**App tests** (`xcodebuild test`, Debug, macOS): **passed**, 283 tests in 60 suites, 0 failed (`** TEST SUCCEEDED **`; 276 in 59 before this pass). Log: build/logs/app-tests-1123-final.log.
+
+**Engine package tests** (`swift test` in `Packages/VespertineKit`, the whole package, run once each, nothing else of mine running alongside the branch run; the machine had other load, averages 4 to 15):
+
+| Test group | Clean `origin/main` (f39e3116, 1.2.3) | This branch |
+|---|---|---|
+| Engine (`VespertineAudioTests`) | 1483 tests in 234 suites, **5 failed** (6 issues) | 1483 tests in 234 suites, **4 failed** (4 issues) |
+| UPnP and Sonos (`VespertineUPnPTests`) | 107 passed | 154 passed |
+| The six other groups (AirPlay 2 211, 273, 151, 73, 37, 31) | all passed | all passed |
+| Time | 15 min 14 s | 12 min 48 s |
+
+**The timing failures were there before.** Clean `main` fails the same kind of tests in a whole run, so they don't come from this branch. Every failure on either side waited 360 to 420 s, or failed while a share was being slow:
+
+- Failed on both: "Stop while the next song at another rate waits on its share" (`RateJoinStopTests`), "A flush notice from another renderer is not this session's business" (`AtmosRouteChangeTests`), "With a scan in flight, the song's copy goes over the link…" (`NetworkPriorityTests`).
+- Only on `main`: "Play pressed twice while the share is quiet…" and "A song skipped to while the share is quiet plays…".
+- Only on the branch: "Play and pause pressed while the song is still opening on a slow share…" (`PlayPauseStateTests`).
+
+Run alone on the branch right after, the four suites the branch failed in (18 tests) **passed**. Which tests fail changes from run to run (the earlier pass's two runs also failed a different five), and none of these tests or the engine code they exercise was changed by this branch. One caveat: during the `main` run my own test builds for this pass were running at the same time.
+
+Also run: `scripts/check-localizations.py` (complete, 44 languages), and the UPnP group alone four more times after the last renderer change (all passed). The new queue-edit race (below) was run 16 times on its own: 0 failures, against 12 of 25 before its fix.
+
+Not run this pass: the release-mode engine tests, the analysis package tests, the sanitizer checks and the Release build (`scripts/audit.sh` does these).
+
+**A race found and fixed along the way:** the first version of the P1 fix let `settleForTests` return while the next song was still being handed to the player. The OpenHome queue-edit test then failed about half the time (12 of 25 runs on its own). The "being prepared" marker now stays until the hand-over is done. Only the test helper ever read it early; playback itself was not affected.
 
 ## Not verified: needs a real Sonos
 
