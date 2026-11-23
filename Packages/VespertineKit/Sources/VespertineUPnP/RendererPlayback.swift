@@ -499,12 +499,28 @@ public final class RendererPlayback: @unchecked Sendable {
     }
 
     private func fail(_ item: PlayableItem?, _ error: Error) {
-        var reason = (error as? UPnPError)?.message ?? (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
-        if let hint = Self.sonosHint(error, isSonos: renderer.isSonos) { reason += ". " + hint }
-        let message = String(localized: "\(renderer.name) couldn't play the song (\(reason)).", comment: "%1$@ is a network player's name, %2$@ the reason.")
-        state.withLock { $0.snapshot.state = .stopped; $0.snapshot.lastError = message; $0.wantsPlaying = false; $0.awaitingStartSince = nil }
+        let message = failureMessage(error)
+        state.withLock { Self.markFailed(&$0, message) }
         refreshActivity()
         emit(.failed(item, message))
+    }
+
+    /// What the listener is told when the renderer couldn't play a song.
+    private func failureMessage(_ error: Error) -> String {
+        var reason = (error as? UPnPError)?.message ?? (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+        if let hint = Self.sonosHint(error, isSonos: renderer.isSonos) { reason += ". " + hint }
+        return String(localized: "\(renderer.name) couldn't play the song (\(reason)).", comment: "%1$@ is a network player's name, %2$@ the reason.")
+    }
+
+    private static func markFailed(_ s: inout State, _ message: String) {
+        s.snapshot.state = .stopped; s.snapshot.lastError = message; s.wantsPlaying = false; s.awaitingStartSince = nil
+    }
+
+    /// Changes the state only while `polled` (the play a poll inspects) is still the current play, checked under the
+    /// generation lock as `play` and `stop()` change it: a poll queued before a stop or a song chosen does nothing to the
+    /// song that replaces its own. Returns what `body` did, or nil for a play no longer current.
+    private func ifStill<T>(_ polled: Int, _ body: (inout State) -> T) -> T? {
+        generation.withLock { g in g == polled ? state.withLock(body) : nil }
     }
 
     /// What to check when a Sonos refuses a song with one of its two usual codes: 714 (it fetched something it can't play)
@@ -1015,7 +1031,8 @@ public final class RendererPlayback: @unchecked Sendable {
         // The renderer moved on to the next song by itself.
         if let uri = status.currentURI, let next = state.withLock({ $0.next }), uri == next.mediaURL {
             // The song now playing first; the one after it is prepared and sent by the queue's own step.
-            let old = state.withLock { s -> Entry? in
+            // Only for the play it is part of: a stop or a song chosen queued behind this poll replaces both songs.
+            guard let old = ifStill(polled, { s -> Entry? in
                 defer {
                     s.current = next; s.next = nil; s.snapshot.item = next.item; s.snapshot.signalPath = next.path
                     s.snapshot.duration = next.duration ?? 0; s.snapshot.position = 0; s.stoppedPolls = 0
@@ -1023,26 +1040,27 @@ public final class RendererPlayback: @unchecked Sendable {
                     s.awaitingStartSince = s.wantsPlaying ? now() : nil
                 }
                 return s.current
-            }
+            }) else { return }
             old.map(release)
             current = next
             advanced = true
         }
         if status.currentURI == current.mediaURL, !current.announced, status.state == .playing || status.state == .transitioning {
+            // A song the listener has moved on from isn't announced as started.
+            guard ifStill(polled, { s -> Void in s.current?.announced = true; s.awaitingStartSince = nil }) != nil else { return }
             current.announced = true
-            let item = current.item
-            state.withLock { $0.current?.announced = true; $0.awaitingStartSince = nil }
-            if current.announces { emit(.trackStarted(item)) }
+            if current.announces { emit(.trackStarted(current.item)) }
         }
         // The song after the one it moved on to is prepared and sent now, while this one plays.
         if advanced { await planNextQuietly() }
-        if let seek = state.withLock({ $0.pendingSeek }), status.state == .playing, status.currentURI == current.mediaURL {
+        // A seek pending for a play no longer current isn't sent (the command queued behind this poll replaces the song).
+        if status.state == .playing, status.currentURI == current.mediaURL, let seek = ifStill(polled, { $0.pendingSeek }) ?? nil {
             do {
                 try await transport.seek(to: seek)
-                state.withLock { $0.pendingSeek = nil; $0.heard = seek }
+                _ = ifStill(polled) { s -> Void in s.pendingSeek = nil; s.heard = seek }
             } catch {
                 // Still settling: tried again at the next polls, then given up on (the song plays from where it is).
-                let giveUp = state.withLock { s -> Bool in s.pendingSeekTries += 1; if s.pendingSeekTries >= 5 { s.pendingSeek = nil; return true }; return false }
+                let giveUp = ifStill(polled) { s -> Bool in s.pendingSeekTries += 1; if s.pendingSeekTries >= 5 { s.pendingSeek = nil; return true }; return false } ?? false
                 if giveUp { emit(.notice(String(localized: "\(renderer.name) didn't seek (\((error as? UPnPError)?.message ?? error.localizedDescription)).", comment: "%1$@ is a network player's name, %2$@ the reason."))) }
             }
             return
@@ -1050,13 +1068,17 @@ public final class RendererPlayback: @unchecked Sendable {
         // Told to play and still not playing: the renderer couldn't fetch or decode the song, and says nothing about it.
         if !current.announced, let since = state.withLock({ $0.wantsPlaying ? $0.awaitingStartSince : nil }),
            now().timeIntervalSince(since) >= startTimeout {
-            let old = state.withLock { s -> [Entry] in
-                defer { s.current = nil; s.next = nil; s.staleNexts = []; s.anchor = nil; s.awaitingStartSince = nil }
+            let message = failureMessage(RendererPlaybackError.unplayable(String(localized: "it didn't start playing", comment: "The reason a network player couldn't play a song, inside “%1$@ couldn't play the song (%2$@).”: told to play, it never started. Lowercase, no full stop.")))
+            // Failed only while its play is the current one, and in the same step: a song chosen meanwhile (queued behind
+            // this poll) isn't left paused by the old song's failure, and the old song isn't reported as failed.
+            guard let old = ifStill(polled, { s -> [Entry] in
+                defer { s.current = nil; s.next = nil; s.staleNexts = []; s.anchor = nil; Self.markFailed(&s, message) }
                 return [s.current, s.next].compactMap { $0 } + s.staleNexts
-            }
+            }) else { return }
             old.forEach(release)
             try? await transport.stop()
-            fail(current.item, RendererPlaybackError.unplayable(String(localized: "it didn't start playing", comment: "The reason a network player couldn't play a song, inside “%1$@ couldn't play the song (%2$@).”: told to play, it never started. Lowercase, no full stop.")))
+            refreshActivity()
+            emit(.failed(current.item, message))
             return
         }
         enum Outcome { case nothing, ended, stoppedThere }

@@ -47,7 +47,11 @@ private final class GatedTransport: RendererTransport, @unchecked Sendable {
         loadsAsked.withLock { $0 += 1 }
         while held.withLock({ $0 }) { try? await Task.sleep(for: .milliseconds(10)) }
         try await inner.load(current: current, next: next)
+        // The next status request (the first poll of the song just loaded) waits, once set.
+        if holdsStatusAfterLoad.withLock({ s in defer { s = false }; return s }) { statusHeld.withLock { $0 = true } }
     }
+    /// Set: once the next song is loaded, `statusHeld` is set (then this is cleared).
+    let holdsStatusAfterLoad = Locked(false)
     func replaceNext(_ next: RendererTrack?) async throws {
         beforeReplaceNext.withLock { hook -> (@Sendable () -> Void)? in defer { hook = nil }; return hook }?()
         if refusesNext.withLock({ $0 }) {
@@ -108,7 +112,7 @@ private struct Rig {
     let queue: Locked<[PlayableItem]>
 
     /// `second`: the song after the first one, in place of the one converted for Sonos.
-    static func make(second: PlayableItem? = nil) async throws -> Rig {
+    static func make(second: PlayableItem? = nil, startTimeout: TimeInterval = 15) async throws -> Rig {
         let fake = try await FakeRenderer(kind: .av(setNext: true), udn: "uuid:RINCON_BAR01400_MR")
         fake.sonosRoom = "Living Room"
         fake.sink = "http-get:*:audio/flac:*,http-get:*:audio/mp4:*,http-get:*:audio/wav:*,http-get:*:audio/mpeg:*"
@@ -117,7 +121,8 @@ private struct Rig {
         let device = try await RendererDevice.load(location: fake.location)
         let maker = StuckStreamMaker()
         let transport = GatedTransport(try device.makeTransport())
-        let playback = RendererPlayback(renderer: device, transport: transport, media: media, processed: maker, pollInterval: 0.05)
+        let playback = RendererPlayback(renderer: device, transport: transport, media: media, processed: maker, pollInterval: 0.05,
+                                        startTimeout: startTimeout)
         // Long enough that a worker held by it would fail every check below; short enough not to hold the run up for long.
         playback.wholeFileWait = 30
         let first = PlayableItem(url: try makeFLAC(from: try makeWAV(seconds: 2, seed: 3)))
@@ -507,6 +512,98 @@ struct NextPreparationTests {
             #expect(!rig.playback.wantsPlaying)
             #expect(rig.playback.snapshot.state == .stopped)
         }
+    }
+
+    // MARK: After the fifth review (2026-11-23): the rest of what a poll queued before a command does to the old song
+
+    @Test("A poll queued before a song is chosen finds the old song never started, past the start timeout: the old song isn't failed, the chosen one plays (not paused)")
+    func timedOutPollQueuedBeforeSelection() async throws {
+        let ready = PlayableItem(url: try makeFLAC(from: try makeWAV(seconds: 2, seed: 7)))
+        let chosen = PlayableItem(url: try makeFLAC(from: try makeWAV(seconds: 2, seed: 9)))
+        let rig = try await Rig.make(second: ready, startTimeout: 0.5)
+        defer { rig.close() }
+        // The player takes the first song and never starts it; the first poll after the load is held on its way.
+        rig.fake.ignoresPlay = true
+        rig.transport.holdsStatusAfterLoad.withLock { $0 = true }
+        rig.playback.play(rig.first)
+        #expect(await within(3) { rig.transport.statusWaiting.withLock { $0 } > 0 })
+        // Past the start timeout while it waits; another poll is queued behind it, then a song is chosen.
+        try await Task.sleep(for: .milliseconds(700))
+        rig.playback.queuePollForTests()
+        rig.playback.play(chosen)
+        rig.fake.ignoresPlay = false
+        rig.transport.statusHeld.withLock { $0 = false }
+        #expect(await rig.events.wait(for: "started \(chosen.url.lastPathComponent)", timeout: 5), "the song chosen didn't play")
+        await rig.playback.settleForTests()
+        #expect(!rig.events.all.contains { $0.hasPrefix("failed") }, "the queued poll failed the old song after the selection")
+        #expect(rig.playback.wantsPlaying)
+        #expect(rig.playback.snapshot.item?.id == chosen.id)
+        #expect(rig.playback.snapshot.state == .playing)
+    }
+
+    @Test("A poll queued before a stop, or a song chosen, finds the player gone on to the next song by itself: it isn't followed or announced",
+          arguments: [false, true])
+    func followPollQueuedBeforeCommand(select: Bool) async throws {
+        let ready = PlayableItem(url: try makeFLAC(from: try makeWAV(seconds: 2, seed: 7)))
+        let chosen = PlayableItem(url: try makeFLAC(from: try makeWAV(seconds: 2, seed: 9)))
+        let rig = try await Rig.make(second: ready)
+        defer { rig.close() }
+        rig.playback.play(rig.first)
+        #expect(await rig.events.wait(for: "started \(rig.first.url.lastPathComponent)"))
+        #expect(await within(5) { rig.fake.nextURI != nil })
+        await rig.playback.settleForTests()
+        // The worker is held in a poll; the player goes on to the next song meanwhile.
+        rig.transport.statusHeld.withLock { $0 = true }
+        #expect(await within(2) { rig.transport.statusWaiting.withLock { $0 } > 0 })
+        rig.fake.advance()
+        rig.playback.queuePollForTests()
+        if select { rig.playback.play(chosen) } else { rig.playback.stop() }
+        rig.transport.statusHeld.withLock { $0 = false }
+        if select {
+            #expect(await rig.events.wait(for: "started \(chosen.url.lastPathComponent)", timeout: 5), "the song chosen didn't play")
+        } else {
+            #expect(await within(3) { rig.fake.transportState == "Stopped" })
+        }
+        try await Task.sleep(for: .milliseconds(1000))
+        await rig.playback.settleForTests()
+        #expect(!rig.events.all.contains("started \(ready.url.lastPathComponent)"), "the queued poll announced the old next song after the command")
+        if select {
+            #expect(rig.playback.snapshot.item?.id == chosen.id)
+            #expect(rig.playback.wantsPlaying)
+        } else {
+            #expect(!rig.playback.wantsPlaying)
+            #expect(rig.playback.snapshot.state == .stopped)
+            #expect(rig.playback.snapshot.item == nil)
+        }
+    }
+
+    @Test("A poll queued before a stop, or a song chosen, finds the old song just started, with a seek pending: it isn't announced and the seek isn't sent",
+          arguments: [false, true])
+    func startedPollQueuedBeforeCommand(select: Bool) async throws {
+        let ready = PlayableItem(url: try makeFLAC(from: try makeWAV(seconds: 2, seed: 7)))
+        let chosen = PlayableItem(url: try makeFLAC(from: try makeWAV(seconds: 2, seed: 9)))
+        let rig = try await Rig.make(second: ready)
+        defer { rig.close() }
+        // The first song is started at 1 s (an output change carrying it over): the seek waits until it plays. The first
+        // poll after the load is held on its way; the player plays meanwhile.
+        rig.transport.holdsStatusAfterLoad.withLock { $0 = true }
+        rig.playback.play(rig.first, at: 1)
+        #expect(await within(3) { rig.transport.statusWaiting.withLock { $0 } > 0 })
+        #expect(await within(2) { rig.fake.transportState == "Playing" })
+        rig.playback.queuePollForTests()
+        let before = rig.fake.actions.count
+        if select { rig.playback.play(chosen) } else { rig.playback.stop() }
+        rig.transport.statusHeld.withLock { $0 = false }
+        if select {
+            #expect(await rig.events.wait(for: "started \(chosen.url.lastPathComponent)", timeout: 5), "the song chosen didn't play")
+        } else {
+            #expect(await within(3) { rig.fake.transportState == "Stopped" })
+        }
+        try await Task.sleep(for: .milliseconds(500))
+        await rig.playback.settleForTests()
+        #expect(!rig.events.all.contains("started \(rig.first.url.lastPathComponent)"), "the queued poll announced the old song after the command")
+        #expect(!rig.fake.actions.dropFirst(before).contains("Seek"), "the queued poll sent the old song's seek after the command")
+        if select { #expect(rig.playback.snapshot.item?.id == chosen.id) } else { #expect(!rig.playback.wantsPlaying) }
     }
 
     @Test("The player goes on to the old next song between a poll's answer and the clear's success: it is still recognised and put right")
