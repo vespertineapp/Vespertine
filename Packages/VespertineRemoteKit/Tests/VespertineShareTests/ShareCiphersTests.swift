@@ -1,5 +1,5 @@
 //
-// Vespertine: the two ciphers SMB 3 encrypts with, against the vectors their own standards publish.
+// Vespertine: the ciphers SMB 3 encrypts with (AES-GCM and AES-CCM, 128- and 256-bit keys), against the vectors their own standards publish.
 // SPDX-License-Identifier: GPL-3.0-or-later WITH LicenseRef-Vespertine-App-Store-Exception
 //
 
@@ -55,6 +55,41 @@ import Testing
         #expect(opened.ciphertext == [UInt8](0x20..<0x30) && opened.tag == two.tag)
     }
 
+    @Test func aes256MatchesFIPS197() {
+        // FIPS 197, appendix C.3: the 256-bit example.
+        let key = ShareDigests.AESKey([UInt8](0..<32))
+        #expect(hex(ShareDigests.aesEncrypt(block: unhex("00112233445566778899aabbccddeeff"), key: key)) == "8ea2b7ca516745bfeafc49904b496089")
+    }
+
+    @Test(arguments: [false, true]) func gcm256MatchesItsSpecification(plain: Bool) {
+        // The GCM specification's test cases 13 to 16: the same messages as 1 to 4, with 256-bit keys.
+        let zeros = [UInt8](repeating: 0, count: 32), zeroNonce = [UInt8](repeating: 0, count: 12)
+        let thirteen = ShareCiphers.seal(.gcm256, key: zeros, nonce: zeroNonce, [], aad: [], plain: plain)
+        #expect(thirteen.ciphertext.isEmpty && hex(thirteen.tag) == "530f8afbc74536b9a963b4f1c4cb738b")
+        let fourteen = ShareCiphers.seal(.gcm256, key: zeros, nonce: zeroNonce, Array(zeros.prefix(16)), aad: [], plain: plain)
+        #expect(hex(fourteen.ciphertext) == "cea7403d4d606b6e074ec5d3baf39d18" && hex(fourteen.tag) == "d0d1c8a799996bf0265b98b5d48ab919")
+
+        let key = unhex(Self.gcmKey + Self.gcmKey), nonce = unhex(Self.gcmNonce), message = unhex(Self.gcmMessage)
+        let encrypted = "522dc1f099567d07f47f37a32a84427d643a8cdcbfe5c0c97598a2bd2555d1aa8cb08e48590dbb3da7b08b1056828838c5f61e6393ba7a0abcc9f662898015ad"
+        let fifteen = ShareCiphers.seal(.gcm256, key: key, nonce: nonce, message, aad: [], plain: plain)
+        #expect(hex(fifteen.ciphertext) == encrypted && hex(fifteen.tag) == "b094dac5d93471bdec1a502270e3cc6c")
+        let aad = unhex("feedfacedeadbeeffeedfacedeadbeefabaddad2")
+        let sixteen = ShareCiphers.seal(.gcm256, key: key, nonce: nonce, Array(message.prefix(60)), aad: aad, plain: plain)
+        #expect(hex(sixteen.ciphertext) == String(encrypted.prefix(120)) && hex(sixteen.tag) == "76fc6ece0f4e1768cddf8853bb2d551b")
+        #expect(ShareCiphers.open(.gcm256, key: key, nonce: nonce, sixteen, aad: aad, plain: plain) == Array(message.prefix(60)))
+        var changed = sixteen
+        changed.ciphertext[0] ^= 1
+        #expect(ShareCiphers.open(.gcm256, key: key, nonce: nonce, changed, aad: aad, plain: plain) == nil)
+    }
+
+    @Test func theCiphersSayTheirSizes() {
+        #expect(ShareCiphers.Kind.gcm.keyLength == 16 && ShareCiphers.Kind.ccm.keyLength == 16)
+        #expect(ShareCiphers.Kind.gcm256.keyLength == 32 && ShareCiphers.Kind.ccm256.keyLength == 32)
+        #expect(ShareCiphers.Kind.gcm256.nonceLength == 12 && ShareCiphers.Kind.ccm256.nonceLength == 11)
+        // MS-SMB2 2.2.3.1.2's numbers.
+        #expect(ShareCiphers.Kind.ccm256.rawValue == 3 && ShareCiphers.Kind.gcm256.rawValue == 4)
+    }
+
     @Test func theSystemsCiphersAndTheOnesWrittenHereAgree() {
         // On Apple's systems encryption uses the system's AES; elsewhere both sides of this are the same code.
         var seed: UInt64 = 7
@@ -65,8 +100,8 @@ import Testing
             }
         }
         for length in [0, 1, 15, 16, 17, 31, 32, 33, 64, 113, 1000, 65536 + 5] {
-            for kind in [ShareCiphers.Kind.gcm, .ccm] {
-                let key = bytes(16), nonce = bytes(kind.nonceLength), message = bytes(length), aad = bytes(32)
+            for kind in [ShareCiphers.Kind.gcm, .ccm, .gcm256, .ccm256] {
+                let key = bytes(kind.keyLength), nonce = bytes(kind.nonceLength), message = bytes(length), aad = bytes(32)
                 let sealed = ShareCiphers.seal(kind, key: key, nonce: nonce, message, aad: aad)
                 #expect(sealed == ShareCiphers.seal(kind, key: key, nonce: nonce, message, aad: aad, plain: true))
                 #expect(ShareCiphers.open(kind, key: key, nonce: nonce, sealed, aad: aad) == message)

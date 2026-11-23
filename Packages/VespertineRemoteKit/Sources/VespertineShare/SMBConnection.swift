@@ -308,19 +308,20 @@ public final class SMBConnection: @unchecked Sendable {
         }
     }
 
-    /// SMB 3's key derivation (SP 800-108, counter mode, HMAC-SHA-256), for a 16-byte key. `context` is followed by a
+    /// SMB 3's key derivation (SP 800-108, counter mode, HMAC-SHA-256). `context` is followed by a
     /// zero byte when it is text (SMB 3.0), and goes in as it is when it is SMB 3.1.1's digest.
     static func derive(_ key: [UInt8], label: String, context: String) -> [UInt8] {
         derive(key, label: label, context: Array(context.utf8) + [0])
     }
 
-    static func derive(_ key: [UInt8], label: String, context: [UInt8]) -> [UInt8] {
+    /// `bits`: how long a key to make, 128 or (for the AES-256 ciphers' keys) 256.
+    static func derive(_ key: [UInt8], label: String, context: [UInt8], bits: Int = 128) -> [UInt8] {
         var input: [UInt8] = [0, 0, 0, 1]
         input += Array(label.utf8) + [0]
         input.append(0)
         input += context
-        input += [0, 0, 0, 128]
-        return Array(ShareDigests.hmacSHA256(key: key, input).prefix(16))
+        input += [0, 0, UInt8(bits >> 8), UInt8(bits & 0xff)]
+        return Array(ShareDigests.hmacSHA256(key: key, input).prefix(bits / 8))
     }
 
     private func treeConnect(server: String, share: String) throws {
