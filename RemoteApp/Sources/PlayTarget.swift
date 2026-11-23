@@ -10,6 +10,7 @@ import UIKit
 import VespertinePhonePlayer
 import VespertineRemoteClient
 import VespertineRemoteProtocol
+import VespertineShare
 
 /// Who can play the music when a Mac is part of the library: the Mac, this device, or both.
 nonisolated enum PlaySides: String, Sendable, CaseIterable {
@@ -159,6 +160,11 @@ final class PlayTarget {
         playback.holdReason = { [weak self] in self?.holdReason }
         let keeper = KeptShelf.shared.keeper(for: session)
         playback.kept = { [weak keeper] song in keeper?.store.kept(song).map { ($0.file, $0.descriptor) } }
+        // A DSD song kept as its own file is made into DoP or PCM for the output each time it plays.
+        playback.keptRendering = { file, _, maxSampleRate, dop in
+            guard let kept = try? KeptDSD.open(file, maxSampleRate: maxSampleRate, dop: dop) else { return nil }
+            return (kept.descriptor, KeptDSDSource(kept))
+        }
         // A kept song's ReplayGain values are kept beside it, so it is levelled the same with the Mac off.
         playback.keptGain = { [weak keeper] song in keeper?.store.kept(song)?.replayGain }
         playback.onGainValues = { [weak keeper] song, values in keeper?.store.noteReplayGain(values, of: song) }

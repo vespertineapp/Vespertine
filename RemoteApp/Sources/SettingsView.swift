@@ -74,6 +74,7 @@ struct SettingsView: View {
                     } else {
                     Text("Albums and playlists you keep are fetched whole from your Mac and play without it. With smaller copies, lossless songs above 48 kHz are converted on the Mac to 44.1 or 48 kHz before they’re kept; everything else is kept as it is. This applies to what you keep from now on.")
                     }
+                    Text("Fetching goes on for a while after you leave Vespertine on iOS 26 and later, and overnight while this device is charging and online. A song that was cut off carries on from where it stopped.", comment: "Shown on the iPhone or iPad in Settings, under the section about music kept on the device for listening offline. Says when kept music is fetched while the app is not open: iOS 26 lets it continue for a while after leaving the app; any version may fetch overnight while charging with a network connection.")
                 }
                 Section {
                     // Where Macs, shares and folders are added, and where what the library is made of is chosen.

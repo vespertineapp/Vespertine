@@ -15,8 +15,10 @@ struct VespertineRemoteApp: App {
     init() {
         let model = RemoteAppModel()
         _model = State(initialValue: model)
-        // Before launch ends, as iOS asks: a share's scan can then carry on in time iOS gives the app later.
+        // Before launch ends, as iOS asks: a share's scan can then carry on in time iOS gives the app later, and the
+        // overnight task can keep music with the app closed.
         ShareBackgroundScan.shared.register(model)
+        KeepInBackground.shared.registerAtLaunch()
     }
 
     var body: some Scene {

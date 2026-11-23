@@ -97,6 +97,17 @@ final class RemoteAppModel {
         folders = folderShelf.load()
         ownFolderInUse = OpenedFiles.holdsAnything(SavedFolder.ownURL)
         discovery.onChange = { [weak self] macs in self?.discovered(macs) }
+        // A background task keeping music: what it needs is connected while it runs, and let go of after (unless music plays).
+        KeepInBackground.shared.wake = { [weak self] in
+            self?.session?.connect()
+            self?.macSession?.connect()
+        }
+        KeepInBackground.shared.ended = { [weak self] in
+            guard let self, !PlayTarget.shared.isBusy else { return }
+            macSession?.suspend()
+            // A share still being scanned keeps its libraries; the scan lets them go when it is done.
+            if !sharesScanning { session?.suspend() }
+        }
         // On a first run the search for Macs waits for the setup step that needs it (see `lookForMacs`).
         discoveryHeld = SetupAssistant.shared.launched(pairings: pairings.count, shares: shares.count, folders: shownFolders.count)
         if !discoveryHeld { discovery.start() }
@@ -861,7 +872,8 @@ final class RemoteAppModel {
     /// The app is away and nothing needs the libraries: they are let go, as when it leaves the screen (a scan under way
     /// keeps what it has read). Not while music plays on this device.
     func letLibrariesRest() {
-        guard !isInFront, !PlayTarget.shared.isBusy else { return }
+        // A background task keeping music still needs them; it lets go itself when it ends.
+        guard !isInFront, !PlayTarget.shared.isBusy, !KeepInBackground.shared.running else { return }
         session?.suspend()
     }
 
@@ -883,12 +895,15 @@ final class RemoteAppModel {
         case .background:
             // iOS may end the app from here without telling it: the queue and the place in the song are written now.
             PlayTarget.shared.saveQueue()
-            // Music playing on this device needs its songs from the Mac: the connection stays while it plays. A share
-            // being scanned keeps its libraries open while iOS lets the app run (and asks for time later to go on).
+            // Music playing on this device needs its songs from the Mac: the connection stays while it plays, and while
+            // a background task keeps music (KeepInBackground). A share being scanned keeps its libraries open while iOS
+            // lets the app run (and asks for time later to go on).
+            KeepInBackground.shared.scheduleOvernight()
             if !PlayTarget.shared.isBusy {
-                macSession?.suspend()
+                let keeping = KeepInBackground.shared.running
+                if !keeping { macSession?.suspend() }
                 let scanning = ShareBackgroundScan.shared.appLeft { [weak self] in self?.letLibrariesRest() }
-                if !scanning { session?.suspend() }
+                if !scanning, !keeping { session?.suspend() }
             }
             discovery.stop()
             searchChanged()
