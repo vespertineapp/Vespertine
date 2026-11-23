@@ -2,7 +2,8 @@
 // Vespertine: an SMB client that only reads: signs in to a server, connects to a share, lists folders and reads files
 // (SMB 2.0.2 to 3.1.1, MS-SMB2). It never creates, writes, renames or deletes: there is no code here that could.
 // With SMB 3.1.1 the messages that open the connection are bound into the session's keys, so nothing can have been
-// changed in them on the way; with SMB 3 a server or share that asks for encryption gets it (AES-128-GCM or CCM).
+// changed in them on the way; with SMB 3 a server or share that asks for encryption gets it (AES-128-GCM or CCM, and on
+// SMB 3.1.1 AES-256-GCM or CCM too).
 // One request at a time, each waited for; `SMBShare` puts reconnecting and paths on top.
 // SPDX-License-Identifier: GPL-3.0-or-later WITH LicenseRef-Vespertine-App-Store-Exception
 //
@@ -115,7 +116,7 @@ public final class SMBConnection: @unchecked Sendable {
     /// The server signed this connection in as a guest (or as nobody): there are no keys, so nothing is signed.
     public private(set) var guest = false
     /// The cipher the server agreed to, when it agreed to one.
-    private var cipher: ShareCiphers.Kind?
+    private(set) var cipher: ShareCiphers.Kind?
     /// The keys messages are encrypted and decrypted with, and what this session's nonces start with.
     private var sealing: (seal: [UInt8], open: [UInt8], noncePrefix: [UInt8])?
     private var nonceCount: UInt64 = 0
@@ -165,9 +166,12 @@ public final class SMBConnection: @unchecked Sendable {
         w.u16(1); w.u16(UInt16(salt.count)); w.u16(1)
         w.raw(salt)
         w.zeros(2)
-        // The ciphers, the preferred one first.
-        w.u16(2); w.u16(6); w.u32(0)
-        w.u16(2); w.u16(ShareCiphers.Kind.gcm.rawValue); w.u16(ShareCiphers.Kind.ccm.rawValue)
+        // The ciphers, the preferred one first: AES-128 before AES-256 (Windows' own order), so a server that takes either
+        // keeps the faster one, and one that takes only AES-256 gets it.
+        let ciphers: [ShareCiphers.Kind] = [.gcm, .ccm, .gcm256, .ccm256]
+        w.u16(2); w.u16(UInt16(2 + 2 * ciphers.count)); w.u32(0)
+        w.u16(UInt16(ciphers.count))
+        for cipher in ciphers { w.u16(cipher.rawValue) }
         let reply = try exchange(.negotiate, w.bytes)
         guard reply.status == Self.statusOK else { throw SMBError.unsupported }
         let r = ByteReader(reply.body)
@@ -272,7 +276,7 @@ public final class SMBConnection: @unchecked Sendable {
                                                negotiate: first, challenge: challenge, clientChallenge: options.random(8), time: options.now(),
                                                newKey: options.random(16))
             done = try setup(SPNEGO.response(answer.message, mechListMIC: answer.carriesDigest ? answer.listSignature(SPNEGO.mechanismList) : nil))
-            sessionKey = Array(answer.sessionKey.prefix(16))
+            sessionKey = answer.sessionKey
         }
         guard done.status == Self.statusOK else {
             sessionID = 0
@@ -281,15 +285,19 @@ public final class SMBConnection: @unchecked Sendable {
         let flags = try ByteReader(done.body).u16(2)
         // A guest or anonymous session has no key: nothing is signed or encrypted, as the protocol has it.
         guest = flags & 0x3 != 0 || sessionKey == nil
-        if !guest, let key = sessionKey {
+        if !guest, let full = sessionKey {
+            // The first 16 bytes of the session's key sign; the AES-256 ciphers' keys are made from all of it (MS-SMB2 3.2.5.3.1).
+            let key = Array(full.prefix(16))
             if dialect == 0x0311, let bound {
                 signingKey = Self.derive(key, label: "SMBSigningKey", context: bound)
                 // The server signs its last sign-in answer with a key made from the digest of everything said so far.
                 // If any of it was changed on the way (a version or a cipher struck out), the two keys differ and this fails.
                 guard done.flags & Self.flagSigned != 0, signatureFits(done.raw) else { throw SMBError.badSignature }
-                if cipher != nil {
-                    sealing = (Self.derive(key, label: "SMBC2SCipherKey", context: bound), Self.derive(key, label: "SMBS2CCipherKey", context: bound),
-                               options.random((cipher?.nonceLength ?? 12) - 8))
+                if let cipher {
+                    let source = cipher.keyLength == 32 ? full : key, bits = cipher.keyLength * 8
+                    sealing = (Self.derive(source, label: "SMBC2SCipherKey", context: bound, bits: bits),
+                               Self.derive(source, label: "SMBS2CCipherKey", context: bound, bits: bits),
+                               options.random(cipher.nonceLength - 8))
                 }
             } else if dialect >= 0x0300 {
                 signingKey = Self.derive(key, label: "SMB2AESCMAC", context: "SmbSign")
