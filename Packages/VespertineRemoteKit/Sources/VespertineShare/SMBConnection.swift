@@ -1,6 +1,8 @@
 //
 // Vespertine: an SMB client that only reads: signs in to a server, connects to a share, lists folders and reads files
-// (SMB 2.0.2 to 3.1.1, MS-SMB2). It never creates, writes, renames or deletes: there is no code here that could.
+// (SMB 2.0.2 to 3.1.1, MS-SMB2). It never creates, writes, renames or deletes a file: there is no code here that could.
+// The one thing it sends that isn't a read is a question to the server's share service on IPC$ ("which shares are
+// there?"), which is a request and an answer on a pipe, not a file.
 // With SMB 3.1.1 the messages that open the connection are bound into the session's keys, so nothing can have been
 // changed in them on the way; with SMB 3 a server or share that asks for encryption gets it (AES-128-GCM or CCM, and on
 // SMB 3.1.1 AES-256-GCM or CCM too).
@@ -79,7 +81,8 @@ public struct SMBOptions: Sendable {
 public final class SMBConnection: @unchecked Sendable {
     // Commands (MS-SMB2 2.2.1).
     private enum Command: UInt16 {
-        case negotiate = 0, sessionSetup = 1, logoff = 2, treeConnect = 3, treeDisconnect = 4, create = 5, close = 6, read = 8, queryDirectory = 14
+        case negotiate = 0, sessionSetup = 1, logoff = 2, treeConnect = 3, treeDisconnect = 4, create = 5, close = 6, read = 8, ioctl = 11,
+             queryDirectory = 14
     }
 
     private static let statusOK: UInt32 = 0
@@ -87,6 +90,8 @@ public final class SMBConnection: @unchecked Sendable {
     private static let statusMoreProcessing: UInt32 = 0xC000_0016
     private static let statusNoMoreFiles: UInt32 = 0x8000_0006
     private static let statusEndOfFile: UInt32 = 0xC000_0011
+    /// A pipe's answer is longer than was asked for: the rest is read after it.
+    static let statusBufferOverflow: UInt32 = 0x8000_0005
 
     private static let flagAsync: UInt32 = 0x2
     private static let flagSigned: UInt32 = 0x8
@@ -358,7 +363,8 @@ public final class SMBConnection: @unchecked Sendable {
         let reply = try exchange(.treeConnect, w.bytes)
         guard reply.status == Self.statusOK else { throw Self.error(for: reply.status, connecting: true) }
         let r = ByteReader(reply.body)
-        guard try r.u8(2) == 1 else { throw SMBError.noSuchShare }      // a disk share, not a printer or a pipe
+        // A disk share, not a printer or a pipe; or, asked for by name, the server's IPC$, where its share service is.
+        guard try r.u8(2) == (share.uppercased() == "IPC$" ? 2 : 1) else { throw SMBError.noSuchShare }
         treeID = reply.treeID
         if try r.u32(4) & 0x8000 != 0 {
             // The share wants everything encrypted from here on.
@@ -614,6 +620,78 @@ public final class SMBConnection: @unchecked Sendable {
     private func abandon(_ list: [Asked]) {
         for asked in list where early.removeValue(forKey: asked.request.id) == nil {
             abandoned.insert(asked.request.id)
+        }
+    }
+
+    // MARK: The server's share service
+
+    /// Opens one of the server's own services on IPC$ (`srvsvc`, which lists its shares). Only there: on a disk share
+    /// nothing is ever opened for anything but reading.
+    func openService(_ name: String) throws -> SMBHandle {
+        try lock.withLock {
+            guard name == "srvsvc" else { throw SMBError.unsupported }
+            let path = name.utf16LE
+            var w = ByteWriter()
+            w.u16(57)
+            w.u8(0)
+            w.u8(0)
+            w.u32(2)
+            w.u64(0)
+            w.u64(0)
+            w.u32(0x0012_019F)                  // a pipe is spoken to: requests go in, answers come out
+            w.u32(0)
+            w.u32(0x3)
+            w.u32(1)                            // open only what exists
+            w.u32(0x40)
+            w.u16(UInt16(Self.headerSize + 56))
+            w.u16(UInt16(path.count))
+            w.u32(0)
+            w.u32(0)
+            w.raw(path)
+            let reply = try exchange(.create, w.bytes)
+            guard reply.status == Self.statusOK else { throw Self.error(for: reply.status) }
+            let r = ByteReader(reply.body)
+            guard try r.u16(0) == 89 else { throw SMBError.malformed }
+            return SMBHandle(id: try r.slice(64, 16), size: 0, modified: .distantPast, isFolder: false)
+        }
+    }
+
+    /// Hands a service a request and takes its answer (FSCTL_PIPE_TRANSCEIVE). `more` is true when the answer goes on
+    /// past what came back, to be read with `readService`.
+    func transceive(_ handle: SMBHandle, _ input: [UInt8], maxOutput: Int = 65536) throws -> (output: [UInt8], more: Bool) {
+        try lock.withLock {
+            var w = ByteWriter()
+            w.u16(57)
+            w.u16(0)
+            w.u32(0x0011_C017)
+            w.raw(handle.id)
+            w.u32(UInt32(Self.headerSize + 56))
+            w.u32(UInt32(input.count))
+            w.u32(0)
+            w.u32(0)
+            w.u32(0)
+            w.u32(UInt32(maxOutput))
+            w.u32(1)                            // a file system control
+            w.u32(0)
+            w.raw(input)
+            let reply = try exchange(.ioctl, w.bytes, charge: largeReads ? max(1, (max(input.count, maxOutput) + 65535) / 65536) : 1)
+            guard reply.status == Self.statusOK || reply.status == Self.statusBufferOverflow else { throw Self.error(for: reply.status) }
+            let r = ByteReader(reply.body)
+            guard try r.u16(0) == 49 else { throw SMBError.malformed }
+            let output = try r.slice(Int(try r.u32(32)) - Self.headerSize, Int(try r.u32(36)))
+            return (output, reply.status == Self.statusBufferOverflow)
+        }
+    }
+
+    /// The next part of a service's answer.
+    func readService(_ handle: SMBHandle, length: Int = 65536) throws -> (output: [UInt8], more: Bool) {
+        try lock.withLock {
+            guard let asked = try ask(handle, offset: 0, length: length, must: true) else { throw SMBError.malformed }
+            let reply = try receive(asked.request)
+            guard reply.status == Self.statusOK || reply.status == Self.statusBufferOverflow else { throw Self.error(for: reply.status) }
+            let r = ByteReader(reply.body)
+            let output = try r.slice(Int(try r.u8(2)) - Self.headerSize, Int(try r.u32(4)))
+            return (output, reply.status == Self.statusBufferOverflow)
         }
     }
 

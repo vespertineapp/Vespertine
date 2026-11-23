@@ -126,7 +126,7 @@ func recordedConversation(_ connection: SMBConnection, credentials: SMBCredentia
     }
 
     @Test func everyRecordingIsPlayed() {
-        #expect(Set(Self.cases.map(\.name)) == Set(SMBRecordings.all.keys))
+        #expect(Set(Self.cases.map(\.name)) == Set(SMBRecordings.all.keys.filter { !$0.hasSuffix("shares") }))
     }
 
     @Test func theClientOffersEveryCipherWithAES128First() throws {

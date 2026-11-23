@@ -160,6 +160,29 @@ private let live: (host: String, port: Int, share: String, user: String, passwor
         try transport.source(named: name).write(toFile: ProcessInfo.processInfo.environment["VESPERTINE_SMB_RECORD"]! + "/\(name).txt", atomically: true, encoding: .utf8)
     }
 
+    /// The shares the server offers, as "Add a Share" lists them after signing in. VESPERTINE_SMB_SHARES is the names
+    /// expected, with commas between (the Samba setup in docs/PHONE-SHARES.md has "archive,music").
+    @Test func listsTheServersShares() throws {
+        let live = try #require(live)
+        let shares = try SMBShareList.fetch(host: live.host, port: live.port, credentials: SMBCredentials(name: live.user, password: live.password))
+        print("shares", shares)
+        #expect(shares.contains { $0.name == live.share })
+        #expect(!shares.contains { $0.name.hasSuffix("$") })
+        if let expected = ProcessInfo.processInfo.environment["VESPERTINE_SMB_SHARES"] {
+            #expect(shares.map(\.name) == expected.split(separator: ",").map(String.init))
+        }
+    }
+
+    /// Writes the share listing SMBShareListTests plays back (VESPERTINE_SMB_RECORD as for `record`).
+    @Test(.enabled(if: !(ProcessInfo.processInfo.environment["VESPERTINE_SMB_RECORD"] ?? "").isEmpty)) func recordShareList() throws {
+        let live = try #require(live)
+        let transport = RecordingTransport(try SocketTransport(host: live.host, port: live.port))
+        let connection = SMBConnection(transport: transport, options: recordedOptions)
+        _ = try SMBShareList.fetch(on: connection, server: live.host, credentials: SMBCredentials(name: live.user, password: live.password))
+        let name = (ProcessInfo.processInfo.environment["VESPERTINE_SMB_RECORD_NAME"] ?? "smb" + String(connection.dialect, radix: 16)) + "shares"
+        try transport.source(named: name).write(toFile: ProcessInfo.processInfo.environment["VESPERTINE_SMB_RECORD"]! + "/\(name).txt", atomically: true, encoding: .utf8)
+    }
+
     @Test(.enabled(if: live?.user.isEmpty == false)) func aWrongPasswordIsRefusedAsASignInFailure() throws {
         let live = try #require(live)
         let connection = SMBConnection(transport: try SocketTransport(host: live.host, port: live.port))
