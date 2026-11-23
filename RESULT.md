@@ -9,7 +9,31 @@ Branch `feat/sonos-and-output-routes`, local commits only, not pushed; `git log 
 - **No silent downgrade**: every output row says what the loaded song would be played as ("Will play 24-bit / 48 kHz FLAC, stereo (source 24/96)", copper when samples change); while playing, the badge (RESAMPLED / FOLDED TO STEREO / DSD AS PCM · 24/48 SENT) and a "Player limit" line in the signal path. Same planner for DACs, HDMI, Bluetooth, AirPlay and other network players.
 - **Sonos volume** slider (room or group), the room's details (speaker setup, Music Playback Ambient/Full, read only), plain error for "couldn't fetch" (firewall), `vespertine-probe sonos`, and docs/output-routes.md.
 
-## This pass: the third review's findings (2026-11-23, 07:45 onwards)
+## This pass: the fourth review's findings (2026-11-23, 08:35 onwards)
+
+A fourth independent review (Codex) agreed the cache fix (third review, item 1) and the xHE-AAC fix (item 3) are right, and said the fix for a failed clear of the next song (item 2) was incomplete, with three findings. Each has a test written first and seen failing, then the fix. Signed commits 655f9413, 7f3dc007, e5cf73c9, and a docs/RESULT commit; nothing pushed.
+
+1. **P2, a clear refused by the player made the transport forget the song it still held.** `AVTransportControl.replaceNext` set its `next` before the call to the player. Refused, the transport had forgotten the old next song, so `status()` filtered its address out and `RendererPlayback` never saw the player go on to it. The third pass's tests missed this because their transport threw before the real one was reached. Now `next` changes only once the player has taken the change. A next song replaced on the player also stays recognised until a status asked for after the change shows the player still on the song before. If the player is found on such a song, that address is reported and becomes the transport's current song. Tests, with the failure injected by the pretend player itself (`FakeRenderer.fail("SetNextAVTransportURI", …)`): `avRefusedClearKeepsNext` (a refused clear, and a refused new next song: the transport still reports the song the player moved on to), `avClearedAfterAdvance`, and `playerRefusedClearMovesOn` (2 cases: put right to the queue's next song, or stopped at the queue's end; the old song never announced).
+2. **P2, putting a stale next song right overrode a Stop or a song chosen meanwhile.** The poll that found the player on the stale song called `play(following)` without checking the play it began in. A Stop pressed while the poll waited for the player's answer was followed by the queue's next song, and a song chosen then was overtaken. Now the poll notes the generation before it asks, and the put-right, or the stop at the queue's end, is carried out only while that is still the current play. The check and the change are made together under the generation lock, which `stop()` now takes for its own state change too. If a command came in between, it lets go of the stale song itself. The same guard now covers a song that simply ended (the same pattern; no review finding, no separate test). Test `commandDuringStalePollWins` (2 cases): the poll's status request is held, the player goes on to the stale song, then Stop, or another song is chosen, then the answer is let through. The stop or the choice stands, and the queue's next song never starts. This test can only fail once fix 1 lets the stale song be seen; it was seen failing at 655f9413 (fix 1 in, fix 2 not).
+3. **P2, a confirmed clear let the old song go before the player's song was checked.** After a successful clear, the old next song was let go of at once. A player that moved on to it between the poll's status answer and the clear arriving then played a song Vespertine had forgotten: not put right, its address released. Now a next song replaced on the player (by a clear, or by a new next song, confirmed or not) stays stale, with its address and copy, until reconciled. Once the change is confirmed, no further clear is sent. The next poll, whose status was asked for after the confirmation, either puts it right (the player is on it) or lets it go (the player is on anything else). Stale songs are now a list, so a new next song confirmed while one was stale keeps both until then. Test `advanceBeforeClearCompletes`: the clear retried by a poll reaches the pretend player only after it has moved on to the old next song, and then succeeds. The queue's next song must play and the old one must never be announced. It failed before the fix, including with fixes 1 and 2 in (`red-3-isolated.log`).
+4. **Retry exhaustion** (asked for, not a finding): `staleClearExhausted` (2 cases, ended by a stop or by a shutdown). A clear refused every time is sent exactly ten more times, then only watched. The song stays held and is not let go of meanwhile (its media token is still registered). A stop or a shutdown then lets go of it exactly once, and a shutdown after the stop doesn't release it again. Counting uses a new test hook (`releasesForTests`); the clears' one-second spacing is now a setting a test can shorten. This passed before fix 3 as well; it guards the behaviour, it didn't find a bug.
+
+Not changed: OpenHome's `replaceNext` still ignores a failed `DeleteId` of the old next song (`try?`) and forgets it. That is the same kind of gap on the OpenHome side; the review named only the AV transport, and Sonos uses AV. Not tested.
+
+docs/output-routes.md now says the old song is kept until Vespertine has seen which song Sonos is on, and that a Stop or a song chosen wins.
+
+### Test figures, this pass
+
+On this machine, 2026-11-23 from 08:35, other work running throughout (load average 13 to 22 on 8 cores). Logs: `build/logs/r4/`.
+
+- **Before and after**: `red-1-3.log` (all new tests, before any fix: the transport tests, `playerRefusedClearMovesOn`, `advanceBeforeClearCompletes` failed; `commandDuringStalePollWins` passed, as it can't fail before fix 1; `staleClearExhausted` failed on the test's own count, which missed the empty NextURI the first song's load sends, and the count was corrected), `red-2.log` (after fix 1: `commandDuringStalePollWins` failed, both cases), `red-3-isolated.log` (fixes 1 and 2 only), then `green-2.log` and `green-3.log`.
+- **UPnP and Sonos** (`VespertineUPnPTests`, debug): **170 passed**, 0 failed (164 before, plus the 6 new tests) (`upnp.log`). A first run (`upnp-stale-binary.log`, 1 failure) used a test binary left from the red-3 check, with fix 3 out; rebuilt, it passed.
+- **The new tests, repeated**: `NextPreparationTests` and the two transport tests, 18 tests, 3 runs in a row: all passed each time (`repeat-3.log`).
+- **App tests** (`xcodebuild test`, Debug, macOS, `-derivedDataPath build/DD`) at e5cf73c9: **passed**, 284 tests in 61 suites, 0 failed (`** TEST SUCCEEDED **`; `app-tests.log`). No app code changed in this pass.
+- **Release-mode package tests** (`swift test -c release`, scratch path `build/swiftpm-release`, run once): **passed**, every group, 0 failed, 08:53 to 08:59 (build included). Engine (`VespertineAudioTests`) 1484 tests in 235 suites; UPnP and Sonos 170 (the new tests among them, so built from this pass's code); library 274; AirPlay 2 211; and 151, 73, 37 and 31 in the other four (`release-tests.log`).
+- Not run this pass: the whole package in debug mode, the analysis package, the sanitizer checks, the Release app build.
+
+## The third review's findings (2026-11-23, 07:45 onwards)
 
 A third independent review of 3e6cd9b9 still said not to ship. Each of its three findings has a test written first and seen failing (`build/logs/r3/red-*.log`), then the fix (`green-*.log`). Signed commits 9bed9b51, 86835ab1, a1f8bc30, the follow-up 7dd60ab6 (see item 2), and ee0d1fc0 for the docs; nothing pushed.
 
@@ -19,7 +43,7 @@ A third independent review of 3e6cd9b9 still said not to ship. Each of its three
 
 Also: docs/output-routes.md describes items 1 and 2.
 
-### Test figures, this pass
+### Test figures, third pass
 
 On this machine, 2026-11-23 from 07:45. The machine was busy with other work throughout: load averages of 15 to 18 on 8 cores before anything of mine started.
 
