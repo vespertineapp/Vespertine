@@ -35,6 +35,10 @@ private final class KeepingMac: @unchecked Sendable {
     private var reads = 0
     var files: [Int64: Data] = [:]
     var refused: Set<Int64> = []
+    /// Songs sent as FLAC files (the rest as WAV).
+    var flac: Set<Int64> = []
+    /// Called (with the files) after the first song is opened: a Mac whose file changes between tries.
+    var afterFirstOpen: ((inout [Int64: Data]) -> Void)?
     /// Songs the Mac brings down when asked for the smaller form.
     var bringsDown: Set<Int64> = []
     /// The ReplayGain values the Mac has for each song.
@@ -70,7 +74,10 @@ private final class KeepingMac: @unchecked Sendable {
                 numbers[next] = id
                 _opened.append(id)
                 _rates.append(rate)
-                return .streamOpened(StreamDescriptor(stream: next, kind: .original, byteSize: Int64(data.count), format: Self.format(), frames: nil,
+                if _opened.count == 2, let change = afterFirstOpen { change(&files); afterFirstOpen = nil }
+                let format = flac.contains(id) ? StreamFormat(codec: "FLAC", container: "flac", sampleRate: 48_000, bitDepth: 16, channels: 2,
+                                                              channelLabels: nil, lossless: true) : Self.format()
+                return .streamOpened(StreamDescriptor(stream: next, kind: .original, byteSize: Int64(data.count), format: format, frames: nil,
                                                       tag: "tag-\(id)", chunkSize: 1000,
                                                       reduced: rate == nil ? nil : bringsDown.contains(id)))
             }
@@ -228,6 +235,41 @@ private func bytes(_ id: Int64, count: Int = 3500) -> Data { Data((0..<count).ma
         #expect(reopened.progress(of: "album:a").done == 2)
         #expect(!mac.offsets.dropFirst(asked).contains { $0.song == 1 && $0.offset == 0 })
         #expect(try Data(contentsOf: #require(reopened.store.kept(1)).file) == bytes(1))
+    }
+
+    @Test func aSongThatDidNotArriveWholeIsFetchedAgainAndNeverKeptBroken() async throws {
+        // Song 1 is a real FLAC; the Mac sends it with one byte of its audio changed the first time, and whole after that.
+        let (keeper, mac, _) = try made([2])
+        let flac = try madeFLAC(bits: 16)
+        defer { try? FileManager.default.removeItem(at: flac) }
+        let good = try Data(contentsOf: flac)
+        var bad = good
+        bad[bad.count - 1500] ^= 0x20
+        mac.files[1] = bad
+        mac.flac = [1]
+        mac.afterFirstOpen = { $0[1] = good }
+        keeper.keep(album([1, 2]))
+        try await wait { keeper.isIdle }
+        #expect(keeper.progress(of: "album:a").done == 2)
+        #expect(try Data(contentsOf: #require(keeper.store.kept(1)).file) == good)
+        #expect(mac.opened.filter { $0 == 1 }.count == 2)
+        #expect(keeper.damaged.isEmpty)
+    }
+
+    @Test func aSongThatKeepsArrivingBrokenIsLeftOutAndSaidSo() async throws {
+        let (keeper, mac, directory) = try made([2])
+        let flac = try madeFLAC(bits: 16)
+        defer { try? FileManager.default.removeItem(at: flac) }
+        var bad = try Data(contentsOf: flac)
+        bad[bad.count - 1500] ^= 0x20
+        mac.files[1] = bad
+        mac.flac = [1]
+        keeper.keep(album([1, 2]))
+        try await wait { keeper.isIdle }
+        #expect(keeper.store.kept(1) == nil && keeper.store.kept(2) != nil)
+        #expect(keeper.damaged == [1])
+        let names = try FileManager.default.contentsOfDirectory(atPath: directory.path)
+        #expect(!names.contains { $0.hasPrefix("1") })
     }
 
     @Test func removingAListClearsWhatWasPartFetchedOfIt() async throws {
