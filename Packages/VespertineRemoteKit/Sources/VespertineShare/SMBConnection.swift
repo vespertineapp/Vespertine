@@ -4,7 +4,8 @@
 // With SMB 3.1.1 the messages that open the connection are bound into the session's keys, so nothing can have been
 // changed in them on the way; with SMB 3 a server or share that asks for encryption gets it (AES-128-GCM or CCM, and on
 // SMB 3.1.1 AES-256-GCM or CCM too).
-// One request at a time, each waited for; `SMBShare` puts reconnecting and paths on top.
+// Reads go out several at a time and ahead of a file read straight through; everything else is one request at a time,
+// each waited for. `SMBShare` puts reconnecting and paths on top.
 // SPDX-License-Identifier: GPL-3.0-or-later WITH LicenseRef-Vespertine-App-Store-Exception
 //
 
@@ -124,6 +125,20 @@ public final class SMBConnection: @unchecked Sendable {
     private var negotiated: [UInt8]?
     /// The last request, as sent (without its length in front).
     private var lastSent: [UInt8] = []
+    /// Answers that arrived before they were waited for, by message ID (opened, when they were encrypted), and the IDs
+    /// of requests whose answers are no longer wanted.
+    private var early: [UInt64: (message: [UInt8], sealed: Bool)] = [:]
+    private var abandoned: Set<UInt64> = []
+    /// Messages of a frame that came with several (answers to requests sent together), still to be looked at.
+    private var unread: [(message: [UInt8], sealed: Bool)] = []
+    /// Reads asked for ahead of where a file is being read, bytes that came back beyond the last read, where the last read
+    /// ended and how much has been read in a row there.
+    private var ahead: [Asked] = []
+    private var spare: (handle: [UInt8], offset: Int64, bytes: [UInt8])?
+    private var lastRead: (handle: [UInt8], end: Int64)?
+    private var run: Int64 = 0
+    /// Credits a read-ahead leaves for the requests that aren't reads (opening the next song, a folder).
+    private let reserve = 2
     private var maxRead = 65536
     private var maxTransact = 65536
     private var largeReads = false
@@ -352,6 +367,24 @@ public final class SMBConnection: @unchecked Sendable {
         }
     }
 
+    /// How many reads may be on the line at once, and how far ahead of a file read straight through it is read (bytes).
+    var readDepth = 16
+    var readAheadLimit = 8 << 20
+
+    /// For tests: as if signed in with `dialect` (no signing, no encryption), the server allowing reads of `maxRead`.
+    func signedInForTesting(dialect: UInt16, maxRead: Int, credits: Int) {
+        lock.withLock {
+            self.dialect = dialect
+            largeReads = dialect >= 0x0210
+            self.maxRead = largeReads ? maxRead : min(maxRead, 65536)
+            maxTransact = self.maxRead
+            self.credits = credits
+            messageID = 10
+            sessionID = 1
+            treeID = 1
+        }
+    }
+
     // MARK: Files and folders
 
     /// Opens a file or folder for reading. `path` is from the share's top, with `/` between names; empty is the top itself.
@@ -394,6 +427,12 @@ public final class SMBConnection: @unchecked Sendable {
 
     public func close(_ handle: SMBHandle) throws {
         try lock.withLock {
+            if ahead.first?.handle == handle.id {
+                abandon(ahead)
+                ahead = []
+            }
+            if spare?.handle == handle.id { spare = nil }
+            if lastRead?.handle == handle.id { lastRead = nil }
             let reply = try exchange(.close, Self.closeRequest(handle.id))
             guard reply.status == Self.statusOK else { throw Self.error(for: reply.status) }
         }
@@ -408,30 +447,112 @@ public final class SMBConnection: @unchecked Sendable {
         return w.bytes
     }
 
-    /// Up to `length` bytes of `handle` from `offset`: fewer only at the end of the file.
+    /// Up to `length` bytes of `handle` from `offset`: fewer only at the end of the file. A long read is asked for in
+    /// pieces with several on the line at once, as many as the server's credits allow; a file read straight through is
+    /// read ahead, so the next piece is usually here (or on its way) when it is asked for.
     public func read(_ handle: SMBHandle, offset: Int64, length: Int) throws -> [UInt8] {
         try lock.withLock {
+            let sequential = handle.id == lastRead?.handle && offset == lastRead?.end
             var out: [UInt8] = []
             out.reserveCapacity(max(0, length))
-            while out.count < length {
-                let piece = try readOnce(handle, offset: offset + Int64(out.count), length: length - out.count)
-                if piece.isEmpty { break }
-                out += piece
+            let end = offset + Int64(max(0, length))
+            // What came back beyond the last read: taken when this one starts inside it.
+            if let kept = spare, kept.handle == handle.id, kept.offset <= offset, offset < kept.offset + Int64(kept.bytes.count) {
+                let from = Int(offset - kept.offset), take = min(length, kept.bytes.count - from)
+                out += kept.bytes[from..<(from + take)]
+                spare = from + take < kept.bytes.count ? (kept.handle, kept.offset + Int64(from + take), Array(kept.bytes[(from + take)...])) : nil
+            } else {
+                spare = nil
+            }
+            var queue: [Asked] = []
+            var next = offset + Int64(out.count)
+            // Reads asked for ahead of this one: kept when they carry on from where it starts, given up otherwise.
+            if let first = ahead.first, first.handle == handle.id, first.offset == next {
+                queue = ahead
+                next = (ahead.last.map { $0.offset + Int64($0.count) }) ?? next
+            } else {
+                abandon(ahead)
+            }
+            ahead = []
+            var ended = false
+            // A read that fails leaves nothing of its own on the line that would be taken for something else's answer.
+            defer { abandon(queue) }
+            while out.count < length || !queue.isEmpty {
+                // As many more on the line as the depth and the credits allow (and always one when none is).
+                while !ended, next < end, queue.count < readDepth, let asked = try ask(handle, offset: next, length: Int(end - next), must: queue.isEmpty) {
+                    queue.append(asked)
+                    next += Int64(asked.count)
+                }
+                guard !queue.isEmpty else { break }
+                if out.count >= length {
+                    // Done: what is still on the line is read ahead.
+                    ahead = queue
+                    queue = []
+                    break
+                }
+                let asked = queue.removeFirst()
+                let piece = try collect(asked)
+                let need = length - out.count
+                if piece.count > need {
+                    spare = (handle.id, asked.offset + Int64(need), Array(piece[need...]))
+                    out += piece[..<need]
+                } else {
+                    out += piece
+                }
+                if piece.count < asked.count {
+                    // Fewer bytes than asked for: what was asked for after them no longer follows on, so it is given up
+                    // and the rest asked for again from where they end. Nothing at all is the end of the file.
+                    abandon(queue)
+                    queue = []
+                    spare = nil
+                    if piece.isEmpty { ended = true } else { next = asked.offset + Int64(piece.count) }
+                }
+            }
+            if ended { ahead = [] }
+            // Read ahead of a file read straight through, more the longer it goes on, up to `readAheadLimit`.
+            let reached = offset + Int64(out.count)
+            run = sequential && !ended ? run + Int64(out.count) : Int64(out.count)
+            lastRead = (handle.id, reached)
+            if !ended, readAheadLimit > 0, sequential {
+                let window = min(Int64(readAheadLimit), max(Int64(length), run))
+                var tail = ahead.last.map { $0.offset + Int64($0.count) } ?? (spare.map { $0.offset + Int64($0.bytes.count) } ?? reached)
+                let limit = min(reached + window, handle.size > 0 ? handle.size : reached + window)
+                while tail < limit, ahead.count < readDepth, let asked = try ask(handle, offset: tail, length: Int(limit - tail), must: false) {
+                    ahead.append(asked)
+                    tail += Int64(asked.count)
+                }
             }
             return out
         }
     }
 
-    private func readOnce(_ handle: SMBHandle, offset: Int64, length: Int) throws -> [UInt8] {
+    /// A read on the line.
+    private struct Asked {
+        var request: Sent
+        var handle: [UInt8]
+        var offset: Int64
+        var count: Int
+    }
+
+    /// Asks for up to `length` bytes from `offset` without waiting for the answer. nil when the credits don't allow
+    /// another request (unless `must`: then it goes with what there is, as a lone request always has).
+    private func ask(_ handle: SMBHandle, offset: Int64, length: Int, must: Bool) throws -> Asked? {
         var count = min(length, maxRead, Self.readLimit)
+        guard count > 0 else { return nil }
+        // Out of credits while answers to reads given up on are still to come: they bring credits back.
+        while must, credits < 1, !abandoned.isEmpty { try awaitAny() }
         // A read above 64 KiB costs a credit per 64 KiB: no more is asked for than the server has granted.
         var charge = 1
         if largeReads {
-            charge = max(1, min((count + 65535) / 65536, credits))
+            let wanted = (count + 65535) / 65536
+            if !must, credits < wanted, credits < 1 + reserve { return nil }
+            charge = max(1, min(wanted, must ? credits : credits - reserve))
             count = min(count, charge * 65536)
+        } else if !must, credits < 1 + reserve {
+            return nil
         }
-        let reply = try exchange(.read, Self.readRequest(handle.id, offset: offset, count: count), charge: charge)
-        return try Self.readData(reply)
+        return Asked(request: try send(.read, Self.readRequest(handle.id, offset: offset, count: count), charge: charge),
+                     handle: handle.id, offset: offset, count: count)
     }
 
     private static func readRequest(_ id: [UInt8], offset: Int64, count: Int) -> [UInt8] {
@@ -449,6 +570,11 @@ public final class SMBConnection: @unchecked Sendable {
         w.u16(0)
         w.u8(0)
         return w.bytes
+    }
+
+    /// The bytes a read came back with: fewer than asked for only at the end of the file.
+    private func collect(_ asked: Asked) throws -> [UInt8] {
+        try Self.readData(try receive(asked.request))
     }
 
     private static func readData(_ reply: Reply) throws -> [UInt8] {
@@ -481,6 +607,13 @@ public final class SMBConnection: @unchecked Sendable {
             guard replies[0].status == Self.statusOK else { throw Self.error(for: replies[0].status) }
             let opened = try Self.handle(replies[0])
             return (try Self.readData(replies[1]), opened.size)
+        }
+    }
+
+    /// Reads that are no longer wanted: their answers are let go of as they arrive.
+    private func abandon(_ list: [Asked]) {
+        for asked in list where early.removeValue(forKey: asked.request.id) == nil {
+            abandoned.insert(asked.request.id)
         }
     }
 
@@ -574,12 +707,13 @@ public final class SMBConnection: @unchecked Sendable {
     }
 
     /// Requests sent together, each acting on what the one before it opened, and their answers in the same order. Each
-    /// is signed on its own; encrypted, they go as one message.
+    /// is signed on its own; encrypted, they go as one message. Their answers are matched by message ID like any others,
+    /// so reads already on the line (read ahead of a song) may come back before, between or after them.
     private func compound(_ parts: [(Command, [UInt8])]) throws -> [Reply] {
         let seals = encrypted
         let signs = signingKey != nil && !seals
         var whole: [UInt8] = []
-        var ids: [UInt64] = []
+        var sent: [Sent] = []
         for (index, part) in parts.enumerated() {
             let id = messageID
             var w = ByteWriter()
@@ -608,60 +742,29 @@ public final class SMBConnection: @unchecked Sendable {
                 message.replaceSubrange(48..<64, with: signature(of: message, key: signingKey))
             }
             whole += message
-            ids.append(id)
+            sent.append(Sent(id: id, command: part.0, seals: seals, signs: signs))
             messageID += 1
             credits -= 1
         }
         if seals { whole = try seal(whole) }
         let length = whole.count
         try transport.send([0, UInt8(length >> 16 & 0xff), UInt8(length >> 8 & 0xff), UInt8(length & 0xff)] + whole)
+        return try sent.map { try receive($0) }
+    }
 
-        var replies: [UInt64: Reply] = [:]
-        while replies.count < parts.count {
-            let prefix = try transport.receive(4)
-            let size = Int(prefix[1]) << 16 | Int(prefix[2]) << 8 | Int(prefix[3])
-            guard prefix[0] == 0, size >= Self.headerSize, size <= 16 << 20 else { throw SMBError.malformed }
-            var frame = try transport.receive(size)
-            let sealed = frame.starts(with: Self.sealedMark)
-            if sealed { frame = try open(frame) }
-            // What was asked encrypted is answered encrypted. An answer in the clear didn't come from the server signed in to.
-            if seals != sealed { throw seals ? SMBError.badSignature : SMBError.malformed }
-            // The answers may come together, each saying where the next starts.
-            var at = 0
-            while true {
-                let r = ByteReader(Array(frame[at...]))
-                guard frame.count - at >= Self.headerSize, try r.slice(0, 4) == [0xfe, 0x53, 0x4d, 0x42] else { throw SMBError.malformed }
-                let next = Int(try r.u32(20))
-                let end = next == 0 ? frame.count : at + next
-                guard end <= frame.count, end - at >= Self.headerSize else { throw SMBError.malformed }
-                let message = Array(frame[at..<end])
-                let header = ByteReader(message)
-                let id = try header.u64(24)
-                if ids.contains(id), replies[id] == nil {
-                    credits += Int(try header.u16(14))
-                    let status = try header.u32(8), flags = try header.u32(16)
-                    // "Still working on it": the real answer follows under the same ID.
-                    if !(status == Self.statusPending && flags & Self.flagAsync != 0) {
-                        if !seals {
-                            if flags & Self.flagSigned != 0, signingKey != nil {
-                                guard signatureFits(message) else { throw SMBError.badSignature }
-                            } else if signs, status == Self.statusOK {
-                                throw SMBError.badSignature
-                            }
-                        }
-                        let tree = flags & Self.flagAsync != 0 ? treeID : try header.u32(36)
-                        replies[id] = Reply(status: status, flags: flags, sessionID: try header.u64(40), treeID: tree,
-                                            body: Array(message[Self.headerSize...]), raw: message)
-                    }
-                }
-                if next == 0 { break }
-                at = end
-            }
-        }
-        return ids.map { replies[$0]! }
+    /// A request sent: what its answer is checked against.
+    private struct Sent {
+        var id: UInt64
+        var command: Command
+        var seals: Bool
+        var signs: Bool
     }
 
     private func exchange(_ command: Command, _ body: [UInt8], charge: Int = 1) throws -> Reply {
+        try receive(try send(command, body, charge: charge))
+    }
+
+    private func send(_ command: Command, _ body: [UInt8], charge: Int = 1) throws -> Sent {
         let id = messageID
         var w = ByteWriter()
         w.raw([0xfe, 0x53, 0x4d, 0x42])
@@ -692,28 +795,73 @@ public final class SMBConnection: @unchecked Sendable {
 
         let length = message.count
         try transport.send([0, UInt8(length >> 16 & 0xff), UInt8(length >> 8 & 0xff), UInt8(length & 0xff)] + message)
+        return Sent(id: id, command: command, seals: seals, signs: signs)
+    }
 
-        while true {
+    /// The next message from the server, opened when it was encrypted, with the credits it grants counted. nil for
+    /// one that isn't a final answer to anything still wanted (one the server sent on its own, "still working on it",
+    /// or the answer to a read that was given up on).
+    private func arrival() throws -> (id: UInt64, message: [UInt8], sealed: Bool)? {
+        if unread.isEmpty {
             let prefix = try transport.receive(4)
             let size = Int(prefix[1]) << 16 | Int(prefix[2]) << 8 | Int(prefix[3])
             guard prefix[0] == 0, size >= Self.headerSize, size <= 16 << 20 else { throw SMBError.malformed }
-            var reply = try transport.receive(size)
-            let sealed = reply.starts(with: Self.sealedMark)
-            if sealed { reply = try open(reply) }
+            var frame = try transport.receive(size)
+            let sealed = frame.starts(with: Self.sealedMark)
+            if sealed { frame = try open(frame) }
+            // Answers to requests sent together may come together, each saying where the next starts (each signed on
+            // its own, padding and all).
+            let r = ByteReader(frame)
+            var at = 0
+            while true {
+                guard frame.count - at >= Self.headerSize, try r.slice(at, 4) == [0xfe, 0x53, 0x4d, 0x42] else { throw SMBError.malformed }
+                let next = Int(try r.u32(at + 20))
+                let end = next == 0 ? frame.count : at + next
+                guard end <= frame.count, end - at >= Self.headerSize else { throw SMBError.malformed }
+                unread.append((at == 0 && end == frame.count ? frame : Array(frame[at..<end]), sealed))
+                if next == 0 { break }
+                at = end
+            }
+        }
+        let (reply, sealed) = unread.removeFirst()
+        let r = ByteReader(reply)
+        let id = try r.u64(24)
+        // Something the server sends on its own (it has message ID 0xFFFF…): not an answer to anything.
+        guard id != UInt64.max else { return nil }
+        credits += Int(try r.u16(14))
+        let status = try r.u32(8), flags = try r.u32(16)
+        // "Still working on it": the real answer follows under the same ID.
+        if status == Self.statusPending, flags & Self.flagAsync != 0 { return nil }
+        if abandoned.remove(id) != nil { return nil }
+        return (id, reply, sealed)
+    }
+
+    /// Waits for whatever comes next, keeping it for whoever asked.
+    private func awaitAny() throws {
+        if let got = try arrival() { early[got.id] = (got.message, got.sealed) }
+    }
+
+    private func receive(_ sent: Sent) throws -> Reply {
+        while true {
+            let reply: [UInt8], sealed: Bool
+            if let kept = early.removeValue(forKey: sent.id) {
+                (reply, sealed) = kept
+            } else {
+                guard let got = try arrival() else { continue }
+                guard got.id == sent.id else {
+                    early[got.id] = (got.message, got.sealed)
+                    continue
+                }
+                (reply, sealed) = (got.message, got.sealed)
+            }
             let r = ByteReader(reply)
-            guard reply.count >= Self.headerSize, try r.slice(0, 4) == [0xfe, 0x53, 0x4d, 0x42] else { throw SMBError.malformed }
-            // Something the server sends on its own (it has message ID 0xFFFF…): not an answer to anything.
-            guard try r.u64(24) == id else { continue }
-            credits += Int(try r.u16(14))
             let status = try r.u32(8), flags = try r.u32(16)
-            // "Still working on it": the real answer follows under the same ID.
-            if status == Self.statusPending, flags & Self.flagAsync != 0 { continue }
-            if seals || sealed {
+            if sent.seals || sealed {
                 // What was asked encrypted is answered encrypted. An answer in the clear didn't come from the server signed in to.
-                guard seals, sealed else { throw SMBError.badSignature }
-            } else if flags & Self.flagSigned != 0, signingKey != nil, command != .sessionSetup {
+                guard sent.seals, sealed else { throw SMBError.badSignature }
+            } else if flags & Self.flagSigned != 0, signingKey != nil, sent.command != .sessionSetup {
                 guard signatureFits(reply) else { throw SMBError.badSignature }
-            } else if signs, status == Self.statusOK {
+            } else if sent.signs, status == Self.statusOK {
                 // A signed session's answers are signed. One that isn't didn't come from the server signed in to.
                 throw SMBError.badSignature
             }
