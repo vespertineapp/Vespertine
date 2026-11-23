@@ -26,7 +26,23 @@ On this machine, 2026-11-23 from 07:45. The machine was busy with other work thr
 - **The new tests, before and after**: all four package tests failed before their fixes and passed after (`build/logs/r3/red-1-3.log`, `green-1-3.log`); the app test likewise (`red-app-tageditor.log`, `green-app-tageditor.log`).
 - **UPnP and Sonos** (`VespertineUPnPTests`, debug): **164 passed**, 0 failed (162 before this pass, plus the 2 new tests; the "moves on" test runs 2 cases). Run once after the three fixes, and again after the follow-up commit 7dd60ab6 (`upnp.log`, `upnp-final.log`).
 - **Library group, and the cache and stream suites fix 1 touches** (`VespertineLibraryTests`, `NetworkPlaybackCacheTests`, `RemoteReaderRegistryTests`, `RemoteEarlyStartTests`, `StagedHandoffTests`, debug): 274 + 38 passed, 0 failed (`library-cache.log`).
-- **App tests** (`xcodebuild test`, Debug, macOS, `-derivedDataPath build/DD` as in the earlier passes): **passed**, 284 tests in 61 suites, 0 failed (`** TEST SUCCEEDED **`; 283 in 60 before, plus `TagEditorFormatTests`). Log: `build/logs/r3/app-tests.log`. They ran at a1f8bc30. The follow-up 7dd60ab6 changed only the renderer's recovery path, and the UPnP group was run again after it; the app tests were not.
+- **App tests** (`xcodebuild test`, Debug, macOS, `-derivedDataPath build/DD` as in the earlier passes): **passed**, 284 tests in 61 suites, 0 failed (`** TEST SUCCEEDED **`; 283 in 60 before, plus `TagEditorFormatTests`). Log: `build/logs/r3/app-tests.log`. They first ran at a1f8bc30, and again at bfab9b4b (the code as at 7dd60ab6, the last code change): 284 passed again (`app-tests-head.log`).
+- **The new tests, repeated**: `StagedHandoffTests`, the two refused-clear tests, the earlier queue-edit and download tests, 5 runs in a row: all passed each time (`repeat-5.log`).
+
+**`scripts/audit.sh`, step by step** (evidence: `build/audit-20261123-080658-r3/`, exit codes in `steps.txt`). audit.sh stops at its first failure (`set -e`). Its first step, the whole package in debug mode, has failed timing tests on `main` and on this branch before (see the earlier passes), and would have stopped the script before the steps asked for. So its later steps were run one by one with its own commands (`build/r3-audit-steps.sh`), each one whether or not the one before passed. Two differences: the release-mode tests used a build folder of their own (`--scratch-path build/swiftpm-release`), warmed while the fixes were written, so their build took minutes instead of starting from nothing; and the Release app build was started once by hand first, for the same reason, while the release-mode tests were still compiling and in the first minutes of their run. Every step passed:
+
+| Step (audit.sh's command) | Result |
+|---|---|
+| Release-mode package tests (`swift test -c release`) | **passed**, every group: engine 1484 tests in 235 suites (1483 before, plus `StagedHandoffTests`), UPnP and Sonos 164, library 274, AirPlay 2 211, and 151, 73, 37 and 31 in the other four; 0 failed (6 min, build included). It compiled the renderer at 08:09:42, after its last change (08:07:20). |
+| Analysis package tests (`VespertineAnalysis`) | passed, 72 tests in 8 suites |
+| Real-time code under AddressSanitizer + UndefinedBehaviorSanitizer, and under ThreadSanitizer (`tests/rt-audit.c`) | built and ran clean, exit 0 both |
+| Static analysis of the real-time code and of the DST decoder (`clang --analyze`) | 0 findings each |
+| DST decoder on invalid frames under ASan + UBSan (`tests/dst-audit.c`) | clean: "1800 random frames, 1712 rejected; crafted frames handled" |
+| XcodeGen | done |
+| Release build, universal (`-configuration Release`, `generic/platform=macOS`, `ONLY_ACTIVE_ARCH=NO`) | `** BUILD SUCCEEDED **`, at the final code |
+| `zsh -n` on the release scripts, `git diff --check` | clean |
+
+audit.sh's own app-test step (Debug, `build/AuditDD`) is the app run above (in `build/DD`, as in the earlier passes).
 
 ## The second review's findings (2026-11-23)
 
