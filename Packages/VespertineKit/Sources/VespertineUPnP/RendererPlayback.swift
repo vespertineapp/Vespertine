@@ -890,17 +890,17 @@ public final class RendererPlayback: @unchecked Sendable {
     /// and never announced.
     private func putRight(after ended: Entry) async {
         log.notice("Renderer \(self.renderer.name, privacy: .public) went on to a song no longer next; playing the queue's")
+        // Let go of at once, so the polls put this right once only (were the right song then to fail, they'd start it again
+        // at every poll).
+        let stale = state.withLock { s -> Entry? in defer { s.staleNext = nil; s.staleClearTries = 0 }; return s.staleNext }
+        defer { stale.map(release) }
         if let following = nextItemProvider?(ended.item) {
-            // The start loads the right song and lets go of the stale one (and of the one that ended).
+            // The start loads the right song in its place (and lets go of the one that ended).
             play(following, at: 0, announce: true)
             return
         }
         try? await transport.stop()
-        let old = state.withLock { s -> [Entry] in
-            defer { s.staleNext = nil; s.staleClearTries = 0; s.snapshot.state = .stopped; s.wantsPlaying = false; s.anchor = nil }
-            return [s.staleNext].compactMap { $0 }
-        }
-        old.forEach(release)
+        state.withLock { s in s.snapshot.state = .stopped; s.wantsPlaying = false; s.anchor = nil }
         refreshActivity()
         emit(.queueEnded)
     }
