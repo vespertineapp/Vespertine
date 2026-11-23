@@ -239,6 +239,8 @@ struct ContainerFormatTests {
     func xheAAC() throws {
         let (format, _, audio, _) = try Self.decode("xhe-stereo.m4a")
         #expect(format.encoding == .lossy && format.channels == 2 && format.sampleRate == 48_000)
+        // Named as what it is, not as plain AAC: a player that takes AAC needn't take xHE-AAC.
+        #expect(format.codec == "xHE-AAC")
         #expect(abs(audio[0].count - 48_000) < 2_400, "\(audio[0].count) frames")
         for (c, tone) in [440.0, 550].enumerated() {
             #expect(Self.dominantTone(audio[c][20_000..<24_096], among: [440, 550]) == tone, "channel \(c)")
