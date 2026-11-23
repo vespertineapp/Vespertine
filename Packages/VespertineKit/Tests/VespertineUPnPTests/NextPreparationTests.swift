@@ -33,9 +33,14 @@ private final class StuckStreamMaker: ProcessedStreamMaking, @unchecked Sendable
     private var _settings: [RendererSettings] = []
     /// The settings each stream was asked for with, in order.
     var settingsAsked: [RendererSettings] { lock.withLock { _settings } }
+    private var _items: [UUID] = []
+    /// The settings each stream for `item` was asked for with, in order.
+    func settingsAsked(for item: PlayableItem) -> [RendererSettings] {
+        lock.withLock { zip(_items, _settings).filter { $0.0 == item.id }.map(\.1) }
+    }
 
     func makeStream(item: PlayableItem, url: URL, settings: RendererSettings, startSeconds: TimeInterval) throws -> (GrowingFile, SourceFormat) {
-        lock.withLock { _begun += 1; _settings.append(settings) }
+        lock.withLock { _begun += 1; _settings.append(settings); _items.append(item.id) }
         if fails { throw RendererPlaybackError.unplayable("the encoder couldn't open it") }
         if openDelay > 0 { Thread.sleep(forTimeInterval: openDelay) }
         let file = try GrowingFile(url: directory.appendingPathComponent(UUID().uuidString + ".flac"))
@@ -76,7 +81,21 @@ private final class GatedTransport: RendererTransport, @unchecked Sendable {
         }
         try await inner.replaceNext(next)
     }
-    func play() async throws { try await inner.play() }
+    func play() async throws {
+        if failsPlay.withLock({ $0 }) {
+            playFailed.withLock { $0 += 1 }
+            // The status request after this failed play waits, once set.
+            if holdsStatusAfterFailedPlay.withLock({ s in defer { s = false }; return s }) { statusHeld.withLock { $0 = true } }
+            throw UPnPError.fault(code: 701, description: "Transition not available")
+        }
+        try await inner.play()
+    }
+    /// While set, every Play (a resume; a load plays through the inner transport) fails as a player busy changing state
+    /// does; `playFailed` counts the failures.
+    let failsPlay = Locked(false)
+    let playFailed = Locked(0)
+    /// Set: once a Play has failed, `statusHeld` is set (then this is cleared).
+    let holdsStatusAfterFailedPlay = Locked(false)
     func pause() async throws { try await inner.pause() }
     func stop() async throws {
         if stopHeld.withLock({ $0 }) {
@@ -1010,6 +1029,40 @@ struct NextPreparationTests {
         #expect(targets == [60], "seeks sent: \(targets)")
         let position = rig.playback.snapshot.position
         #expect(position >= 59.5 && position < 62, "position \(position)")
+    }
+
+    // MARK: After the ninth review (2026-11-23): a refused resume put right after a song chosen
+
+    @Test("A resume the player refuses twice, and a song chosen while the status asked for to put it right is on its way: the song chosen plays (not paused by the old song's state), and the old refusal isn't reported")
+    func staleResumeResyncAfterSelection() async throws {
+        let ready = PlayableItem(url: try makeFLAC(from: try makeWAV(seconds: 2, seed: 7)))
+        let chosen = PlayableItem(url: try makeFLAC(from: try makeWAV(seconds: 2, seed: 9)))
+        let rig = try await Rig.make(second: ready)
+        defer { rig.close() }
+        rig.playback.play(rig.first)
+        #expect(await rig.events.wait(for: "started \(rig.first.url.lastPathComponent)"))
+        rig.playback.pause()
+        #expect(await within(2) { rig.fake.transportState == "Paused" })
+        await rig.playback.settleForTests()
+        // The player refuses Play now; the status asked for after the second refusal (to put the snapshot right) is held.
+        let waits = rig.transport.statusWaiting.withLock { $0 }
+        rig.transport.failsPlay.withLock { $0 = true }
+        rig.transport.holdsStatusAfterFailedPlay.withLock { $0 = true }
+        rig.playback.resume()
+        #expect(await within(3) { rig.transport.statusWaiting.withLock { $0 } > waits }, "the refused resume didn't ask for the status")
+        #expect(rig.transport.playFailed.withLock { $0 } == 2)
+        // A song is chosen while that status is on its way; it answers with the old song, paused.
+        rig.playback.play(chosen)
+        rig.transport.failsPlay.withLock { $0 = false }
+        rig.transport.statusHeld.withLock { $0 = false }
+        #expect(await rig.events.wait(for: "started \(chosen.url.lastPathComponent)", timeout: 5), "the song chosen didn't play")
+        try await Task.sleep(for: .milliseconds(300))
+        await rig.playback.settleForTests()
+        #expect(rig.playback.wantsPlaying, "the old song's paused state was applied after the song chosen")
+        #expect(rig.playback.snapshot.item?.id == chosen.id)
+        #expect(rig.playback.snapshot.state == .playing)
+        #expect(rig.fake.transportState == "Playing", "the song chosen was paused on the player")
+        #expect(!rig.events.all.contains { $0.hasPrefix("notice") }, "the refused resume of the old song was reported after the song chosen")
     }
 
     @Test("The player goes on to the old next song between a poll's answer and the clear's success: it is still recognised and put right")

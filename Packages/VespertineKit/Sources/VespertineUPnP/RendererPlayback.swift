@@ -133,6 +133,10 @@ public final class RendererPlayback: @unchecked Sendable {
         /// `generation` on): an event about a song is delivered only while no stop or other song has come since it was
         /// decided (`emit(_:forSelection:)`).
         var selection = 0
+        /// Every pause, resume, stop and song chosen counts up: what the listener last asked the player to do. A refused
+        /// pause or resume puts the snapshot right from the player's state only while it is still the last thing asked for
+        /// (`retrying`).
+        var intent = 0
     }
     private let state = Locked(State())
 
@@ -161,7 +165,9 @@ public final class RendererPlayback: @unchecked Sendable {
     private let settingsPause: @Sendable () async -> Void
 
     enum Command {
-        case play(PlayableItem, at: TimeInterval, announce: Bool, generation: Int), pause, resume, seek(TimeInterval, SeekTarget), stop, queueChanged, settings(RendererSettings), poll
+        case play(PlayableItem, at: TimeInterval, announce: Bool, generation: Int), seek(TimeInterval, SeekTarget), stop, queueChanged, settings(RendererSettings), poll
+        /// The listener's pause or resume, with what it made `State.intent`.
+        case pause(intent: Int), resume(intent: Int)
         /// A poll a test asked for, which is told when it is done.
         case step(CheckedContinuation<Void, Never>)
         /// The next song, prepared off the worker, is ready (or couldn't be): handed to the renderer if it is still wanted.
@@ -275,7 +281,7 @@ public final class RendererPlayback: @unchecked Sendable {
             state.withLock {
                 // A restart of the song at a position (a seek in a processed stream, a change of settings) keeps what the
                 // listener asked for: a paused song stays paused.
-                if announce { $0.wantsPlaying = true; $0.selection += 1 }
+                if announce { $0.wantsPlaying = true; $0.selection += 1; $0.intent += 1 }
                 $0.snapshot.state = $0.wantsPlaying ? .playing : .paused
                 $0.snapshot.item = item
                 $0.snapshot.position = seconds
@@ -308,18 +314,22 @@ public final class RendererPlayback: @unchecked Sendable {
     }
 
     public func pause() {
-        state.withLock { $0.wantsPlaying = false; if $0.snapshot.state == .playing { $0.snapshot.state = .paused } }
+        let intent = state.withLock { s -> Int in
+            s.wantsPlaying = false; if s.snapshot.state == .playing { s.snapshot.state = .paused }
+            s.intent += 1; return s.intent
+        }
         refreshActivity()
-        enqueue.yield(.pause)
+        enqueue.yield(.pause(intent: intent))
     }
     public func resume() {
-        state.withLock { s in
+        let intent = state.withLock { s -> Int in
             s.wantsPlaying = true
             if s.snapshot.state == .paused { s.snapshot.state = .playing }
             if s.current?.announced == false { s.awaitingStartSince = now() }
+            s.intent += 1; return s.intent
         }
         refreshActivity()
-        enqueue.yield(.resume)
+        enqueue.yield(.resume(intent: intent))
     }
     public func seek(to seconds: TimeInterval) {
         let target = state.withLock { s -> SeekTarget in
@@ -331,7 +341,7 @@ public final class RendererPlayback: @unchecked Sendable {
     public func stop() {
         // Under the generation lock, so a song put right by a poll (`play(_:at:announce:ifStill:)`) is either before it or
         // finds it.
-        generation.withLock { g in g += 1; state.withLock { $0.wantsPlaying = false; $0.snapshot.state = .stopped; $0.selection += 1 } }
+        generation.withLock { g in g += 1; state.withLock { $0.wantsPlaying = false; $0.snapshot.state = .stopped; $0.selection += 1; $0.intent += 1 } }
         cancelNextPreparation()
         refreshActivity()
         enqueue.yield(.stop)
@@ -462,9 +472,9 @@ public final class RendererPlayback: @unchecked Sendable {
                 log.error("Renderer \(self.renderer.name, privacy: .public): \(String(describing: error), privacy: .public)")
                 fail(item, error, generation: g)
             }
-        case .pause: await retrying(.pause, resync: true) { try await self.transport.pause() }
-        case .resume: await retrying(.play, resync: true) { try await self.transport.play() }
-        case .seek(let seconds, let target): await retrying(.seek, resync: false) { try await self.seek(seconds, target) }
+        case .pause(let intent): await retrying(.pause, intent: intent) { try await self.transport.pause() }
+        case .resume(let intent): await retrying(.play, intent: intent) { try await self.transport.play() }
+        case .seek(let seconds, let target): await retrying(.seek, intent: nil) { try await self.seek(seconds, target) }
         case .stop:
             // A next song planned after `stop()` was called (by a start that was still loading its song then) is given
             // up here too.
@@ -495,20 +505,34 @@ public final class RendererPlayback: @unchecked Sendable {
 
     /// Pause, play and seek: a renderer busy changing state refuses them now and then (UPnP 701, "transition not available").
     /// Tried again once after a moment; refused again, the listener is told and the song plays on as it was.
-    /// `resync`: pause and play were shown at once (optimistically); refused, the snapshot and what Vespertine wants go back to what
-    /// the player is really doing, so the interface doesn't say paused while it plays.
-    private func retrying(_ what: RefusedAction, resync: Bool, _ body: @escaping () async throws -> Void) async {
+    /// `intent`: a pause or a play (`State.intent` as it made it), shown at once (optimistically); refused, the snapshot and what
+    /// Vespertine wants go back to what the player is really doing, so the interface doesn't say paused while it plays. Only
+    /// while it is still the last thing the listener asked for: a pause, play, stop or song chosen since is that command's
+    /// to carry out, so the retry isn't sent, and the player's state (still the old song's, as the command comes after this
+    /// on the worker) isn't applied to it, nor the refusal reported. Checked under the generation lock, then the state
+    /// lock, as `play` and `stop()` take them, in the same step as the snapshot is put right. Nil: a seek, which checks its
+    /// own target.
+    private func retrying(_ what: RefusedAction, intent: Int?, _ body: @escaping () async throws -> Void) async {
         do { try await body(); return } catch {}
         try? await Task.sleep(for: .milliseconds(300))
+        let isCurrent = { [state] in intent.map { intent in state.withLock { $0.intent } == intent } ?? true }
+        guard isCurrent() else { return }
         do { try await body() } catch {
-            if resync, let status = try? await transport.status() {
-                state.withLock { s in
-                    switch status.state {
-                    case .playing, .transitioning: s.wantsPlaying = true; s.snapshot.state = .playing
-                    case .paused: s.wantsPlaying = false; s.snapshot.state = .paused; s.anchor = nil
-                    case .stopped, .noMedia: s.wantsPlaying = false; s.snapshot.state = .stopped; s.anchor = nil
+            if let intent {
+                let status = try? await transport.status()
+                let current = generation.withLock { _ in
+                    state.withLock { s -> Bool in
+                        guard s.intent == intent else { return false }
+                        switch status?.state {
+                        case .playing?, .transitioning?: s.wantsPlaying = true; s.snapshot.state = .playing
+                        case .paused?: s.wantsPlaying = false; s.snapshot.state = .paused; s.anchor = nil
+                        case .stopped?, .noMedia?: s.wantsPlaying = false; s.snapshot.state = .stopped; s.anchor = nil
+                        case nil: break
+                        }
+                        return true
                     }
                 }
+                guard current else { return }
             }
             refreshActivity()
             emit(.notice(what.message(player: renderer.name, reason: (error as? UPnPError)?.message ?? error.localizedDescription)))
