@@ -29,14 +29,32 @@ public struct ShareAddress: Codable, Hashable, Sendable {
     /// What people type or paste for a share, taken apart: `smb://nas/music/Albums`, `//nas/music`, `\\nas\music\Albums`,
     /// `nas/music`, with an optional `user@` and `:port`. nil when there is no server and share in it.
     public init?(typed text: String, user: String = "") {
+        guard let parts = Self.parts(text), parts.names.count >= 1 else { return nil }
+        self.init(host: parts.host, port: parts.port, share: parts.names[0], folder: parts.names.dropFirst().joined(separator: "/"),
+                  user: user.isEmpty ? parts.user : user)
+    }
+
+    /// Only a server, typed the same ways (`smb://nas.local`, `\\nas`, `user@nas:4450`): its shares are then listed to
+    /// choose from. nil when there is no server, or there is a share as well.
+    public init?(server text: String, user: String = "") {
+        guard let parts = Self.parts(text), parts.names.isEmpty else { return nil }
+        self.init(host: parts.host, port: parts.port, share: "", user: user.isEmpty ? parts.user : user)
+    }
+
+    /// This server's share called `share`, from its top.
+    public func choosing(_ share: String) -> ShareAddress {
+        ShareAddress(host: host, port: port, share: share, folder: "", user: user)
+    }
+
+    /// The server (with any `user@` and `:port`) and the names after it, from what was typed.
+    private static func parts(_ text: String) -> (host: String, port: Int, user: String, names: [String])? {
         var rest = text.trimmingCharacters(in: .whitespacesAndNewlines).replacingOccurrences(of: "\\", with: "/")
         if rest.lowercased().hasPrefix("smb:") { rest.removeFirst(4) }
         let parts = rest.split(separator: "/", omittingEmptySubsequences: true).map(String.init)
-        guard parts.count >= 2 else { return nil }
-        var host = parts[0]
-        var user = user
+        guard var host = parts.first else { return nil }
+        var user = ""
         if let at = host.lastIndex(of: "@") {
-            if user.isEmpty { user = String(host[..<at]).removingPercentEncoding ?? String(host[..<at]) }
+            user = String(host[..<at]).removingPercentEncoding ?? String(host[..<at])
             host = String(host[host.index(after: at)...])
         }
         var port = 445
@@ -48,8 +66,7 @@ public struct ShareAddress: Codable, Hashable, Sendable {
         }
         host = host.trimmingCharacters(in: CharacterSet(charactersIn: "[]"))
         guard !host.isEmpty else { return nil }
-        self.init(host: host, port: port, share: parts[1].removingPercentEncoding ?? parts[1],
-                  folder: parts.dropFirst(2).map { $0.removingPercentEncoding ?? $0 }.joined(separator: "/"), user: user)
+        return (host, port, user, parts.dropFirst().map { $0.removingPercentEncoding ?? $0 })
     }
 
     /// `smb://nas/music/Albums`, for showing.

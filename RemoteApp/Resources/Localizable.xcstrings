@@ -12961,6 +12961,275 @@
         }
       }
     },
+    "Choose a Share": {
+      "comment": "Shown on the iPhone or iPad above the list of shared folders a network (SMB) server offers, after only the server’s name was typed in the form that adds a share. Tapping one adds it.",
+      "localizations": {
+        "am": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ማጋሪያ ይምረጡ"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اختر مشاركة"
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "একটি শেয়ার বেছে নিন"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vyberte sdílení"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vælg en deling"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Freigabe auswählen"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Επιλογή κοινόχρηστου φακέλου"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elige un recurso compartido"
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "یک اشتراک انتخاب کنید"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Valitse jako"
+          }
+        },
+        "fil": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pumili ng Share"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisir un partage"
+          }
+        },
+        "gu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "શેર પસંદ કરો"
+          }
+        },
+        "ha": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zaɓi Folda ta Cibiyar Sadarwa"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "בחירת שיתוף"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "शेयर चुनें"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Megosztás kiválasztása"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pilih Share"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scegli una condivisione"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "共有を選択"
+          }
+        },
+        "kn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ಶೇರ್ ಆಯ್ಕೆಮಾಡಿ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "공유 선택"
+          }
+        },
+        "ml": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ഒരു ഷെയർ തിരഞ്ഞെടുക്കുക"
+          }
+        },
+        "mr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "शेअर निवडा"
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pilih Perkongsian"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Velg en deling"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kies een share"
+          }
+        },
+        "pa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ਸ਼ੇਅਰ ਚੁਣੋ"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wybierz zasób"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escolha um Compartilhamento"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escolha uma partilha"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alegeți o partajare"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Välj en resurs"
+          }
+        },
+        "sw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chagua Folda ya Mtandao"
+          }
+        },
+        "ta": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "பகிர்வைத் தேர்வுசெய்"
+          }
+        },
+        "te": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "షేర్‌ను ఎంచుకోండి"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "เลือกแชร์"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paylaşım Seçin"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Виберіть ресурс"
+          }
+        },
+        "ur": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "شیئر منتخب کریں"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chọn chia sẻ"
+          }
+        },
+        "zh-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "選擇共享"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择共享"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "選擇共享"
+          }
+        }
+      }
+    },
     "Choose one of these and Vespertine on the Mac plays there.": {
       "localizations": {
         "am": {
@@ -20213,6 +20482,275 @@
         }
       }
     },
+    "Or type only the server, like smb://nas.local, to choose from its shares.": {
+      "comment": "Shown on the iPhone or iPad under the address field of the form that adds a network (SMB) share. Typing just the server’s name and pressing Add lists the shared folders the server offers. Keep “smb://nas.local” as an example in Latin letters.",
+      "localizations": {
+        "am": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ወይም ከማጋሪያዎቹ ለመምረጥ አገልጋዩን ብቻ ይተይቡ፣ ለምሳሌ smb://nas.local።"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "أو اكتب الخادم فقط، مثل smb://nas.local، للاختيار من مشاركاته."
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "অথবা শুধু সার্ভার টাইপ করুন, যেমন smb://nas.local, তারপর তার শেয়ারগুলো থেকে বেছে নিন।"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nebo zadejte jen server, například smb://nas.local, a vyberte z jeho sdílení."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eller skriv kun serveren, f.eks. smb://nas.local, for at vælge blandt dens delinger."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oder gib nur den Server ein, etwa smb://nas.local, um aus seinen Freigaben zu wählen."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ή πληκτρολογήστε μόνο τον διακομιστή, π.χ. smb://nas.local, για να επιλέξετε από τους κοινόχρηστους φακέλους του."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O escribe solo el servidor, por ejemplo smb://nas.local, para elegir entre sus recursos compartidos."
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "یا فقط سرور را تایپ کنید، مانند smb://nas.local، تا از میان اشتراک‌هایش انتخاب کنید."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tai kirjoita vain palvelin, esimerkiksi smb://nas.local, ja valitse sen jaoista."
+          }
+        },
+        "fil": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O i-type lang ang server, tulad ng smb://nas.local, para pumili sa mga share nito."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ou saisissez seulement le serveur, par exemple smb://nas.local, pour choisir parmi ses partages."
+          }
+        },
+        "gu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "અથવા ફક્ત સર્વર ટાઇપ કરો, જેમ કે smb://nas.local, અને તેના શેરમાંથી પસંદ કરો."
+          }
+        },
+        "ha": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ko kuma rubuta sabar kawai, kamar smb://nas.local, don zaɓa daga foldodinta na cibiyar sadarwa."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "או הקלד רק את השרת, למשל smb://nas.local, כדי לבחור מבין השיתופים שלו."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "या केवल सर्वर टाइप करें, जैसे smb://nas.local, और उसके शेयर में से चुनें।"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vagy írja be csak a szervert, például: smb://nas.local, és válasszon a megosztásai közül."
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atau ketik servernya saja, seperti smb://nas.local, untuk memilih dari share-nya."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oppure inserisci solo il server, ad esempio smb://nas.local, per scegliere tra le sue condivisioni."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "サーバだけをsmb://nas.localのように入力して、その共有から選ぶこともできます。"
+          }
+        },
+        "kn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ಅಥವಾ ಸರ್ವರ್ ಅನ್ನು ಮಾತ್ರ smb://nas.local ರೀತಿಯಲ್ಲಿ ಟೈಪ್ ಮಾಡಿ, ಅದರ ಶೇರ್‌ಗಳಿಂದ ಆಯ್ಕೆಮಾಡಿ."
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "또는 smb://nas.local처럼 서버만 입력하여 해당 서버의 공유 중에서 선택하십시오."
+          }
+        },
+        "ml": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "അല്ലെങ്കിൽ സെർവർ മാത്രം smb://nas.local എന്നതുപോലെ ടൈപ്പ് ചെയ്ത് അതിന്റെ ഷെയറുകളിൽ നിന്ന് തിരഞ്ഞെടുക്കുക."
+          }
+        },
+        "mr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "किंवा फक्त सर्व्हर टाइप करा, जसे की smb://nas.local, आणि त्याच्या शेअरमधून निवडा."
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Atau taipkan pelayan sahaja, seperti smb://nas.local, untuk memilih daripada perkongsiannya."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eller skriv bare inn tjeneren, for eksempel smb://nas.local, for å velge blant delingene dens."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Of typ alleen de server, zoals smb://nas.local, om uit de shares te kiezen."
+          }
+        },
+        "pa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ਜਾਂ ਸਿਰਫ਼ ਸਰਵਰ ਟਾਈਪ ਕਰੋ, ਜਿਵੇਂ smb://nas.local, ਅਤੇ ਉਸਦੇ ਸ਼ੇਅਰਾਂ ਵਿੱਚੋਂ ਚੁਣੋ।"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Albo wpisz tylko serwer, na przykład smb://nas.local, aby wybrać jeden z jego zasobów."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ou digite apenas o servidor, como smb://nas.local, para escolher entre seus compartilhamentos."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ou escreva apenas o servidor, como smb://nas.local, para escolher entre as suas partilhas."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sau introduceți doar serverul, de exemplu smb://nas.local, pentru a alege dintre partajările lui."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eller skriv bara servern, till exempel smb://nas.local, för att välja bland dess resurser."
+          }
+        },
+        "sw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Au andika seva pekee, kama smb://nas.local, ili uchague kutoka kwenye folda zake za mtandao."
+          }
+        },
+        "ta": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "அல்லது சர்வரை மட்டும் smb://nas.local என்பது போல உள்ளிட்டு, அதன் பகிர்வுகளில் இருந்து தேர்வுசெய்யவும்."
+          }
+        },
+        "te": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "లేదా సర్వర్‌ను మాత్రమే smb://nas.local లాగా టైప్ చేసి, దాని షేర్‌ల నుండి ఎంచుకోండి."
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "หรือป้อนเฉพาะเซิร์ฟเวอร์ เช่น smb://nas.local เพื่อเลือกจากแชร์ของเซิร์ฟเวอร์นั้น"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ya da yalnızca sunucuyu smb://nas.local biçiminde yazıp paylaşımlarından birini seçin."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Або введіть лише сервер, наприклад smb://nas.local, щоб вибрати з його ресурсів."
+          }
+        },
+        "ur": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "یا صرف سرور ٹائپ کریں، جیسے smb://nas.local، اور اس کے شیئرز میں سے منتخب کریں۔"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hoặc chỉ nhập máy chủ, ví dụ smb://nas.local, để chọn trong các chia sẻ của nó."
+          }
+        },
+        "zh-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "或者只輸入伺服器，例如 smb://nas.local，再從它的共享中選擇。"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "或者只输入服务器，例如 smb://nas.local，再从它的共享中选择。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "或者只輸入伺服器，例如 smb://nas.local，再從它的共享中選擇。"
+          }
+        }
+      }
+    },
     "Plays: %lld": {
       "localizations": {
         "am": {
@@ -20745,6 +21283,275 @@
           "stringUnit": {
             "state": "translated",
             "value": "最近播放"
+          }
+        }
+      }
+    },
+    "This server didn’t list its shares. Type the share’s name as well, like smb://server/share.": {
+      "comment": "Shown on the iPhone or iPad at the top of the form that adds a network (SMB) share, when only a server was typed and the server would not say which shared folders it has (or has none this account can see). Keep “smb://server/share” as an example in Latin letters.",
+      "localizations": {
+        "am": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ይህ አገልጋይ ማጋሪያዎቹን አልዘረዘረም። የማጋሪያውንም ስም ይተይቡ፣ ለምሳሌ smb://server/share።"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لم يعرض هذا الخادم مشاركاته. اكتب اسم المشاركة أيضًا، مثل smb://server/share."
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "এই সার্ভার তার শেয়ারগুলোর তালিকা দেয়নি। শেয়ারের নামও টাইপ করুন, যেমন smb://server/share।"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tento server nevypsal svá sdílení. Zadejte i název sdílení, například smb://server/share."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Denne server viste ikke sine delinger. Skriv også delingens navn, f.eks. smb://server/share."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dieser Server hat seine Freigaben nicht aufgelistet. Gib auch den Namen der Freigabe ein, etwa smb://server/share."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Αυτός ο διακομιστής δεν εμφάνισε τους κοινόχρηστους φακέλους του. Πληκτρολογήστε και το όνομα του κοινόχρηστου φακέλου, π.χ. smb://server/share."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este servidor no ha mostrado sus recursos compartidos. Escribe también el nombre del recurso, por ejemplo smb://server/share."
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "این سرور اشتراک‌هایش را فهرست نکرد. نام اشتراک را هم تایپ کنید، مانند smb://server/share."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tämä palvelin ei näyttänyt jakojaan. Kirjoita myös jaon nimi, esimerkiksi smb://server/share."
+          }
+        },
+        "fil": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hindi inilista ng server na ito ang mga share nito. I-type din ang pangalan ng share, tulad ng smb://server/share."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce serveur n’a pas indiqué ses partages. Saisissez aussi le nom du partage, par exemple smb://server/share."
+          }
+        },
+        "gu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "આ સર્વરે તેના શેરની યાદી આપી નહીં. શેરનું નામ પણ ટાઇપ કરો, જેમ કે smb://server/share."
+          }
+        },
+        "ha": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wannan sabar ba ta lissafa foldodinta na cibiyar sadarwa ba. Rubuta sunan foldar ma, kamar smb://server/share."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "השרת הזה לא הציג את השיתופים שלו. הקלד גם את שם השיתוף, למשל smb://server/share."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "इस सर्वर ने अपने शेयरों की सूची नहीं दी। शेयर का नाम भी टाइप करें, जैसे smb://server/share।"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ez a szerver nem sorolta fel a megosztásait. Írja be a megosztás nevét is, például: smb://server/share."
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server ini tidak menampilkan daftar share-nya. Ketik juga nama share, seperti smb://server/share."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Questo server non ha elencato le sue condivisioni. Inserisci anche il nome della condivisione, ad esempio smb://server/share."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このサーバは共有の一覧を返しませんでした。smb://server/shareのように、共有の名前も入力してください。"
+          }
+        },
+        "kn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ಈ ಸರ್ವರ್ ತನ್ನ ಶೇರ್‌ಗಳ ಪಟ್ಟಿಯನ್ನು ನೀಡಲಿಲ್ಲ. ಶೇರ್‌ನ ಹೆಸರನ್ನೂ smb://server/share ರೀತಿಯಲ್ಲಿ ಟೈಪ್ ಮಾಡಿ."
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 서버가 공유 목록을 보여 주지 않았습니다. smb://server/share 형식으로 공유 이름도 입력하십시오."
+          }
+        },
+        "ml": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ഈ സെർവർ അതിന്റെ ഷെയറുകളുടെ പട്ടിക നൽകിയില്ല. ഷെയറിന്റെ പേരും smb://server/share എന്നതുപോലെ ടൈപ്പ് ചെയ്യുക."
+          }
+        },
+        "mr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "या सर्व्हरने त्याच्या शेअरची यादी दिली नाही. शेअरचे नावही टाइप करा, जसे की smb://server/share."
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pelayan ini tidak menyenaraikan perkongsiannya. Taipkan juga nama perkongsian, seperti smb://server/share."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Denne tjeneren viste ikke delingene sine. Skriv også inn navnet på delingen, for eksempel smb://server/share."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deze server gaf geen lijst van zijn shares. Typ ook de naam van de share, zoals smb://server/share."
+          }
+        },
+        "pa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ਇਸ ਸਰਵਰ ਨੇ ਆਪਣੇ ਸ਼ੇਅਰਾਂ ਦੀ ਸੂਚੀ ਨਹੀਂ ਦਿੱਤੀ। ਸ਼ੇਅਰ ਦਾ ਨਾਮ ਵੀ ਟਾਈਪ ਕਰੋ, ਜਿਵੇਂ smb://server/share।"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ten serwer nie podał listy swoich zasobów. Wpisz też nazwę zasobu, na przykład smb://server/share."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este servidor não listou seus compartilhamentos. Digite também o nome do compartilhamento, como smb://server/share."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este servidor não indicou as suas partilhas. Escreva também o nome da partilha, como smb://server/share."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Acest server nu și-a afișat partajările. Introduceți și numele partajării, de exemplu smb://server/share."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Den här servern visade inte sina resurser. Skriv även resursens namn, till exempel smb://server/share."
+          }
+        },
+        "sw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seva hii haikuorodhesha folda zake za mtandao. Andika pia jina la folda, kama smb://server/share."
+          }
+        },
+        "ta": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "இந்த சர்வர் அதன் பகிர்வுகளைப் பட்டியலிடவில்லை. பகிர்வின் பெயரையும் smb://server/share என்பது போல உள்ளிடவும்."
+          }
+        },
+        "te": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ఈ సర్వర్ తన షేర్‌ల జాబితాను ఇవ్వలేదు. షేర్ పేరును కూడా smb://server/share లాగా టైప్ చేయండి."
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "เซิร์ฟเวอร์นี้ไม่ได้แสดงรายการแชร์ ป้อนชื่อแชร์ด้วย เช่น smb://server/share"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu sunucu paylaşımlarını listelemedi. Paylaşımın adını da smb://server/share biçiminde yazın."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Цей сервер не показав своїх ресурсів. Введіть також назву ресурсу, наприклад smb://server/share."
+          }
+        },
+        "ur": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اس سرور نے اپنے شیئرز کی فہرست نہیں دی۔ شیئر کا نام بھی ٹائپ کریں، جیسے smb://server/share۔"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Máy chủ này không liệt kê các chia sẻ. Hãy nhập cả tên chia sẻ, ví dụ smb://server/share."
+          }
+        },
+        "zh-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此伺服器沒有列出它的共享。請同時輸入共享的名稱，例如 smb://server/share。"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此服务器没有列出它的共享。请同时输入共享的名称，例如 smb://server/share。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此伺服器沒有列出它的共享。請同時輸入共享的名稱，例如 smb://server/share。"
           }
         }
       }
