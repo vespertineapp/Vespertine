@@ -67,8 +67,7 @@ public enum StreamChange: Sendable, Hashable {
             to == 2
                 ? String(localized: "\(player) takes two-channel music only, so this song's \(from) channels are folded down to stereo.",
                          comment: "%1$@ is a kind of network player (Sonos); %2$lld is a number of channels.")
-                : String(localized: "\(player) takes up to \(to) channels, so this song's \(from) channels are folded down.",
-                         comment: "%1$@ is a kind of network player; the numbers are channel counts.")
+                : CapabilityWarning.channelsAboveMaximum(source: from, max: to).message
         case .dsdToPCM(let name):
             String(localized: "\(player) doesn't play DSD, so this \(name) song is converted to PCM.", comment: "%1$@ is a kind of network player (Sonos); %2$@ is DSD64, DSD128…")
         case .wordLength(let from, let to):

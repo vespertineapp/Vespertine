@@ -285,6 +285,14 @@ struct SonosPlayerTests {
         try await room.setMuted(true)
         #expect(try await room.isMuted())
         #expect(fake.calls.contains { $0.service == "RenderingControl" && $0.action == "SetVolume" && $0.arguments["Channel"] == "Master" })
+        // How its surrounds play music is read from it, never set; a room without surrounds says nothing.
+        let control = try #require(RenderingControlVolume(description: device.description))
+        #expect(await control.surroundMusic() == nil)
+        fake.surroundMode = "0"
+        #expect(await control.surroundMusic() == .ambient)
+        fake.surroundMode = "1"
+        #expect(await control.surroundMusic() == .full)
+        #expect(!fake.actions.contains("SetEQ"))
         device.sonos = SonosTopology.parse(sonosHome)?.zone(uuid: "RINCON_BAR01400")
         let group = try #require(device.makeVolume())
         try await group.setVolume(12)

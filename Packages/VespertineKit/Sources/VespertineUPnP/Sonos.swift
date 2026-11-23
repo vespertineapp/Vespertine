@@ -206,6 +206,27 @@ public struct RenderingControlVolume: RendererVolume {
     }
 }
 
+/// How a Sonos home theater's surround speakers play two-channel music: the Sonos app's Music Playback setting.
+public enum SonosSurroundMusic: String, Sendable, Hashable {
+    /// Quiet, limited range (Sonos's default).
+    case ambient
+    /// Full range, as loud as the front.
+    case full
+}
+
+extension RenderingControlVolume {
+    /// The room's Music Playback setting, read (never set) from the sound bar; nil for a room without surrounds, or when it
+    /// doesn't say.
+    public func surroundMusic() async -> SonosSurroundMusic? {
+        guard let value = try? await client.call(service, "GetEQ", [("InstanceID", "0"), ("EQType", "SurroundMode")])["CurrentValue"] else { return nil }
+        switch value.trimmingCharacters(in: .whitespaces) {
+        case "0": return .ambient
+        case "1": return .full
+        default: return nil
+        }
+    }
+}
+
 /// Sonos GroupRenderingControl: every room of a group at once, each keeping its level relative to the others, as the
 /// Sonos app's group slider does.
 public struct SonosGroupVolume: RendererVolume {

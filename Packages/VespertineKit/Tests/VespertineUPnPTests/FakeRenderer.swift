@@ -44,6 +44,8 @@ final class FakeRenderer: @unchecked Sendable {
     var sonosModel = "Sonos Playbar"
     /// What GetZoneGroupState answers.
     var zoneGroupState = ""
+    /// The Music Playback setting of a room with surrounds: "0" ambient, "1" full; nil for a room without.
+    var surroundMode: String?
     private var _volume = 20
     private var _muted = false
     var volume: Int { lock.withLock { _volume } }
@@ -160,6 +162,9 @@ final class FakeRenderer: @unchecked Sendable {
             case ("RenderingControl", "GetMute"), ("GroupRenderingControl", "GetGroupMute"): return .success([("CurrentMute", _muted ? "1" : "0")])
             case ("RenderingControl", "SetMute"), ("GroupRenderingControl", "SetGroupMute"): _muted = arguments["DesiredMute"] == "1"; return .success([])
             case ("GroupRenderingControl", "SnapshotGroupVolume"): return .success([])
+            case ("RenderingControl", "GetEQ"):
+                guard arguments["EQType"] == "SurroundMode", let mode = surroundMode else { return .failure(FakeFault(code: 402)) }
+                return .success([("CurrentValue", mode)])
             case ("Product", "SourceXml"):
                 return .success([("Value", "<SourceList><Source><Name>Radio</Name><Type>Radio</Type><Visible>true</Visible></Source><Source><Name>Playlist</Name><Type>Playlist</Type><Visible>true</Visible></Source><Source><Name>Receiver</Name><Type>Receiver</Type><Visible>true</Visible></Source></SourceList>")])
             case ("Product", "SourceIndex"): return .success([("Value", String(sourceIndex))])

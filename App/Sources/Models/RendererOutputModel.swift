@@ -22,6 +22,9 @@ final class RendererOutputModel {
     /// The chosen player's own volume, 0…1, where Vespertine sets it (a Sonos room); nil when it has none Vespertine sets,
     /// or it hasn't answered yet.
     private(set) var playerVolume: Double?
+    /// How the chosen Sonos room's surrounds play two-channel music (the Sonos app's Music Playback setting), as last read;
+    /// nil for a room without surrounds or one that didn't say.
+    private(set) var surroundMusic: SonosSurroundMusic?
     @ObservationIgnored private var volumeControl: (uid: String, description: DeviceDescription, isGroup: Bool, control: any RendererVolume)?
     @ObservationIgnored private var volumeSend: Task<Void, Never>?
     @ObservationIgnored private var volumeWatch: Task<Void, Never>?
@@ -72,6 +75,7 @@ final class RendererOutputModel {
             volumeWatch?.cancel()
             volumeWatch = nil
             playerVolume = nil
+            surroundMusic = nil
             return
         }
         // The same player, arranged as before: the watch that is running carries on.
@@ -79,8 +83,11 @@ final class RendererOutputModel {
         volumeControl = (device.uid, device.description, device.sonos?.isGroup == true, control)
         volumeWatch?.cancel()
         playerVolume = nil
+        surroundMusic = nil
+        let room = device.sonos?.isHomeTheater == true ? RenderingControlVolume(description: device.description) : nil
         volumeWatch = Task { [weak self] in
             while !Task.isCancelled {
+                if let room, let mode = await room.surroundMusic(), let self, self.volumeControl?.uid == device.uid { self.surroundMusic = mode }
                 if let level = try? await control.volume() {
                     // Not while the listener's own change is still on its way: the slider would jump back.
                     if let self, self.volumeSend == nil, self.volumeControl?.uid == device.uid { self.playerVolume = Double(level) / 100 }

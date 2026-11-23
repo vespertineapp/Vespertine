@@ -109,6 +109,11 @@ struct RendererDetails: View {
                 row(String(localized: "Gapless"), renderer.kind.gapless ? String(localized: "Yes") : RendererText.gaplessNotGuaranteed)
                 row(String(localized: "Highest format"), renderer.isSonos ? String(localized: "24-bit / 48 kHz, 2 channels (Sonos's own limit)") : maxFormat)
                 if let setup = renderer.sonos?.speakerSetup { row(String(localized: "Speakers"), setup) }
+                if let mode = model.renderers?.surroundMusic {
+                    row(String(localized: "Surrounds for music", comment: "A Sonos home theater room: how its surround speakers play two-channel music."),
+                        mode == .full ? String(localized: "Full (set in the Sonos app)", comment: "The Sonos app's Music Playback setting: Full.")
+                                      : String(localized: "Ambient (set in the Sonos app)", comment: "The Sonos app's Music Playback setting: Ambient."))
+                }
                 if !renderer.capabilities.acceptedFormats.isEmpty {
                     row(String(localized: "Formats"), renderer.capabilities.acceptedFormats.joined(separator: ", "))
                 }
