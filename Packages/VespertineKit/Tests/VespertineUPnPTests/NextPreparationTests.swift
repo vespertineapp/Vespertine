@@ -435,4 +435,47 @@ struct NextPreparationTests {
         }
         #expect(rig.playback.heldNextURIsForTests.allSatisfy { $0 != old })
     }
+
+    @Test("The player goes on to the old next song between a poll's answer and the clear's success: it is still recognised and put right")
+    func advanceBeforeClearCompletes() async throws {
+        let ready = PlayableItem(url: try makeFLAC(from: try makeWAV(seconds: 2, seed: 7)))
+        let rig = try await Rig.make(second: ready)
+        defer { rig.close() }
+        let old = try await playerRefusedClear(rig, queue: [rig.first, rig.third])
+        // The clear tried again by a poll (after its status answer said the first song) reaches the player only after it
+        // has gone on to the old next song, and then succeeds.
+        let fake = rig.fake
+        rig.transport.beforeReplaceNext.withLock { $0 = { fake.advance(); fake.succeed("SetNextAVTransportURI") } }
+        #expect(await within(4) { rig.transport.beforeReplaceNext.withLock { $0 == nil } }, "the clear wasn't tried again")
+        #expect(await rig.events.wait(for: "started \(rig.third.url.lastPathComponent)", timeout: 5), "the player plays the old next song on")
+        #expect(rig.fake.currentURI != old)
+        #expect(!rig.events.all.contains("started \(ready.url.lastPathComponent)"), "the song no longer next was announced")
+    }
+
+    @Test("A clear refused every time: tried ten more times, then only watched; the song is kept, and a stop or a shutdown lets go of it once",
+          arguments: [false, true])
+    func staleClearExhausted(shutdown: Bool) async throws {
+        let ready = PlayableItem(url: try makeFLAC(from: try makeWAV(seconds: 2, seed: 7)))
+        let rig = try await Rig.make(second: ready)
+        defer { rig.close() }
+        rig.playback.staleClearSpacing = 0.05
+        let old = try await playerRefusedClear(rig, queue: [rig.first])
+        let clears = { rig.fake.calls.filter { $0.action == "SetNextAVTransportURI" && ($0.arguments["NextURI"] ?? "").isEmpty }.count }
+        // The first song's load sent one empty NextURI; then the clear that failed, and the tries again.
+        let expected = 1 + 1 + RendererPlayback.staleClearAttempts
+        #expect(await within(5) { clears() >= expected })
+        // A while longer: no more tries.
+        try await Task.sleep(for: .milliseconds(600))
+        await rig.playback.settleForTests()
+        #expect(clears() == expected)
+        #expect(rig.playback.heldNextURIsForTests.contains(old), "let go of while the player may still go on to it")
+        #expect(rig.playback.releasesForTests(old) == 0)
+        #expect(rig.media.tokens.contains(URL(string: old)!.deletingPathExtension().lastPathComponent))
+        if shutdown { rig.playback.stopAndWait(timeout: 5) } else { rig.playback.stop(); await rig.playback.settleForTests() }
+        #expect(rig.playback.heldNextURIsForTests.isEmpty)
+        #expect(rig.playback.releasesForTests(old) == 1)
+        // A shutdown after the stop lets go of nothing a second time.
+        rig.playback.stopAndWait(timeout: 5)
+        #expect(rig.playback.releasesForTests(old) == 1)
+    }
 }

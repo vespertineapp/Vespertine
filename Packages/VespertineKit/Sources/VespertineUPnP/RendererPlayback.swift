@@ -94,12 +94,16 @@ public final class RendererPlayback: @unchecked Sendable {
         var settings = RendererSettings()
         var current: Entry?
         var next: Entry?
-        /// A next song the player was told to drop and didn't confirm (the clear failed): it may still hold it and go on to
-        /// it, so its address and its copy are kept until a clear (or a new next song) is confirmed, and a player found
-        /// playing it is put right (`poll`). No longer the queue's next song.
-        var staleNext: Entry?
-        /// Clears of `staleNext` tried again by the polls (a few, then it is only watched for), and when the last was tried
-        /// (the clear that failed first counts as one, at that time).
+        /// Next songs the player held that are no longer next: it may still go on to them (a clear it didn't confirm), or
+        /// may have gone on to one just before a change it did confirm. Their addresses and copies are kept, and a player
+        /// found playing one is put right (`poll`), until the player's current song is reconciled: a status asked for after
+        /// the change was confirmed shows it on another song. Never the queue's next song.
+        var staleNexts: [Entry] = []
+        /// The player confirmed what it holds next after these became stale (a clear, or a new next song): no clear is tried
+        /// again, the next poll only reconciles.
+        var staleConfirmed = false
+        /// Clears of `staleNexts` tried again by the polls (a few, then they are only watched for), and when the last was
+        /// tried (the clear that failed first counts as one, at that time).
         var staleClearTries = 0
         var staleTriedAt: Date?
         var anchor: (position: TimeInterval, at: Date)?
@@ -382,7 +386,7 @@ public final class RendererPlayback: @unchecked Sendable {
     }
 
     /// The addresses of the songs Vespertine still keeps (their token and their copy) as the player's next song.
-    var heldNextURIsForTests: [String] { state.withLock { [$0.next, $0.staleNext].compactMap { $0?.mediaURL.absoluteString } } }
+    var heldNextURIsForTests: [String] { state.withLock { ([$0.next].compactMap { $0 } + $0.staleNexts).map(\.mediaURL.absoluteString) } }
 
     /// How many times the song at this address was let go of (once is right; never is a leak, twice a double release).
     private let releases = Locked<[String: Int]>([:])
@@ -425,8 +429,8 @@ public final class RendererPlayback: @unchecked Sendable {
                 cancelNextPreparation()
                 try? await transport.stop()
                 let old = state.withLock { s -> [Entry] in
-                    defer { s.current = nil; s.next = nil; s.staleNext = nil; s.anchor = nil; s.snapshot = EngineSnapshot() }
-                    return [s.current, s.next, s.staleNext].compactMap { $0 }
+                    defer { s.current = nil; s.next = nil; s.staleNexts = []; s.anchor = nil; s.snapshot = EngineSnapshot() }
+                    return [s.current, s.next].compactMap { $0 } + s.staleNexts
                 }
                 old.forEach(release)
             case .queueChanged:
@@ -672,7 +676,7 @@ public final class RendererPlayback: @unchecked Sendable {
                 s.currentGeneration = g
                 s.next = next
                 // The song just loaded replaced what the player plays, and its next song with it (`load` clears it).
-                s.staleNext = nil; s.staleClearTries = 0
+                s.staleNexts = []; s.staleConfirmed = false; s.staleClearTries = 0
                 s.anchor = nil
                 s.failedPolls = 0
                 s.failingSince = nil
@@ -688,7 +692,7 @@ public final class RendererPlayback: @unchecked Sendable {
                 s.snapshot.lastError = nil
                 s.snapshot.state = s.wantsPlaying ? .playing : .paused
             }
-            return [s.current, s.next, s.staleNext].compactMap { $0 }.filter { $0.mediaURL != current.mediaURL && $0.mediaURL != next?.mediaURL }
+            return [s.current, s.next].compactMap { $0 } + s.staleNexts.filter { $0.mediaURL != current.mediaURL && $0.mediaURL != next?.mediaURL }
         }
         old.forEach(release)
         if !state.withLock({ $0.wantsPlaying }) { try await transport.pause() }
@@ -829,39 +833,42 @@ public final class RendererPlayback: @unchecked Sendable {
             log.error("Renderer \(self.renderer.name, privacy: .public), next song: \(String(describing: error), privacy: .public)")
             return
         }
-        // The player holds this one now, and nothing it held before.
-        let old = state.withLock { s -> [Entry] in
-            defer { s.next = entry; s.staleNext = nil; s.staleClearTries = 0 }
-            return [s.next, s.staleNext].compactMap { $0 }
-        }
-        old.forEach(release)
+        // The player holds this one now as its next song, and nothing it held before; it may have gone on to one of those
+        // just before the change reached it, so they are kept until the next poll has seen the song it is on.
+        retire(replacedBy: entry)
     }
 
-    /// Takes the next song off the player (an empty NextURI). Confirmed: what it held is let go of. Not confirmed (the
-    /// player refused, or didn't answer): the song is kept as `staleNext`, with its address and its copy, since the player
-    /// may still go on to it; the polls try the clear again, and put a player found playing it right. Throws the failure.
+    /// The player confirmed `next` (nil: nothing) as its next song: what it held next before is stale until reconciled.
+    private func retire(replacedBy next: Entry?) {
+        state.withLock { s in
+            if let old = s.next, old.mediaURL != next?.mediaURL { s.staleNexts.append(old) }
+            s.next = next
+            s.staleClearTries = 0
+            s.staleConfirmed = !s.staleNexts.isEmpty
+        }
+    }
+
+    /// Takes the next song off the player (an empty NextURI). Confirmed: what it held is stale until the next poll has
+    /// seen the song the player is on (it may have gone on to it just before the clear). Not confirmed (the player refused,
+    /// or didn't answer): the song is stale, with its address and its copy, since the player may still go on to it; the
+    /// polls try the clear again, and put a player found playing it right. Throws the failure.
     private func takeNextOff() async throws {
         do { try await setNext(nil) } catch {
             keepNextAsStale()
             throw error
         }
-        let old = state.withLock { s -> [Entry] in
-            defer { s.next = nil; s.staleNext = nil; s.staleClearTries = 0 }
-            return [s.next, s.staleNext].compactMap { $0 }
-        }
-        old.forEach(release)
+        retire(replacedBy: nil)
     }
 
-    /// The next song held is no longer next, and the player wasn't confirmed to have dropped it: it becomes `staleNext`.
-    /// One that was stale before goes (the player confirmed the song after it, `next`, so it holds that one, if any).
+    /// The next song held is no longer next, and the player wasn't confirmed to have dropped it: it becomes stale, and
+    /// the clear is to be tried again (for every stale song: the player is told what it is to hold next, `next`).
     private func keepNextAsStale() {
         let at = now()
-        let older = state.withLock { s -> Entry? in
-            guard let next = s.next else { return nil }
-            defer { s.staleNext = next; s.next = nil; s.staleClearTries = 0; s.staleTriedAt = at }
-            return s.staleNext
+        state.withLock { s in
+            guard let next = s.next else { return }
+            s.staleNexts.append(next); s.next = nil
+            s.staleConfirmed = false; s.staleClearTries = 0; s.staleTriedAt = at
         }
-        older.map(release)
     }
 
     /// Clears a stale next song again (the player may answer now): what it is to hold is `next` (nil: nothing). A few tries,
@@ -869,7 +876,7 @@ public final class RendererPlayback: @unchecked Sendable {
     private func retryStaleClear() async {
         let at = now()
         let next = state.withLock { s -> Entry?? in
-            guard s.staleNext != nil, s.staleClearTries < Self.staleClearAttempts,
+            guard !s.staleNexts.isEmpty, !s.staleConfirmed, s.staleClearTries < Self.staleClearAttempts,
                   s.staleTriedAt.map({ at.timeIntervalSince($0) >= staleClearSpacing }) ?? true else { return .none }
             s.staleClearTries += 1
             s.staleTriedAt = at
@@ -880,8 +887,9 @@ public final class RendererPlayback: @unchecked Sendable {
             log.error("Renderer \(self.renderer.name, privacy: .public), clearing the old next song again: \(String(describing: error), privacy: .public)")
             return
         }
-        let old = state.withLock { s -> Entry? in defer { s.staleNext = nil; s.staleClearTries = 0 }; return s.staleNext }
-        old.map(release)
+        // Confirmed: kept until the next poll has seen the song the player is on (it may have gone on to a stale one after
+        // the poll that sent this clear asked, and before the clear reached it).
+        state.withLock { s in if !s.staleNexts.isEmpty { s.staleConfirmed = true; s.staleClearTries = 0 } }
     }
     /// Tries of a stale clear (one a second), then only watched for: a renderer that always refuses an empty NextURI isn't
     /// asked for ever.
@@ -918,7 +926,7 @@ public final class RendererPlayback: @unchecked Sendable {
         }
     }
 
-    /// The player went on to a next song it couldn't be told to drop (`staleNext`): `ended` played to its end, and what
+    /// The player went on to a next song no longer next (`staleNexts`): `ended` played to its end, and what
     /// follows it in the queue now is what plays; at the queue's end the player is stopped. The stale song is let go of then,
     /// and never announced.
     /// `polled`: the play the poll that found it began in. A stop or a song chosen while that poll waited for the player's
@@ -935,16 +943,23 @@ public final class RendererPlayback: @unchecked Sendable {
         log.notice("Renderer \(self.renderer.name, privacy: .public) went on to a song no longer next; playing the queue's")
         // Let go of at once, so the polls put this right once only (were the right song then to fail, they'd start it again
         // at every poll).
-        let stale = state.withLock { s -> Entry? in defer { s.staleNext = nil; s.staleClearTries = 0 }; return s.staleNext }
-        stale.map(release)
+        releaseStale()
         guard following == nil else { return }
         try? await transport.stop()
         emit(.queueEnded)
     }
 
+    /// Lets go of every stale next song (put right, or reconciled).
+    private func releaseStale() {
+        let stale = state.withLock { s -> [Entry] in defer { s.staleNexts = []; s.staleConfirmed = false; s.staleClearTries = 0 }; return s.staleNexts }
+        stale.forEach(release)
+    }
+
     private func poll() async {
         // The play this poll begins in: what it finds is acted on only while that is still the current one.
         let polled = generation.withLock { $0 }
+        // What the player holds next was confirmed before this status was asked for: what it answers settles the stale songs.
+        let reconciles = state.withLock { $0.staleConfirmed }
         let status: RendererStatus
         do { status = try await transport.status() } catch {
             // Gone once it has failed to answer for a while, not at a moment's trouble on the network: it may well be
@@ -960,10 +975,10 @@ public final class RendererPlayback: @unchecked Sendable {
             if lost {
                 let old = state.withLock { s -> [Entry] in
                     defer {
-                        s.current = nil; s.next = nil; s.staleNext = nil; s.anchor = nil; s.snapshot.state = .stopped; s.wantsPlaying = false
+                        s.current = nil; s.next = nil; s.staleNexts = []; s.anchor = nil; s.snapshot.state = .stopped; s.wantsPlaying = false
                         s.failedPolls = 0; s.failingSince = nil; s.awaitingStartSince = nil
                     }
-                    return [s.current, s.next, s.staleNext].compactMap { $0 }
+                    return [s.current, s.next].compactMap { $0 } + s.staleNexts
                 }
                 old.forEach(release)
                 refreshActivity()
@@ -973,15 +988,18 @@ public final class RendererPlayback: @unchecked Sendable {
         }
         state.withLock { $0.failedPolls = 0; $0.failingSince = nil }
         guard var current = state.withLock({ $0.current }) else { return }
-        // A next song the player was told to drop and didn't confirm. Gone on to it all the same (the song playing ended):
-        // it isn't the queue's, so it isn't taken for the next song; Vespertine plays the one the queue has after the song
-        // that ended, or stops at the queue's end. Else the clear is tried again.
-        if let stale = state.withLock({ $0.staleNext }) {
-            if status.currentURI == stale.mediaURL {
+        // Next songs the player held that are no longer next. Gone on to one all the same (the song playing ended): it
+        // isn't the queue's, so it isn't taken for the next song; Vespertine plays the one the queue has after the song that
+        // ended, or stops at the queue's end. Else, once the change was confirmed, they are let go of; until then the clear
+        // is tried again.
+        let stale = state.withLock { $0.staleNexts }
+        if !stale.isEmpty {
+            if let uri = status.currentURI, stale.contains(where: { $0.mediaURL == uri }) {
                 await putRight(after: current, polled: polled)
                 return
             }
-            await retryStaleClear()
+            // On another song, asked after the change was confirmed: it can't go on to them any more.
+            if reconciles { releaseStale() } else { await retryStaleClear() }
         }
         var advanced = false
         // The renderer moved on to the next song by itself.
@@ -1023,8 +1041,8 @@ public final class RendererPlayback: @unchecked Sendable {
         if !current.announced, let since = state.withLock({ $0.wantsPlaying ? $0.awaitingStartSince : nil }),
            now().timeIntervalSince(since) >= startTimeout {
             let old = state.withLock { s -> [Entry] in
-                defer { s.current = nil; s.next = nil; s.staleNext = nil; s.anchor = nil; s.awaitingStartSince = nil }
-                return [s.current, s.next, s.staleNext].compactMap { $0 }
+                defer { s.current = nil; s.next = nil; s.staleNexts = []; s.anchor = nil; s.awaitingStartSince = nil }
+                return [s.current, s.next].compactMap { $0 } + s.staleNexts
             }
             old.forEach(release)
             try? await transport.stop()
