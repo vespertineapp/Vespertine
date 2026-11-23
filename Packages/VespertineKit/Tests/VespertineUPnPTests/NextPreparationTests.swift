@@ -84,7 +84,16 @@ private final class GatedTransport: RendererTransport, @unchecked Sendable {
     /// While set, a stop waits before it reaches the player (a slow answer); `stopWaiting` counts the waits.
     let stopHeld = Locked(false)
     let stopWaiting = Locked(0)
-    func seek(to seconds: TimeInterval) async throws { try await inner.seek(to: seconds) }
+    func seek(to seconds: TimeInterval) async throws {
+        if failsSeek.withLock({ $0 }) {
+            seekFailed.withLock { $0 += 1 }
+            throw UPnPError.fault(code: 710, description: "Seek mode not supported")
+        }
+        try await inner.seek(to: seconds)
+    }
+    /// While set, every seek fails (a player that won't seek yet); `seekFailed` counts the failures.
+    let failsSeek = Locked(false)
+    let seekFailed = Locked(0)
     /// While set, a status request waits before it reaches the player (a slow answer); `statusWaiting` counts the waits.
     let statusHeld = Locked(false)
     let statusWaiting = Locked(0)
@@ -761,7 +770,7 @@ struct NextPreparationTests {
         #expect(!rig.playback.wantsPlaying)
     }
 
-    // MARK: After vtsonos10 (2026-11-23): a start's own failure after a command
+    // MARK: After vtsonos10 (2026-11-23): a start's own failure, and the pending seek given up, after a command
 
     @Test("The player refuses the song, and Stop or Play again comes while the load is on its way: the old failure isn't reported, and the song played again plays (not paused)",
           arguments: [false, true])
@@ -816,6 +825,40 @@ struct NextPreparationTests {
         await rig.playback.settleForTests()
         #expect(!rig.events.all.contains { $0.hasPrefix("failed") }, "the old song's failure was delivered after the command")
         #expect(rig.playback.wantsPlaying == retry)
+    }
+
+    @Test("A song started part-way in whose seek the player keeps refusing: the listener is told the seek was given up")
+    func seekGivenUpReported() async throws {
+        let ready = PlayableItem(url: try makeFLAC(from: try makeWAV(seconds: 2, seed: 7)))
+        let rig = try await Rig.make(second: ready)
+        defer { rig.close() }
+        rig.transport.failsSeek.withLock { $0 = true }
+        rig.playback.play(rig.first, at: 1)
+        #expect(await rig.events.wait(for: "notice", timeout: 5), "the seek given up wasn't reported")
+        #expect(rig.transport.seekFailed.withLock { $0 } == 5)
+    }
+
+    @Test("The seek of a song started part-way in is given up, and Stop comes before the notice reaches the main actor: it isn't delivered")
+    func seekGivenUpOvertakenBeforeDelivery() async throws {
+        let ready = PlayableItem(url: try makeFLAC(from: try makeWAV(seconds: 2, seed: 7)))
+        let rig = try await Rig.make(second: ready)
+        defer { rig.close() }
+        rig.transport.failsSeek.withLock { $0 = true }
+        let gaveUp = await MainActor.run { () -> Bool in
+            rig.playback.play(rig.first, at: 1)
+            // The main actor is busy until the fifth try has failed (the notice sent its way); Stop is pressed there.
+            let deadline = Date().addingTimeInterval(5)
+            while rig.transport.seekFailed.withLock({ $0 }) < 5, Date() < deadline { Thread.sleep(forTimeInterval: 0.01) }
+            Thread.sleep(forTimeInterval: 0.2)
+            rig.playback.stop()
+            return rig.transport.seekFailed.withLock { $0 } >= 5
+        }
+        #expect(gaveUp, "the seek wasn't given up")
+        #expect(await within(3) { rig.fake.transportState == "Stopped" })
+        try await Task.sleep(for: .milliseconds(300))
+        await rig.playback.settleForTests()
+        #expect(!rig.events.all.contains { $0.hasPrefix("notice") }, "the seek given up was reported after Stop")
+        #expect(!rig.playback.wantsPlaying)
     }
 
     @Test("The player goes on to the old next song between a poll's answer and the clear's success: it is still recognised and put right")

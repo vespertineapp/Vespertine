@@ -1084,9 +1084,18 @@ public final class RendererPlayback: @unchecked Sendable {
                 try await transport.seek(to: seek)
                 _ = ifStill(polled) { s -> Void in s.pendingSeek = nil; s.heard = seek }
             } catch {
-                // Still settling: tried again at the next polls, then given up on (the song plays from where it is).
-                let giveUp = ifStill(polled) { s -> Bool in s.pendingSeekTries += 1; if s.pendingSeekTries >= 5 { s.pendingSeek = nil; return true }; return false } ?? false
-                if giveUp { emit(.notice(String(localized: "\(renderer.name) didn't seek (\((error as? UPnPError)?.message ?? error.localizedDescription)).", comment: "%1$@ is a network player's name, %2$@ the reason."))) }
+                // Still settling: tried again at the next polls, then given up on (the song plays from where it is). The
+                // notice carries the selection it was given up in: not delivered once a stop or another song has come.
+                let gaveUpIn = ifStill(polled) { s -> Int? in
+                    s.pendingSeekTries += 1
+                    guard s.pendingSeekTries >= 5 else { return nil }
+                    s.pendingSeek = nil
+                    return s.selection
+                } ?? nil
+                if let gaveUpIn {
+                    emit(.notice(String(localized: "\(renderer.name) didn't seek (\((error as? UPnPError)?.message ?? error.localizedDescription)).", comment: "%1$@ is a network player's name, %2$@ the reason.")),
+                         forSelection: gaveUpIn)
+                }
             }
             return
         }
