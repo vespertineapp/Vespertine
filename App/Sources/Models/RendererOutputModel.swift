@@ -28,6 +28,8 @@ final class RendererOutputModel {
     @ObservationIgnored private var volumeControl: (uid: String, description: DeviceDescription, isGroup: Bool, control: any RendererVolume)?
     @ObservationIgnored private var volumeSend: Task<Void, Never>?
     @ObservationIgnored private var volumeWatch: Task<Void, Never>?
+    /// The player's own volume control for a device (the tests hand in one that records what it is told).
+    @ObservationIgnored var makeVolume: (RendererDevice) -> (any RendererVolume)? = { $0.makeVolume() }
     /// Called when the list of renderers changes.
     @ObservationIgnored var onChange: (() -> Void)?
     /// A renderer that is never listed: this Mac's own receiver (Receive from Other Apps), which would only play to itself.
@@ -74,6 +76,8 @@ final class RendererOutputModel {
     func stop() {
         playback?.shutdown()
         playback = nil
+        // Network Players off: nothing more goes to any player, a volume change on its way included.
+        cancelVolumeSend()
         watchVolume(of: nil)
         service.want(false)
         renderers = []
@@ -82,7 +86,9 @@ final class RendererOutputModel {
     /// The player's own volume for `device`: read now, and every few seconds while it stays the chosen one (the level is
     /// also changed from the Sonos app and the TV remote). nil lets go of it.
     func watchVolume(of device: RendererDevice?) {
-        guard let device, let control = device.makeVolume() else {
+        guard let device, let control = makeVolume(device) else {
+            // A change still on its way was meant for the player let go of: it isn't sent after all.
+            cancelVolumeSend()
             volumeControl = nil
             volumeWatch?.cancel()
             volumeWatch = nil
@@ -92,6 +98,8 @@ final class RendererOutputModel {
         }
         // The same player, arranged as before: the watch that is running carries on.
         if let held = volumeControl, held.uid == device.uid, held.description == device.description, held.isGroup == (device.sonos?.isGroup == true) { return }
+        // Another player (or the same one somewhere else, with a control of its own): what was on its way to the old one stays unsent.
+        cancelVolumeSend()
         volumeControl = (device.uid, device.description, device.sonos?.isGroup == true, control)
         volumeWatch?.cancel()
         playerVolume = nil
@@ -124,6 +132,11 @@ final class RendererOutputModel {
         }
     }
 
+    private func cancelVolumeSend() {
+        volumeSend?.cancel()
+        volumeSend = nil
+    }
+
     /// Searches again (the output list opened).
     func refresh() { service.refresh() }
 
@@ -144,6 +157,8 @@ final class RendererOutputModel {
             }
             playback?.shutdown()
             playback = nil
+            // No network player plays now: a volume change still on its way to one stays unsent.
+            cancelVolumeSend()
             return nil
         }
         // The same renderer at the same address, or one that is answering as it is: its playback carries on. So does one
