@@ -159,7 +159,8 @@ private struct Rig {
     let queue: Locked<[PlayableItem]>
 
     /// `second`: the song after the first one, in place of the one converted for Sonos.
-    static func make(second: PlayableItem? = nil, startTimeout: TimeInterval = 15, lostAfter: TimeInterval = 10) async throws -> Rig {
+    /// `pollInterval` 0: no polls of its own (a test steps them with `settleForTests`).
+    static func make(second: PlayableItem? = nil, startTimeout: TimeInterval = 15, lostAfter: TimeInterval = 10, pollInterval: TimeInterval = 0.05) async throws -> Rig {
         let fake = try await FakeRenderer(kind: .av(setNext: true), udn: "uuid:RINCON_BAR01400_MR")
         fake.sonosRoom = "Living Room"
         fake.sink = "http-get:*:audio/flac:*,http-get:*:audio/mp4:*,http-get:*:audio/wav:*,http-get:*:audio/mpeg:*"
@@ -168,7 +169,7 @@ private struct Rig {
         let device = try await RendererDevice.load(location: fake.location)
         let maker = StuckStreamMaker()
         let transport = GatedTransport(try device.makeTransport())
-        let playback = RendererPlayback(renderer: device, transport: transport, media: media, processed: maker, pollInterval: 0.05,
+        let playback = RendererPlayback(renderer: device, transport: transport, media: media, processed: maker, pollInterval: pollInterval,
                                         startTimeout: startTimeout, lostAfter: lostAfter)
         // Long enough that a worker held by it would fail every check below; short enough not to hold the run up for long.
         playback.wholeFileWait = 30
@@ -942,7 +943,7 @@ struct NextPreparationTests {
         #expect(!rig.events.all.contains { $0.hasPrefix("notice") })
     }
 
-    // MARK: After the eighth review (2026-11-23): a change of settings queued before a command
+    // MARK: After the eighth review (2026-11-23): a change of settings queued before a command, and a seek after a pending one
 
     @Test("A change of settings that restarts the song, queued before a song chosen or a Stop: the song chosen plays, or the Stop holds; the old song isn't started again, and the settings still apply",
           arguments: [false, true])
@@ -991,6 +992,24 @@ struct NextPreparationTests {
             #expect(await within(5) { rig.maker.begun > streams }, "the song played after the Stop wasn't processed")
             #expect(rig.maker.settingsAsked.last == quieter, "the settings given before the Stop were lost")
         }
+    }
+
+    @Test("A song started part-way in, seeked by the listener before the player played it: the seek asked for holds, the start's position isn't sent after it")
+    func explicitSeekClearsPendingSeek() async throws {
+        let ready = PlayableItem(url: try makeFLAC(from: try makeWAV(seconds: 2, seed: 7)))
+        // No polls but the ones this test steps: the start's own seek (30 s) is still pending when the listener seeks.
+        let rig = try await Rig.make(second: ready, pollInterval: 0)
+        defer { rig.close() }
+        rig.playback.play(rig.first, at: 30)
+        #expect(await within(5) { rig.playback.isEngaged && rig.fake.transportState == "Playing" }, "the song wasn't loaded")
+        let before = rig.fake.calls.filter { $0.action == "Seek" }.count
+        rig.playback.seek(to: 60)
+        await rig.playback.settleForTests()
+        await rig.playback.settleForTests()
+        let targets = rig.fake.calls.filter { $0.action == "Seek" }.dropFirst(before).map { DIDLLite.seconds($0.arguments["Target"]).map { Int($0) } ?? -1 }
+        #expect(targets == [60], "seeks sent: \(targets)")
+        let position = rig.playback.snapshot.position
+        #expect(position >= 59.5 && position < 62, "position \(position)")
     }
 
     @Test("The player goes on to the old next song between a poll's answer and the clear's success: it is still recognised and put right")

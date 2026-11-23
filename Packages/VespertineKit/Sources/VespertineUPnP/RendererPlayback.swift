@@ -790,11 +790,13 @@ public final class RendererPlayback: @unchecked Sendable {
             return current
         }) else { return }
         // What the player was told is shown only while it is still the song seeked (a stop or a song chosen while the
-        // player answered has set the snapshot itself).
+        // player answered has set the snapshot itself). The position a start part-way in still had pending is older than
+        // this seek: it is dropped in the same step, else a poll would send it after this one and undo it.
         let landed = { [state] (heard: TimeInterval) in
             state.withLock { s in
                 guard s.selection == target.selection, s.current?.item.id == target.item else { return }
                 s.anchor = nil; s.snapshot.position = seconds; s.heard = heard
+                s.pendingSeek = nil; s.pendingSeekTries = 0
             }
         }
         if let stream = current.processedFile, renderer.limits?.wholeFiles == true, stream.isFinished, seconds >= current.startOffset {
