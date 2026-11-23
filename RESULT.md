@@ -72,7 +72,7 @@ Not run this pass: the release-mode engine tests, the analysis package tests, th
 On the Mac you play from, on the same network as the Sonos (not a guest network):
 
 1. Settings › Playback › Network Players (Sonos and UPnP, beta) on; allow local-network access.
-2. Output list: one row named after the room, `SONOS · 5.1 · UP TO 24/48 · STEREO`, no rows for the Ones or the Sub. Otherwise: `cd Packages/VespertineKit && swift run vespertine-probe sonos` and keep the output.
+2. Output list: one row named after the room, `SONOS · 5.1 · UP TO 24/48 · STEREO`, no rows for the Ones or the Sub. `UP TO 16/48` means Vespertine took it for S1 or couldn't tell; the probe's "software:" line shows what the speaker stated (please keep it either way). Otherwise: `cd Packages/VespertineKit && swift run vespertine-probe sonos` and keep the output.
 3. A 16/44.1 FLAC: "Will play 16-bit / 44.1 kHz FLAC, stereo, the file as it is"; plays within seconds; badge `BIT-PERFECT · 16/44.1 SENT`. "UPnP error 716": allow Vespertine in System Settings › Network › Firewall.
 4. A 24/96 or 24/192 song: copper "Will play 24-bit / 48 kHz FLAC, stereo (source …)"; up to 20 s "Preparing output…"; badge `RESAMPLED · 24/48 SENT`; "Player limit" in the signal path.
 5. Pause, play, seek, skip; move the SONOS volume slider and watch the Sonos app follow.
