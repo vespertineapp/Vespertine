@@ -188,7 +188,14 @@ public actor AVTransportControl: RendererTransport {
     private let client: SOAPClient
     private let retryPause: @Sendable () async -> Void
     private var current: RendererTrack?
+    /// The next song the renderer is confirmed to hold: changed only once the renderer took the change, so a change it
+    /// refused leaves the one it still holds known (it may well go on to it).
     private var next: RendererTrack?
+    /// Next songs replaced on the renderer that it may already have gone on to before the change reached it: still
+    /// recognised as the song it is on until a status asked for after the change shows it on `current` (it can't go on to
+    /// them after that). `replaced` counts the changes, so a status that began before one doesn't count.
+    private var retired: [RendererTrack] = []
+    private var replaced = 0
     private static let instance = ("InstanceID", "0")
 
     /// `retryPause`: the wait before a Stop refused with UPnP 501 is tried again (a test waits for nothing).
@@ -213,16 +220,22 @@ public actor AVTransportControl: RendererTransport {
 
     public func load(current: RendererTrack, next: RendererTrack?) async throws {
         try await setCurrent(current)
-        self.next = next
+        // The new current URI replaced whatever the renderer held, its next song with it.
+        self.next = nil
+        retired = []
+        replaced += 1
         // A next song left from before must not play after this one: an empty NextURI clears it (some renderers refuse
         // the empty one; setting the current URI clears it on those).
-        if let next { try await setNextOnRenderer(next) } else { try? await setNextOnRenderer(nil) }
+        if let next { try await setNextOnRenderer(next); self.next = next } else { try? await setNextOnRenderer(nil) }
         try await play()
     }
 
     public func replaceNext(_ next: RendererTrack?) async throws {
-        self.next = next
+        // Refused (or no answer): the renderer still holds the old next song, and `next` still says so.
         try await setNextOnRenderer(next)
+        replaced += 1
+        if let old = self.next, old.uri != next?.uri { retired.append(old) }
+        self.next = next
     }
 
     public func play() async throws {
@@ -246,6 +259,7 @@ public actor AVTransportControl: RendererTransport {
     }
 
     public func status() async throws -> RendererStatus {
+        let changes = replaced
         let info = try await client.call(transport, "GetTransportInfo", [Self.instance])
         let position = try await client.call(transport, "GetPositionInfo", [Self.instance])
         let state: RendererState = switch info["CurrentTransportState"] ?? "" {
@@ -256,11 +270,22 @@ public actor AVTransportControl: RendererTransport {
         default: .stopped
         }
         let uri = (position["TrackURI"]).flatMap { URL(string: $0) }
-        let currentURI = [current, next].compactMap { $0 }.first { $0.uri == uri }?.uri ?? (uri == nil ? current?.uri : nil)
+        let known = [current, next].compactMap { $0 } + retired
+        let currentURI = known.first { $0.uri == uri }?.uri ?? (uri == nil ? current?.uri : nil)
         if let currentURI, currentURI == next?.uri {
             // The renderer moved on to the next song by itself.
             current = next
             next = nil
+            retired = []
+        } else if let currentURI, let gone = retired.first(where: { $0.uri == currentURI }) {
+            // It went on to a next song before the change of it arrived: that is the song it plays, and what it holds
+            // next is unknown (Vespertine puts it right).
+            current = gone
+            next = nil
+            retired = []
+        } else if currentURI == current?.uri, changes == replaced {
+            // Asked after the last change and still on the song before: it can't go on to the replaced ones any more.
+            retired = []
         }
         return RendererStatus(state: state, position: DIDLLite.seconds(position["RelTime"]) ?? 0,
                               duration: DIDLLite.seconds(position["TrackDuration"]).flatMap { $0 > 0 ? $0 : nil }, currentURI: currentURI)

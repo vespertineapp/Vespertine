@@ -49,6 +49,7 @@ private final class GatedTransport: RendererTransport, @unchecked Sendable {
         try await inner.load(current: current, next: next)
     }
     func replaceNext(_ next: RendererTrack?) async throws {
+        beforeReplaceNext.withLock { hook -> (@Sendable () -> Void)? in defer { hook = nil }; return hook }?()
         if refusesNext.withLock({ $0 }) {
             nextRefused.withLock { $0 += 1 }
             throw UPnPError.fault(code: 501, description: "Action Failed")
@@ -59,7 +60,18 @@ private final class GatedTransport: RendererTransport, @unchecked Sendable {
     func pause() async throws { try await inner.pause() }
     func stop() async throws { try await inner.stop() }
     func seek(to seconds: TimeInterval) async throws { try await inner.seek(to: seconds) }
-    func status() async throws -> RendererStatus { try await inner.status() }
+    /// While set, a status request waits before it reaches the player (a slow answer); `statusWaiting` counts the waits.
+    let statusHeld = Locked(false)
+    let statusWaiting = Locked(0)
+    /// Run once, at the next change of the next song, before it reaches the player (then cleared).
+    let beforeReplaceNext = Locked<(@Sendable () -> Void)?>(nil)
+    func status() async throws -> RendererStatus {
+        if statusHeld.withLock({ $0 }) {
+            statusWaiting.withLock { $0 += 1 }
+            while statusHeld.withLock({ $0 }) { try? await Task.sleep(for: .milliseconds(5)) }
+        }
+        return try await inner.status()
+    }
 }
 
 /// A stream's song whose download never finishes (a slow server that is still sending): its reads wait until the test ends
@@ -348,5 +360,44 @@ struct NextPreparationTests {
             #expect(await rig.events.wait(for: "ended", timeout: 5), "the queue's end wasn't reached")
             #expect(await within(2) { rig.fake.transportState == "Stopped" }, "the song no longer in the queue plays on")
         }
+    }
+
+    // MARK: The fourth review (2026-11-23)
+
+    /// As `refusedClear`, but the player itself refuses (`FakeRenderer.fail`): the failure goes through the real transport,
+    /// which must still know the song the player holds. `times`: how many changes of the next song it refuses.
+    private func playerRefusedClear(_ rig: Rig, queue: [PlayableItem], times: Int = 10_000) async throws -> String {
+        rig.playback.play(rig.first)
+        #expect(await rig.events.wait(for: "started \(rig.first.url.lastPathComponent)"))
+        #expect(await within(5) { rig.fake.nextURI != nil })
+        await rig.playback.settleForTests()
+        let old = try #require(rig.fake.nextURI)
+        let asked = rig.fake.actions.filter { $0 == "SetNextAVTransportURI" }.count
+        rig.fake.fail("SetNextAVTransportURI", code: 501, times: times)
+        rig.queue.withLock { $0 = queue }
+        rig.playback.queueChanged()
+        #expect(await within(2) { rig.fake.actions.filter { $0 == "SetNextAVTransportURI" }.count > asked }, "the clear wasn't asked for")
+        await rig.playback.settleForTests()
+        #expect(rig.fake.nextURI == old)
+        return old
+    }
+
+    @Test("The player itself refuses the clear and then goes on to the old next song: it is recognised and put right",
+          arguments: [false, true])
+    func playerRefusedClearMovesOn(following: Bool) async throws {
+        let ready = PlayableItem(url: try makeFLAC(from: try makeWAV(seconds: 2, seed: 7)))
+        let rig = try await Rig.make(second: ready)
+        defer { rig.close() }
+        let old = try await playerRefusedClear(rig, queue: following ? [rig.first, rig.third] : [rig.first])
+        rig.fake.advance()
+        #expect(rig.fake.currentURI == old)
+        if following {
+            #expect(await rig.events.wait(for: "started \(rig.third.url.lastPathComponent)", timeout: 5), "the queue's next song didn't play")
+            #expect(rig.fake.currentURI != old)
+        } else {
+            #expect(await rig.events.wait(for: "ended", timeout: 5), "the queue's end wasn't reached")
+            #expect(await within(2) { rig.fake.transportState == "Stopped" }, "the song no longer in the queue plays on")
+        }
+        #expect(!rig.events.all.contains("started \(ready.url.lastPathComponent)"), "the song no longer next was announced")
     }
 }
