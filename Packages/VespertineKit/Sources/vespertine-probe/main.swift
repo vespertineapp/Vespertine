@@ -90,8 +90,9 @@ if args.count >= 2, args[1] == "sonos" {
                 if let volume = device.makeVolume(client: client), let level = try? await volume.volume() { print("          volume now: \(level)") }
                 for file in files {
                     guard let described = try? SourceDescription.describe(PlayableItem(url: file), url: file) else { print("          \(file.lastPathComponent): can't be read"); continue }
-                    let forecast = RouteForecast.renderer(source: described.format, mime: MediaType.mime(forExtension: file.pathExtension), limits: device.limits,
-                                                          homeTheater: zone?.isHomeTheater == true)
+                    let item = PlayableItem(url: file)
+                    let forecast = RouteForecast.renderer(item: item, url: file, source: described.format, settings: RendererSettings(),
+                                                          capabilities: device.capabilities, limits: device.limits, homeTheater: zone?.isHomeTheater == true)
                     print("          \(file.lastPathComponent): \(forecast.line)")
                     forecast.notes.forEach { print("            \($0)") }
                 }

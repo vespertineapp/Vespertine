@@ -17,17 +17,22 @@ public struct RouteForecast: Sendable, Hashable {
     /// What happens to surround or Dolby Atmos on this output, and anything else worth a sentence; often empty.
     public var notes: [String]
 
-    public init(sent: String, source: String? = nil, notes: [String] = []) {
+    /// The player can't be sent this song at all (it takes neither the file nor FLAC): why, as a sentence. Nil otherwise.
+    public var refusal: String?
+
+    public init(sent: String, source: String? = nil, notes: [String] = [], refusal: String? = nil) {
         self.sent = sent
         self.source = source
         self.notes = notes
+        self.refusal = refusal
     }
 
-    /// The samples arrive as they are in the file.
-    public var unchanged: Bool { source == nil }
+    /// The samples arrive as they are in the file (and the song can be sent at all).
+    public var unchanged: Bool { source == nil && refusal == nil }
 
-    /// "24-bit / 48 kHz FLAC, stereo (source 24/192)".
+    /// "24-bit / 48 kHz FLAC, stereo (source 24/192)"; for a player that can't be sent the song, why.
     public var line: String {
+        if let refusal { return refusal }
         guard let source else { return sent }
         return String(localized: "\(sent) (source \(source))", comment: "Output list: what a song will be played as on this output, then its own format in brackets, e.g. “24-bit / 48 kHz FLAC, stereo (source 24/192)”.")
     }
@@ -62,11 +67,13 @@ public struct RouteForecast: Sendable, Hashable {
 
     // MARK: Network players
 
-    /// A network player that pulls a file from Vespertine. `limits`: what it takes beyond its own list (a Sonos); nil for a
-    /// player sent the file as it is. `mime`: the file's type when the whole file can be handed over. `processed`: the
-    /// listener's own equalizer, room correction, volume or ReplayGain is on for it, so a 24-bit FLAC is made either way.
-    public static func renderer(source: SourceFormat, mime: String?, limits: StreamLimits?, processed: Bool = false, homeTheater: Bool = false) -> RouteForecast {
-        let fitted = limits.map { StreamNegotiation.plan(source: source, mime: mime, limits: $0) }
+    /// A network player that pulls a file from Vespertine, from the very decision playback makes for it
+    /// (`RendererMode.decide`): what the player advertises (`capabilities`), what it takes beyond its own list (`limits`, a
+    /// Sonos; nil for a player sent the file as it is), and the listener's own equalizer, room correction, volume and
+    /// ReplayGain (`settings`, the item's gain). `url`: the file playback would open for the item. A player that can be sent
+    /// nothing gets a `refusal`, not a format.
+    public static func renderer(item: PlayableItem, url: URL, source: SourceFormat, settings: RendererSettings, capabilities: RendererCapabilities,
+                                limits: StreamLimits?, homeTheater: Bool = false) -> RouteForecast {
         var notes: [String] = []
         if let limits, source.channels > limits.maxChannels {
             notes.append(isAtmos(source)
@@ -76,21 +83,42 @@ public struct RouteForecast: Sendable, Hashable {
         if homeTheater {
             notes.append(String(localized: "The room's surround speakers play two-channel music the way the Sonos app's Music Playback setting says: Ambient or Full.", comment: "A Sonos home theater room (soundbar with surrounds) playing stereo music. “Music Playback”, “Ambient” and “Full” are the Sonos app's own words."))
         }
-        if let fitted, !fitted.original {
-            let sent = "\(format(rate: fitted.sampleRate, bits: fitted.bitDepth)) FLAC, \(layout(fitted.channels))"
-            // The same samples in another file is not a change worth the song's own format in brackets, unless the chain is on.
-            let changed = fitted.changesSamples || processed
-            return RouteForecast(sent: sent, source: changed ? short(source, withLayout: fitted.channels != source.channels) : nil, notes: notes)
+        let decision = RendererMode.decide(item: item, url: url, source: source, settings: settings, capabilities: capabilities, limits: limits)
+        switch decision {
+        case .unplayable(let reason):
+            return RouteForecast(sent: "", notes: notes, refusal: reason)
+        case .passThrough(let mime):
+            // What the player says it doesn't take is named, as the signal path names it once the song plays.
+            // (A player that lists nothing is left to refuse what it can't play, as `decide` leaves it: nothing to name.)
+            if !capabilities.entries.isEmpty { notes += capabilities.warnings(for: source, sending: mime).map(\.message) }
+            let own = source.dsdName ?? format(rate: source.sampleRate, bits: source.bitDepth)
+            return RouteForecast(sent: String(localized: "\(own) \(source.codec), \(layout(source.channels)), the file as it is", comment: "Output list: a network player is sent the original file. %1$@ is a format (24-bit / 96 kHz), %2$@ a codec (FLAC), %3$@ a layout (stereo)."),
+                                 notes: notes)
+        case .processed(let reasons):
+            // The stream playback makes: to the player's limits when it has them (`NetworkRender.Target(_:limits:)`), else
+            // 24-bit FLAC at the song's own rate (DSD as PCM) and channels.
+            let rate: Double, bits: Int, channels: Int, fitChanges: Bool
+            let whole = item.regionStartFrame == nil && item.regionFrameLength == nil && item.sacdArea == nil && item.dvd == nil
+                && item.audioStream == nil && url.isFileURL
+            if let limits {
+                let fitted = StreamNegotiation.plan(source: source, mime: whole ? MediaType.mime(forExtension: url.pathExtension) : nil, limits: limits)
+                rate = fitted.sampleRate
+                bits = fitted.original ? limits.maxBitDepth : fitted.bitDepth ?? limits.maxBitDepth
+                channels = fitted.channels
+                fitChanges = fitted.changesSamples
+            } else {
+                rate = source.encoding == .dsd ? source.sampleRate / 8 : source.sampleRate
+                bits = 24
+                channels = source.channels
+                fitChanges = source.encoding == .dsd
+            }
+            let listeners: [SignalPath.RendererStage.Processing] = [.roomCorrection, .equalizer, .volume, .replayGain]
+            let changed = fitChanges || reasons.contains { listeners.contains($0) } || (source.bitDepth ?? 0) > bits
+            let sent = SourceFormat(encoding: .pcm, codec: "FLAC", sampleRate: rate, bitDepth: bits, channels: channels)
+            if !capabilities.entries.isEmpty { notes += capabilities.warnings(for: sent, sending: "audio/flac").map(\.message) }
+            return RouteForecast(sent: "\(format(rate: rate, bits: bits)) FLAC, \(layout(channels))",
+                                 source: changed ? short(source, withLayout: channels != source.channels) : nil, notes: notes)
         }
-        let rate = source.encoding == .dsd ? source.sampleRate / 8 : source.sampleRate
-        if processed || mime == nil {
-            // Decoded and sent as 24-bit FLAC at its own rate (DSD as PCM).
-            let sent = "\(format(rate: rate, bits: 24)) FLAC, \(layout(source.channels))"
-            return RouteForecast(sent: sent, source: processed || source.encoding == .dsd ? short(source, withLayout: false) : nil, notes: notes)
-        }
-        let own = source.dsdName ?? format(rate: source.sampleRate, bits: source.bitDepth)
-        return RouteForecast(sent: String(localized: "\(own) \(source.codec), \(layout(source.channels)), the file as it is", comment: "Output list: a network player is sent the original file. %1$@ is a format (24-bit / 96 kHz), %2$@ a codec (FLAC), %3$@ a layout (stereo)."),
-                             notes: notes)
     }
 
     // MARK: AirPlay

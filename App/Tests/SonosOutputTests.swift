@@ -53,12 +53,33 @@ struct SonosOutputTests {
         #expect(RendererText.sonosNotes(room(grouped)).contains { $0.contains("whole group") })
     }
 
+    @Test("The output row's forecast comes from what the player advertises: one that takes nothing Vespertine sends says so instead of \"Will play\"")
+    func advertised() {
+        let location = URL(string: "http://192.168.1.50:49152/description.xml")!
+        let description = DeviceDescription(udn: "uuid:wma-only", friendlyName: "Old Streamer", location: location, services: [])
+        let wmaOnly = RendererDevice(description: description, kind: .av(gapless: false), capabilities: .parse(sink: "http-get:*:audio/x-ms-wma:*"))
+        let item = PlayableItem(url: URL(fileURLWithPath: "/tmp/a.flac"))
+        let cd = SourceFormat(encoding: .pcm, codec: "FLAC", sampleRate: 44_100, bitDepth: 16, channels: 2)
+        let refused = RendererForecast.forecast(format: cd, item: item, renderer: wmaOnly, chain: RendererSettings())
+        #expect(refused.refusal != nil)
+        #expect(OutputForecastText.willPlay(refused) == "The player doesn't take FLAC, so this song can't be sent to it processed.")
+        // One that lists FLAC gets the file.
+        let flacPlayer = RendererDevice(description: description, kind: .av(gapless: true), capabilities: .parse(sink: "http-get:*:audio/flac:*"))
+        #expect(OutputForecastText.willPlay(RendererForecast.forecast(format: cd, item: item, renderer: flacPlayer, chain: RendererSettings()))
+            == "Will play 16-bit / 44.1 kHz FLAC, stereo, the file as it is")
+        // A Sonos S1 room with the listener's volume on: 16-bit FLAC.
+        let s1 = room(nil, swGen: "1")
+        #expect(RendererForecast.forecast(format: cd, item: item, renderer: s1, chain: RendererSettings(digitalVolumeDB: -6)).line
+            == "16-bit / 44.1 kHz FLAC, stereo (source 16/44.1)")
+    }
+
     @Test("The forecast reads a song's format from the library: DSD has no word length, a lossy file isn't PCM")
     func libraryFormat() {
         var track = Track.transient(location: "/nowhere/a.flac", title: "A", artist: "B", album: "C", duration: 60)
         track.codec = "FLAC"; track.isLossless = true; track.isDSD = false; track.sampleRate = 192_000; track.bitDepth = 24; track.channels = 2
         #expect(track.forecastFormat == SourceFormat(encoding: .pcm, codec: "FLAC", sampleRate: 192_000, bitDepth: 24, channels: 2))
-        #expect(RouteForecast.renderer(source: track.forecastFormat, mime: "audio/flac", limits: .sonos).line == "24-bit / 48 kHz FLAC, stereo (source 24/192)")
+        #expect(RendererForecast.forecast(format: track.forecastFormat, item: PlayableItem(url: URL(fileURLWithPath: "/nowhere/a.flac")), renderer: room(nil),
+                                          chain: RendererSettings()).line == "24-bit / 48 kHz FLAC, stereo (source 24/192)")
         track.codec = "DSF"; track.isDSD = true; track.sampleRate = 2_822_400; track.bitDepth = 1
         #expect(track.forecastFormat.encoding == .dsd)
         #expect(track.forecastFormat.bitDepth == nil)

@@ -26,20 +26,23 @@ extension AppModel {
         return (player.signalPath?.source ?? current.track.forecastFormat, current.item)
     }
 
-    /// The file's type when the whole file could be handed to a network player as it is.
-    private func wholeFileType(_ item: PlayableItem) -> String? {
-        guard item.regionStartFrame == nil, item.regionFrameLength == nil, item.sacdArea == nil, item.dvd == nil, item.audioStream == nil,
-              item.url.isFileURL else { return nil }
-        return MediaType.mime(forExtension: item.url.pathExtension)
-    }
-
     func forecast(for renderer: RendererDevice) -> RouteForecast? {
         guard let song = forecastSong else { return nil }
-        let chain = settings.rendererSettings(uid: renderer.uid)
-        let processed = chain.activeEqualizer != nil || chain.activeRoomCorrection != nil || chain.activeVolumeDB != nil || (song.item.replayGainDB ?? 0) != 0
-        return RouteForecast.renderer(source: song.format, mime: wholeFileType(song.item), limits: renderer.limits, processed: processed,
-                                      homeTheater: renderer.sonos?.isHomeTheater == true)
+        return RendererForecast.forecast(format: song.format, item: song.item, renderer: renderer, chain: settings.rendererSettings(uid: renderer.uid))
     }
+}
+
+/// The forecast for a network player: the decision its playback would make (`RendererMode.decide`), from what it
+/// advertises, its limits (a Sonos's, S1 or S2) and the listener's own chain for it.
+enum RendererForecast {
+    static func forecast(format: SourceFormat, item: PlayableItem, renderer: RendererDevice, chain: RendererSettings) -> RouteForecast {
+        RouteForecast.renderer(item: item, url: item.url, source: format, settings: chain, capabilities: renderer.capabilities,
+                               limits: renderer.limits, homeTheater: renderer.sonos?.isHomeTheater == true)
+    }
+}
+
+@MainActor
+extension AppModel {
 
     func forecast(for receiver: AirPlayDevice) -> RouteForecast? {
         guard let song = forecastSong, receiver.isSupported else { return nil }
@@ -68,8 +71,10 @@ extension AppModel {
 }
 
 enum OutputForecastText {
-    /// The forecast line under an output's name: "Will play 24-bit / 48 kHz FLAC, stereo (source 24/192)".
+    /// The forecast line under an output's name: "Will play 24-bit / 48 kHz FLAC, stereo (source 24/192)"; for a player that
+    /// can't be sent the song, why (a whole sentence of its own), never "Will play".
     static func willPlay(_ forecast: RouteForecast) -> String {
-        String(localized: "Will play \(forecast.line)", comment: "Output list: what the song loaded now would be played as on this output; %@ is e.g. “24-bit / 48 kHz FLAC, stereo (source 24/192)”.")
+        if let refusal = forecast.refusal { return refusal }
+        return String(localized: "Will play \(forecast.line)", comment: "Output list: what the song loaded now would be played as on this output; %@ is e.g. “24-bit / 48 kHz FLAC, stereo (source 24/192)”.")
     }
 }

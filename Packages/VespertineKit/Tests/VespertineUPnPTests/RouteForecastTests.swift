@@ -14,40 +14,49 @@ private func pcm(_ rate: Double, _ bits: Int? = 24, channels: Int = 2, codec: St
 private let dsd64 = SourceFormat(encoding: .dsd, codec: "DSF", sampleRate: 2_822_400, bitDepth: nil, channels: 2)
 private let atmos = SourceFormat(encoding: .lossy, codec: "Dolby Atmos", sampleRate: 48_000, bitDepth: nil, channels: 6)
 
+/// The forecast for a player that lists nothing (so takes anything): `mime` nil is a song with no file of its own to hand over
+/// (one stream of a file); `processed`, the listener's digital volume on.
+private func renderer(source: SourceFormat, mime: String?, limits: StreamLimits?, processed: Bool = false, homeTheater: Bool = false) -> RouteForecast {
+    let ext = ["audio/flac": "flac", "audio/wav": "wav", "audio/x-dsf": "dsf", "audio/mp4": "m4a"][mime ?? ""] ?? "m4a"
+    let item = PlayableItem(url: URL(fileURLWithPath: "/tmp/song.\(ext)"), audioStream: mime == nil ? 1 : nil)
+    return RouteForecast.renderer(item: item, url: item.url, source: source, settings: processed ? RendererSettings(digitalVolumeDB: -6) : RendererSettings(),
+                                  capabilities: RendererCapabilities(), limits: limits, homeTheater: homeTheater)
+}
+
 @Suite("What a song would be played as, per output")
 struct RouteForecastTests {
     @Test("Sonos: the file as it is within its limits; above them, what it is resampled to, with the song's own format in brackets")
     func sonos() {
-        let hiRes = RouteForecast.renderer(source: pcm(192_000), mime: "audio/flac", limits: .sonos)
+        let hiRes = renderer(source: pcm(192_000), mime: "audio/flac", limits: .sonos)
         #expect(hiRes.line == "24-bit / 48 kHz FLAC, stereo (source 24/192)")
         #expect(hiRes.notes.isEmpty)
         #expect(!hiRes.unchanged)
-        let cd = RouteForecast.renderer(source: pcm(44_100, 16), mime: "audio/flac", limits: .sonos)
+        let cd = renderer(source: pcm(44_100, 16), mime: "audio/flac", limits: .sonos)
         #expect(cd.line == "16-bit / 44.1 kHz FLAC, stereo, the file as it is")
         #expect(cd.unchanged)
-        #expect(RouteForecast.renderer(source: dsd64, mime: "audio/x-dsf", limits: .sonos).line == "24-bit / 44.1 kHz FLAC, stereo (source DSD64)")
+        #expect(renderer(source: dsd64, mime: "audio/x-dsf", limits: .sonos).line == "24-bit / 44.1 kHz FLAC, stereo (source DSD64)")
         // The same samples in another file: said as what is sent, not as a loss.
-        let wav = RouteForecast.renderer(source: pcm(48_000, codec: "WAV"), mime: "audio/wav", limits: .sonos)
+        let wav = renderer(source: pcm(48_000, codec: "WAV"), mime: "audio/wav", limits: .sonos)
         #expect(wav.line == "24-bit / 48 kHz FLAC, stereo")
         #expect(wav.unchanged)
     }
 
     @Test("Sonos and surround: folded to stereo and said so; Dolby Atmos is named as not possible; a home theater room adds how its surrounds play music")
     func sonosSurround() {
-        let surround = RouteForecast.renderer(source: pcm(96_000, channels: 6), mime: "audio/flac", limits: .sonos, homeTheater: true)
+        let surround = renderer(source: pcm(96_000, channels: 6), mime: "audio/flac", limits: .sonos, homeTheater: true)
         #expect(surround.line == "24-bit / 48 kHz FLAC, stereo (source 24/96 5.1)")
         #expect(surround.notes == ["Surround can't be sent to Sonos from a computer: the song is folded to stereo.",
                                    "The room's surround speakers play two-channel music the way the Sonos app's Music Playback setting says: Ambient or Full."])
-        let object = RouteForecast.renderer(source: atmos, mime: nil, limits: .sonos)
+        let object = renderer(source: atmos, mime: nil, limits: .sonos)
         #expect(object.line == "24-bit / 48 kHz FLAC, stereo (source Dolby Atmos)")
         #expect(object.notes == ["Dolby Atmos can't be sent to Sonos from a computer: the song's 5.1 bed is folded to stereo."])
     }
 
     @Test("Any other network player gets the file as it is, or 24-bit FLAC at the song's rate when Vespertine's own processing is on")
     func otherPlayers() {
-        #expect(RouteForecast.renderer(source: pcm(192_000), mime: "audio/flac", limits: nil).line == "24-bit / 192 kHz FLAC, stereo, the file as it is")
-        #expect(RouteForecast.renderer(source: pcm(96_000, 16), mime: "audio/flac", limits: nil, processed: true).line == "24-bit / 96 kHz FLAC, stereo (source 16/96)")
-        #expect(RouteForecast.renderer(source: dsd64, mime: "audio/x-dsf", limits: nil).line == "DSD64 DSF, stereo, the file as it is")
+        #expect(renderer(source: pcm(192_000), mime: "audio/flac", limits: nil).line == "24-bit / 192 kHz FLAC, stereo, the file as it is")
+        #expect(renderer(source: pcm(96_000, 16), mime: "audio/flac", limits: nil, processed: true).line == "24-bit / 96 kHz FLAC, stereo (source 16/96)")
+        #expect(renderer(source: dsd64, mime: "audio/x-dsf", limits: nil).line == "DSD64 DSF, stereo, the file as it is")
     }
 
     @Test("AirPlay: Apple Lossless at what the receiver takes; only a song already in that format arrives unchanged")
