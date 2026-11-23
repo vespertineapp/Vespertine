@@ -980,7 +980,9 @@ public final class RendererPlayback: @unchecked Sendable {
 
     private func poll() async {
         // What the player holds next was confirmed before this status was asked for: what it answers settles the stale songs.
-        let reconciles = state.withLock { $0.staleConfirmed }
+        // The play of the song loaded when the status was asked for: a player found lost is let go of only while that is
+        // still the current play (a song chosen meanwhile, queued behind this poll, isn't left paused by it).
+        let (reconciles, asked) = state.withLock { ($0.staleConfirmed, $0.currentGeneration) }
         let status: RendererStatus
         do { status = try await transport.status() } catch {
             // Gone once it has failed to answer for a while, not at a moment's trouble on the network: it may well be
@@ -993,14 +995,15 @@ public final class RendererPlayback: @unchecked Sendable {
                 s.failingSince = since
                 return s.failedPolls >= 3 && now().timeIntervalSince(since) >= lostAfter
             }
-            if lost {
-                let old = state.withLock { s -> [Entry] in
-                    defer {
-                        s.current = nil; s.next = nil; s.staleNexts = []; s.anchor = nil; s.snapshot.state = .stopped; s.wantsPlaying = false
-                        s.failedPolls = 0; s.failingSince = nil; s.awaitingStartSince = nil
-                    }
-                    return [s.current, s.next].compactMap { $0 } + s.staleNexts
+            // A stop or a song chosen since the status was asked for wins: the command queued behind this poll replaces or
+            // stops the song (and a start resets the count of failed polls).
+            if lost, let old = ifStill(asked, { s -> [Entry] in
+                defer {
+                    s.current = nil; s.next = nil; s.staleNexts = []; s.anchor = nil; s.snapshot.state = .stopped; s.wantsPlaying = false
+                    s.failedPolls = 0; s.failingSince = nil; s.awaitingStartSince = nil
                 }
+                return [s.current, s.next].compactMap { $0 } + s.staleNexts
+            }) {
                 old.forEach(release)
                 refreshActivity()
                 emit(.deviceLost(renderer.name))

@@ -69,10 +69,19 @@ private final class GatedTransport: RendererTransport, @unchecked Sendable {
     let statusWaiting = Locked(0)
     /// Run once, at the next change of the next song, before it reaches the player (then cleared).
     let beforeReplaceNext = Locked<(@Sendable () -> Void)?>(nil)
+    /// While set, a status request fails as a player off the network does; decided when the request begins, so one held
+    /// meanwhile still fails after this is cleared. `statusFailed` counts the failures.
+    let failsStatus = Locked(false)
+    let statusFailed = Locked(0)
     func status() async throws -> RendererStatus {
+        let fails = failsStatus.withLock { $0 }
         if statusHeld.withLock({ $0 }) {
             statusWaiting.withLock { $0 += 1 }
             while statusHeld.withLock({ $0 }) { try? await Task.sleep(for: .milliseconds(5)) }
+        }
+        if fails {
+            statusFailed.withLock { $0 += 1 }
+            throw UPnPError.timeout
         }
         return try await inner.status()
     }
@@ -112,7 +121,7 @@ private struct Rig {
     let queue: Locked<[PlayableItem]>
 
     /// `second`: the song after the first one, in place of the one converted for Sonos.
-    static func make(second: PlayableItem? = nil, startTimeout: TimeInterval = 15) async throws -> Rig {
+    static func make(second: PlayableItem? = nil, startTimeout: TimeInterval = 15, lostAfter: TimeInterval = 10) async throws -> Rig {
         let fake = try await FakeRenderer(kind: .av(setNext: true), udn: "uuid:RINCON_BAR01400_MR")
         fake.sonosRoom = "Living Room"
         fake.sink = "http-get:*:audio/flac:*,http-get:*:audio/mp4:*,http-get:*:audio/wav:*,http-get:*:audio/mpeg:*"
@@ -122,7 +131,7 @@ private struct Rig {
         let maker = StuckStreamMaker()
         let transport = GatedTransport(try device.makeTransport())
         let playback = RendererPlayback(renderer: device, transport: transport, media: media, processed: maker, pollInterval: 0.05,
-                                        startTimeout: startTimeout)
+                                        startTimeout: startTimeout, lostAfter: lostAfter)
         // Long enough that a worker held by it would fail every check below; short enough not to hold the run up for long.
         playback.wholeFileWait = 30
         let first = PlayableItem(url: try makeFLAC(from: try makeWAV(seconds: 2, seed: 3)))
@@ -604,6 +613,39 @@ struct NextPreparationTests {
         #expect(!rig.events.all.contains("started \(rig.first.url.lastPathComponent)"), "the queued poll announced the old song after the command")
         #expect(!rig.fake.actions.dropFirst(before).contains("Seek"), "the queued poll sent the old song's seek after the command")
         if select { #expect(rig.playback.snapshot.item?.id == chosen.id) } else { #expect(!rig.playback.wantsPlaying) }
+    }
+
+    // MARK: After the sixth review (2026-11-23): a stale poll that finds the player lost
+
+    @Test("A poll that fails for the last time before the player counts as lost, while a song chosen waits behind it: the chosen song plays (not paused), and nothing is lost")
+    func lostPollQueuedBeforeSelection() async throws {
+        let ready = PlayableItem(url: try makeFLAC(from: try makeWAV(seconds: 2, seed: 7)))
+        let chosen = PlayableItem(url: try makeFLAC(from: try makeWAV(seconds: 2, seed: 9)))
+        let rig = try await Rig.make(second: ready, lostAfter: 1)
+        defer { rig.close() }
+        rig.playback.play(rig.first)
+        #expect(await rig.events.wait(for: "started \(rig.first.url.lastPathComponent)"))
+        // The player stops answering: three polls fail well within `lostAfter`; the next one is held on its way, decided to fail.
+        let since = Date()
+        rig.transport.failsStatus.withLock { $0 = true }
+        #expect(await within(0.8) { rig.transport.statusFailed.withLock { $0 } >= 3 })
+        rig.transport.statusHeld.withLock { $0 = true }
+        #expect(await within(0.8) { rig.transport.statusWaiting.withLock { $0 } > 0 })
+        #expect(Date().timeIntervalSince(since) < 1, "the machine was too slow to hold a poll before the player counted as lost")
+        // Past `lostAfter` while it waits; a song is chosen, and the player answers again. The held poll fails, the last one.
+        try await Task.sleep(for: .milliseconds(max(0, Int((1.3 - Date().timeIntervalSince(since)) * 1000))))
+        let failed = rig.transport.statusFailed.withLock { $0 }
+        rig.playback.play(chosen)
+        rig.transport.failsStatus.withLock { $0 = false }
+        rig.transport.statusHeld.withLock { $0 = false }
+        #expect(await within(2) { rig.transport.statusFailed.withLock { $0 } > failed }, "the held poll didn't fail")
+        #expect(await rig.events.wait(for: "started \(chosen.url.lastPathComponent)", timeout: 5), "the song chosen didn't play")
+        await rig.playback.settleForTests()
+        #expect(!rig.events.all.contains { $0.hasPrefix("lost") }, "the stale poll reported the player lost after the selection")
+        #expect(rig.playback.wantsPlaying)
+        #expect(rig.playback.snapshot.item?.id == chosen.id)
+        #expect(rig.playback.snapshot.state == .playing)
+        #expect(rig.playback.isEngaged)
     }
 
     @Test("The player goes on to the old next song between a poll's answer and the clear's success: it is still recognised and put right")
