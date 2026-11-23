@@ -385,6 +385,13 @@ public final class RendererPlayback: @unchecked Sendable {
         }
     }
 
+    /// Queues a poll now, as the poller does (behind whatever the worker is doing): the order against a command asked for
+    /// next is then certain.
+    func queuePollForTests() {
+        state.withLock { $0.pollQueued = true }
+        enqueue.yield(.poll)
+    }
+
     /// The addresses of the songs Vespertine still keeps (their token and their copy) as the player's next song.
     var heldNextURIsForTests: [String] { state.withLock { ([$0.next].compactMap { $0 } + $0.staleNexts).map(\.mediaURL.absoluteString) } }
 
@@ -956,8 +963,6 @@ public final class RendererPlayback: @unchecked Sendable {
     }
 
     private func poll() async {
-        // The play this poll begins in: what it finds is acted on only while that is still the current one.
-        let polled = generation.withLock { $0 }
         // What the player holds next was confirmed before this status was asked for: what it answers settles the stale songs.
         let reconciles = state.withLock { $0.staleConfirmed }
         let status: RendererStatus
@@ -987,7 +992,12 @@ public final class RendererPlayback: @unchecked Sendable {
             return
         }
         state.withLock { $0.failedPolls = 0; $0.failingSince = nil }
-        guard var current = state.withLock({ $0.current }) else { return }
+        // The song this poll inspects, and the play it was loaded for: what the poll finds is acted on only while that is
+        // still the current play. Not the generation when the poll began: a poll queued before a stop or a song chosen can
+        // begin after the command moved the generation on, while the old song is still loaded (the command's own turn on
+        // the worker comes after it).
+        guard let (loaded, polled) = state.withLock({ s in s.current.map { ($0, s.currentGeneration) } }) else { return }
+        var current = loaded
         // Next songs the player held that are no longer next. Gone on to one all the same (the song playing ended): it
         // isn't the queue's, so it isn't taken for the next song; Vespertine plays the one the queue has after the song that
         // ended, or stops at the queue's end. Else, once the change was confirmed, they are let go of; until then the clear
@@ -1050,48 +1060,53 @@ public final class RendererPlayback: @unchecked Sendable {
             return
         }
         enum Outcome { case nothing, ended, stoppedThere }
-        let outcome = state.withLock { s -> Outcome in
-            let position = status.position + current.startOffset
-            if let d = status.duration { s.snapshot.duration = d + current.startOffset }
-            switch status.state {
-            case .playing:
-                s.stoppedPolls = 0
-                let at = now()
-                if status.position >= 1 { s.reportsPosition = true }
-                // A long gap between two polls (the Mac slept, the renderer was slow to answer) isn't counted as heard.
-                if let last = s.lastPlayingPoll { s.heard += min(at.timeIntervalSince(last), 2) }
-                s.lastPlayingPoll = at
-                s.snapshot.position = position
-                s.anchor = (position, at)
-                if s.wantsPlaying { s.snapshot.state = .playing }
-            case .paused:
-                s.stoppedPolls = 0
-                s.lastPlayingPoll = nil
-                s.snapshot.position = position
-                s.anchor = nil
-                s.snapshot.state = .paused
-            case .transitioning:
-                // Buffering: the position waits with it.
-                s.anchor = nil
-                s.lastPlayingPoll = nil
-            case .stopped, .noMedia:
-                s.anchor = nil
-                s.lastPlayingPoll = nil
-                guard current.announced, s.wantsPlaying else { break }
-                // Twice in a row: a renderer passes through "stopped" for a moment after a seek or between two songs.
-                s.stoppedPolls += 1
-                guard s.stoppedPolls >= 2 else { break }
-                s.stoppedPolls = 0
-                // At the song's end (or with no length to judge by) it played to the end. Anywhere else it was stopped
-                // on the renderer itself, or lost its stream (the Mac slept): the song stays where it is, paused.
-                let duration = s.snapshot.duration
-                let reached = s.reportsPosition ? s.snapshot.position : current.startOffset + s.heard
-                if duration <= 0 || reached >= duration - 10 { return .ended }
-                s.snapshot.state = .paused
-                s.wantsPlaying = false
-                return .stoppedThere
+        // Under the generation lock, as `play` and `stop()` change the snapshot: a play no longer current (a stop or a song
+        // chosen is queued behind this poll) isn't shown, and its song stopped isn't taken for the chosen one paused.
+        let outcome = generation.withLock { g -> Outcome in
+            guard g == polled else { return .nothing }
+            return state.withLock { s -> Outcome in
+                let position = status.position + current.startOffset
+                if let d = status.duration { s.snapshot.duration = d + current.startOffset }
+                switch status.state {
+                case .playing:
+                    s.stoppedPolls = 0
+                    let at = now()
+                    if status.position >= 1 { s.reportsPosition = true }
+                    // A long gap between two polls (the Mac slept, the renderer was slow to answer) isn't counted as heard.
+                    if let last = s.lastPlayingPoll { s.heard += min(at.timeIntervalSince(last), 2) }
+                    s.lastPlayingPoll = at
+                    s.snapshot.position = position
+                    s.anchor = (position, at)
+                    if s.wantsPlaying { s.snapshot.state = .playing }
+                case .paused:
+                    s.stoppedPolls = 0
+                    s.lastPlayingPoll = nil
+                    s.snapshot.position = position
+                    s.anchor = nil
+                    s.snapshot.state = .paused
+                case .transitioning:
+                    // Buffering: the position waits with it.
+                    s.anchor = nil
+                    s.lastPlayingPoll = nil
+                case .stopped, .noMedia:
+                    s.anchor = nil
+                    s.lastPlayingPoll = nil
+                    guard current.announced, s.wantsPlaying else { break }
+                    // Twice in a row: a renderer passes through "stopped" for a moment after a seek or between two songs.
+                    s.stoppedPolls += 1
+                    guard s.stoppedPolls >= 2 else { break }
+                    s.stoppedPolls = 0
+                    // At the song's end (or with no length to judge by) it played to the end. Anywhere else it was stopped
+                    // on the renderer itself, or lost its stream (the Mac slept): the song stays where it is, paused.
+                    let duration = s.snapshot.duration
+                    let reached = s.reportsPosition ? s.snapshot.position : current.startOffset + s.heard
+                    if duration <= 0 || reached >= duration - 10 { return .ended }
+                    s.snapshot.state = .paused
+                    s.wantsPlaying = false
+                    return .stoppedThere
+                }
+                return .nothing
             }
-            return .nothing
         }
         switch outcome {
         case .nothing:
