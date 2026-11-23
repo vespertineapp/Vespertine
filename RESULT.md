@@ -11,7 +11,7 @@ Branch `feat/sonos-and-output-routes`, local commits only, not pushed; `git log 
 
 ## The ninth review's findings (2026-11-23, 13:55 onwards)
 
-A ninth review (Codex, run 8028b6) found two P2s in `RendererPlayback.swift` and two points of hygiene. Signed commits 2a1c2149 (P2 1), 4b4e15ce (P2 2) and 42b17abd (hygiene), each with its test written first and seen failing, and two RESULT commits (this interim one, and the final one with the audit figures); nothing pushed.
+A ninth review (Codex, run 8028b6) found two P2s in `RendererPlayback.swift` and two points of hygiene. Signed commits 2a1c2149 (P2 1), 4b4e15ce (P2 2) and 42b17abd (hygiene), each with its test written first and seen failing, and two RESULT commits (c708e200, interim, and this one); nothing pushed.
 
 **P2 1, a refused pause or resume was put right over a newer command.** A pause or resume the player refused twice asked it for its status and set `wantsPlaying` and the snapshot from the answer. With a song chosen (or a Stop, pause or resume given) while that status was on its way, the answer was still the old song's. If the old song was paused, the chosen song's start found `wantsPlaying` false and paused it on the player, and the old refusal was reported. Now pause and resume carry the intent they set (`State.intent`, which every pause, resume, stop and song chosen counts up). The second try isn't sent once a newer one has come. The resync, under the generation lock and then the state lock (as `play()` and `stop()` take them), applies the player's state and reports the refusal only while that intent is still the last one asked for, in the same step.
 - `staleResumeResyncAfterSelection`: Play is refused; the status asked for after the second refusal is held while a song is chosen, then answered with the old song, paused. **Red before** (5 issues: the chosen song never started, `wantsPlaying` false, the snapshot and the player paused, the notice delivered). New test hooks: `GatedTransport.failsPlay`, `holdsStatusAfterFailedPlay`.
@@ -27,10 +27,10 @@ Not changed: the other test hooks (`settleForTests`, `queuePollForTests`, `resta
 
 ### Test figures, this pass
 
-Logs: `build/logs/r11/` and the audit folder named below. All from the code at 42b17abd.
+Logs: `build/logs/r11/` and the audit folder named below. All from the code at 42b17abd. Other work was running on the machine (load average 13 to 32 on 8 cores).
 
 - **UPnP and Sonos** (`swift test --filter VespertineUPnPTests`, debug, 14:05 to 14:06, load average 15 to 18): **passed**, 190 tests in 33 suites, 0 failed (187 before, plus the 3 new tests, 5 cases) (`upnp.log`).
-- **The rest of the audit** (`audit-rest.sh`, started 14:06, `build/audit-rest-20261123-140647/`): still running at this interim commit.
+- **The rest of the audit** (`audit-rest.sh`, `scripts/audit.sh` without its first step, the same script as in the last four passes; 14:06 to 14:26, `build/audit-rest-20261123-140647/`, load average 13 to 32): **script exit 0, "All audit checks passed"**. **Release-mode package tests** (`swift test -c release`): engine **1484 tests in 235 suites, passed**; UPnP and Sonos **188** (the 190 above less the two debug-only tests), library 274, AirPlay 2 211, and 151, 73, 37 and 31 in the other four: **every group passed, 0 failed**. Analysis package **72 tests in 8 suites, passed**. Sanitizer runs (address/undefined, thread) clean; DST audit "1800 random frames, 1712 rejected; crafted frames handled"; static analysis 0 findings for both. **App tests** (`xcodebuild test`, Debug, `build/AuditDD`) **284 tests in 61 suites, passed** (`** TEST SUCCEEDED **`; the app's one `RendererPlayback(...)` call is unchanged and now goes through the public initialiser's clamp). Release universal build `** BUILD SUCCEEDED **` (so the `#if DEBUG` hook isn't needed there); `git diff --check` clean.
 
 Not run this pass: `scripts/audit.sh`'s first step, the whole package in debug mode. Nothing here has been heard on a real Sonos.
 
