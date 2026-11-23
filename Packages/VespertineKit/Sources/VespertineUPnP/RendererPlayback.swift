@@ -432,44 +432,41 @@ public final class RendererPlayback: @unchecked Sendable {
     }
 
     private func run(_ command: Command) async {
-        do {
-            switch command {
-            case .play(let item, let at, let announce, let g):
-                guard generation.withLock({ $0 }) == g else { return }   // overtaken by a later skip or stop
-                try await start(item, at: at, announce: announce, generation: g)
-            case .pause: await retrying(.pause, resync: true) { try await self.transport.pause() }
-            case .resume: await retrying(.play, resync: true) { try await self.transport.play() }
-            case .seek(let seconds): await retrying(.seek, resync: false) { try await self.seek(seconds) }
-            case .stop:
-                // A next song planned after `stop()` was called (by a start that was still loading its song then) is given
-                // up here too.
-                cancelNextPreparation()
-                try? await transport.stop()
-                let old = state.withLock { s -> [Entry] in
-                    defer { s.current = nil; s.next = nil; s.staleNexts = []; s.anchor = nil; s.snapshot = EngineSnapshot() }
-                    return [s.current, s.next].compactMap { $0 } + s.staleNexts
-                }
-                old.forEach(release)
-            case .queueChanged:
-                await planNextQuietly()
-            case .settings(let settings):
-                do { try await apply(settings) } catch {
-                    log.error("Renderer \(self.renderer.name, privacy: .public), settings: \(String(describing: error), privacy: .public)")
-                }
-            case .poll:
-                // Let go of (the output changed) before this poll's turn came: nothing more is asked of the renderer.
-                let skip = state.withLock { s -> Bool in s.pollQueued = false; return s.shutDown }
-                if !skip { await poll() }
-            case .step(let done):
-                if !state.withLock({ $0.shutDown }) { await poll() }
-                done.resume()
-            case .nextPrepared(let preparation):
-                await handOver(preparation)
+        switch command {
+        case .play(let item, let at, let announce, let g):
+            guard generation.withLock({ $0 }) == g else { return }   // overtaken by a later skip or stop
+            do { try await start(item, at: at, announce: announce, generation: g) } catch {
+                log.error("Renderer \(self.renderer.name, privacy: .public): \(String(describing: error), privacy: .public)")
+                fail(item, error, generation: g)
             }
-        } catch {
-            let item = state.withLock { $0.current?.item ?? $0.snapshot.item }
-            log.error("Renderer \(self.renderer.name, privacy: .public): \(String(describing: error), privacy: .public)")
-            fail(item, error)
+        case .pause: await retrying(.pause, resync: true) { try await self.transport.pause() }
+        case .resume: await retrying(.play, resync: true) { try await self.transport.play() }
+        case .seek(let seconds): await retrying(.seek, resync: false) { try await self.seek(seconds) }
+        case .stop:
+            // A next song planned after `stop()` was called (by a start that was still loading its song then) is given
+            // up here too.
+            cancelNextPreparation()
+            try? await transport.stop()
+            let old = state.withLock { s -> [Entry] in
+                defer { s.current = nil; s.next = nil; s.staleNexts = []; s.anchor = nil; s.snapshot = EngineSnapshot() }
+                return [s.current, s.next].compactMap { $0 } + s.staleNexts
+            }
+            old.forEach(release)
+        case .queueChanged:
+            await planNextQuietly()
+        case .settings(let settings):
+            do { try await apply(settings) } catch {
+                log.error("Renderer \(self.renderer.name, privacy: .public), settings: \(String(describing: error), privacy: .public)")
+            }
+        case .poll:
+            // Let go of (the output changed) before this poll's turn came: nothing more is asked of the renderer.
+            let skip = state.withLock { s -> Bool in s.pollQueued = false; return s.shutDown }
+            if !skip { await poll() }
+        case .step(let done):
+            if !state.withLock({ $0.shutDown }) { await poll() }
+            done.resume()
+        case .nextPrepared(let preparation):
+            await handOver(preparation)
         }
     }
 
@@ -508,11 +505,22 @@ public final class RendererPlayback: @unchecked Sendable {
         }
     }
 
-    private func fail(_ item: PlayableItem?, _ error: Error) {
+    /// A start for play `g` couldn't prepare or load its song. Failed only while `g` is still the current play and the
+    /// output is still held, checked under the generation lock in the same step as the failure (as `stop()` and `play`
+    /// move it): a Stop or a song chosen meanwhile isn't shown the old error, nor left paused by it. The event is tagged
+    /// with the selection it was failed in, so one of those given before it reaches the main actor wins too.
+    private func fail(_ item: PlayableItem, _ error: Error, generation g: Int) {
         let message = failureMessage(error)
-        state.withLock { Self.markFailed(&$0, message) }
+        guard let selection = generation.withLock({ current -> Int? in
+            guard current == g else { return nil }
+            return state.withLock { s -> Int? in
+                guard !s.shutDown else { return nil }
+                Self.markFailed(&s, message)
+                return s.selection
+            }
+        }) else { return }
         refreshActivity()
-        emit(.failed(item, message))
+        emit(.failed(item, message), forSelection: selection)
     }
 
     /// What the listener is told when the renderer couldn't play a song.
@@ -672,7 +680,7 @@ public final class RendererPlayback: @unchecked Sendable {
         let overtaken: @Sendable () -> Bool = { [generation, state] in generation.withLock { $0 } != g || state.withLock { $0.shutDown } }
         if let prepared { current = prepared } else {
             do { current = try await entry(for: item, at: seconds, cancelled: overtaken) } catch {
-                if !overtaken() { fail(item, error) }
+                fail(item, error, generation: g)
                 return
             }
         }
@@ -689,7 +697,7 @@ public final class RendererPlayback: @unchecked Sendable {
                 guard generation.withLock({ $0 }) == g else { release(current); return }
                 release(current)
                 do { current = try await entry(for: item, at: seconds, cancelled: overtaken) } catch {
-                    if !overtaken() { fail(item, error) }
+                    fail(item, error, generation: g)
                     return
                 }
                 current.announces = announce

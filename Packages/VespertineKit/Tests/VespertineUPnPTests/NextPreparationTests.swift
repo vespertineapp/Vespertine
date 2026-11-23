@@ -23,9 +23,16 @@ private final class StuckStreamMaker: ProcessedStreamMaking, @unchecked Sendable
     private var _begun = 0
     /// Streams asked for, including one still being opened.
     var begun: Int { lock.withLock { _begun } }
+    private var _fails = false
+    /// Set: making a stream fails (an encoder that can't open the song), and the preparation with it.
+    var fails: Bool {
+        get { lock.withLock { _fails } }
+        set { lock.withLock { _fails = newValue } }
+    }
 
     func makeStream(item: PlayableItem, url: URL, settings: RendererSettings, startSeconds: TimeInterval) throws -> (GrowingFile, SourceFormat) {
         lock.withLock { _begun += 1 }
+        if fails { throw RendererPlaybackError.unplayable("the encoder couldn't open it") }
         if openDelay > 0 { Thread.sleep(forTimeInterval: openDelay) }
         let file = try GrowingFile(url: directory.appendingPathComponent(UUID().uuidString + ".flac"))
         lock.withLock { made.append(file) }
@@ -45,11 +52,16 @@ private final class GatedTransport: RendererTransport, @unchecked Sendable {
     var gapless: Bool { inner.gapless }
     func load(current: RendererTrack, next: RendererTrack?) async throws {
         loadsAsked.withLock { $0 += 1 }
+        let fails = failsLoad.withLock { $0 }
         while held.withLock({ $0 }) { try? await Task.sleep(for: .milliseconds(10)) }
+        if fails { throw UPnPError.fault(code: 714, description: "Illegal MIME-type") }
         try await inner.load(current: current, next: next)
         // The next status request (the first poll of the song just loaded) waits, once set.
         if holdsStatusAfterLoad.withLock({ s in defer { s = false }; return s }) { statusHeld.withLock { $0 = true } }
     }
+    /// While set, a load fails as a player that refuses the song does; decided when the load begins, so one held meanwhile
+    /// still fails after this is cleared.
+    let failsLoad = Locked(false)
     /// Set: once the next song is loaded, `statusHeld` is set (then this is cleared).
     let holdsStatusAfterLoad = Locked(false)
     func replaceNext(_ next: RendererTrack?) async throws {
@@ -747,6 +759,63 @@ struct NextPreparationTests {
         await rig.playback.settleForTests()
         #expect(!rig.events.all.contains("started \(rig.first.url.lastPathComponent)"), "the song was announced after Stop")
         #expect(!rig.playback.wantsPlaying)
+    }
+
+    // MARK: After vtsonos10 (2026-11-23): a start's own failure after a command
+
+    @Test("The player refuses the song, and Stop or Play again comes while the load is on its way: the old failure isn't reported, and the song played again plays (not paused)",
+          arguments: [false, true])
+    func loadFailureOvertaken(retry: Bool) async throws {
+        let ready = PlayableItem(url: try makeFLAC(from: try makeWAV(seconds: 2, seed: 7)))
+        let rig = try await Rig.make(second: ready)
+        defer { rig.close() }
+        // The load is held on its way, decided to fail; the command is given meanwhile, and the next load succeeds.
+        rig.transport.failsLoad.withLock { $0 = true }
+        rig.transport.held.withLock { $0 = true }
+        rig.playback.play(rig.first)
+        #expect(await within(3) { rig.transport.loadsAsked.withLock { $0 } > 0 })
+        rig.transport.failsLoad.withLock { $0 = false }
+        if retry { rig.playback.play(rig.first) } else { rig.playback.stop() }
+        rig.transport.held.withLock { $0 = false }
+        if retry {
+            #expect(await rig.events.wait(for: "started \(rig.first.url.lastPathComponent)", timeout: 5), "the song played again didn't start")
+        } else {
+            #expect(await within(3) { rig.fake.actions.contains("Stop") })
+        }
+        try await Task.sleep(for: .milliseconds(300))
+        await rig.playback.settleForTests()
+        #expect(!rig.events.all.contains { $0.hasPrefix("failed") }, "the refused load's failure was reported after the command")
+        #expect(rig.playback.snapshot.lastError == nil)
+        #expect(rig.playback.wantsPlaying == retry)
+        if retry { #expect(rig.playback.snapshot.state == .playing) }
+    }
+
+    @Test("A song that can't be prepared fails, and Stop or Play again comes before the failure reaches the main actor: it isn't delivered",
+          arguments: [false, true])
+    func preparationFailureOvertakenBeforeDelivery(retry: Bool) async throws {
+        // The song converted for Sonos: its stream can't be made.
+        let rig = try await Rig.make()
+        defer { rig.close() }
+        rig.maker.fails = true
+        let seen = await MainActor.run { () -> Bool in
+            rig.playback.play(rig.stuck)
+            // The main actor is busy until the song has been failed (and the failure sent its way); the command is given
+            // there, as the app gives it, before the failure is delivered.
+            let deadline = Date().addingTimeInterval(3)
+            while rig.playback.snapshot.lastError == nil, Date() < deadline { Thread.sleep(forTimeInterval: 0.01) }
+            Thread.sleep(forTimeInterval: 0.1)
+            let seen = rig.playback.snapshot.lastError != nil
+            if retry { rig.playback.play(rig.first) } else { rig.playback.stop() }
+            return seen
+        }
+        #expect(seen, "the song wasn't failed")
+        if retry {
+            #expect(await rig.events.wait(for: "started \(rig.first.url.lastPathComponent)", timeout: 5), "the song chosen didn't start")
+        }
+        try await Task.sleep(for: .milliseconds(300))
+        await rig.playback.settleForTests()
+        #expect(!rig.events.all.contains { $0.hasPrefix("failed") }, "the old song's failure was delivered after the command")
+        #expect(rig.playback.wantsPlaying == retry)
     }
 
     @Test("The player goes on to the old next song between a poll's answer and the clear's success: it is still recognised and put right")
