@@ -90,7 +90,10 @@ struct FarShareReadyTests {
         print(String(format: "far share, copied whole: %.1f MB ready in %.2f s (%.1f MB/s) in %d reads, largest %d KiB",
                      Double(entry.size) / 1e6, seconds, Double(entry.size) / 1e6 / seconds, sizes.count, (sizes.max() ?? 0) >> 10))
         // All of it crosses the link in about 0.9 s at 30 MiB/s; the round trips are what is left of the two seconds.
-        #expect(seconds < 2, "ready after \(String(format: "%.2f", seconds)) s in \(sizes.count) reads")
+        // The read count is what proves the round trips are gone (old code: 96 reads); the wall clock only guards
+        // against a hang, because a loaded CI runner stretched the same 20 reads to 3.2 s (11-24).
+        #expect(sizes.count < 40, "\(sizes.count) reads for the song")
+        #expect(seconds < 6, "ready after \(String(format: "%.2f", seconds)) s in \(sizes.count) reads")
     }
 
     @Test("From a share 100 ms away the copy fills the link: large reads, several in flight, not one small read per round trip")
