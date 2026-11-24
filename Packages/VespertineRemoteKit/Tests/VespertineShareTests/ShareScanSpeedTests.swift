@@ -10,9 +10,20 @@ import Testing
 @testable import VespertineShare
 
 /// A share whose every answer takes `delay`, as one far away does. Counts how many reads are under way at once.
+/// How many reads are under way at once across several connections.
+final class Crowd: @unchecked Sendable {
+    private let lock = NSLock()
+    private var now = 0
+    private(set) var most = 0
+    func enter() { lock.withLock { now += 1; most = max(most, now) } }
+    func leave() { lock.withLock { now -= 1 } }
+}
+
 final class FarShare: ShareFiles, @unchecked Sendable {
     let share: FakeShare
     let delay: TimeInterval
+    /// Shared with the other connections of the same scan, to see them read side by side.
+    var crowd: Crowd?
     private let lock = NSLock()
     private var reading = 0
     private(set) var mostAtOnce = 0
@@ -37,7 +48,8 @@ final class FarShare: ShareFiles, @unchecked Sendable {
             mostAtOnce = max(mostAtOnce, reading)
             return dropsAfter.map { reads > $0 } ?? false
         }
-        defer { lock.withLock { reading -= 1 } }
+        crowd?.enter()
+        defer { lock.withLock { reading -= 1 }; crowd?.leave() }
         Thread.sleep(forTimeInterval: delay)
         if dead { throw SMBError.timedOut }
         return try share.read(path, offset: offset, length: length)
@@ -73,19 +85,17 @@ final class FarShare: ShareFiles, @unchecked Sendable {
         #expect(readers.allSatisfy { $0.reads > 0 })
     }
 
-    @Test func aScanOverSeveralConnectionsIsSeveralTimesFaster() throws {
+    @Test func aScanOverSeveralConnectionsReadsOnThemAllAtOnce() throws {
+        // Wall-clock time is no measure on a busy test machine; what makes the scan faster is reads overlapping, so count
+        // how many are under way at once. Each read waits 50 ms, as a far server does; six connections should all be busy.
         let share = Self.shelf()
-        func timed(_ body: () throws -> Void) rethrows -> TimeInterval {
-            let start = ProcessInfo.processInfo.systemUptime
-            try body()
-            return ProcessInfo.processInfo.systemUptime - start
-        }
-        let alone = try timed { _ = try ShareScanner.scan(FarShare(share, delay: 0.02), now: FakeShare.day) }
-        let readers = (0..<6).map { _ in FarShare(share, delay: 0.02) }
-        let together = try timed { _ = try ShareScanner.scan(FarShare(share, delay: 0.02), readers: readers, now: FakeShare.day) }
-        // 60 songs and 25 folders at 20 ms an answer: about 1.7 s one at a time. Six at once leaves the listing (0.5 s)
-        // and a sixth of the reads; the margin is wide for a busy test machine.
-        #expect(together < alone / 2, "one connection \(alone) s, seven \(together) s")
+        let crowd = Crowd()
+        let readers = (0..<6).map { _ in FarShare(share, delay: 0.05) }
+        for reader in readers { reader.crowd = crowd }
+        let library = try ShareScanner.scan(FarShare(share, delay: 0), readers: readers, now: FakeShare.day)
+        #expect(library.songs.count == 60)
+        #expect(crowd.most >= 4, "at most \(crowd.most) reads at once over six connections")
+        #expect(crowd.most <= 6)
     }
 
     @Test func aScanStoppedPartWayKeepsWhatItReadAndTheNextCarriesOn() throws {
