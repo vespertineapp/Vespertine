@@ -10,7 +10,7 @@ What Vespertine has been run on, and what each test did and did not show. A **re
 | iBasso DC07 Pro | USB-C | DSD64 (DSDIFF) with DoP switched on, Vespertine 1.0.1 on macOS 27.2.1 | Played as native DSD over DoP; with DoP off it was converted to PCM (user report, [#247](https://github.com/vespertineapp/Vespertine/issues/247)). DoP is on by default for it, see [`dop-dacs.json`](../Packages/VespertineKit/Sources/VespertineAudio/Resources/dop-dacs.json) | Reported (user), 2026-11-11 |
 | AirPods Max | USB-C and Bluetooth | 48 kHz lossless over USB-C; AAC reported over Bluetooth | As documented in [FEATURES](FEATURES.md) | Tested |
 | MacBook Pro speakers | Built in | Stereo playback | Plays | Tested |
-| **Onkyo TX-NR717 (AV receiver)** | HDMI, exclusive (hog) mode, 5.1 speakers | **5.1 and 7.1 FLAC at 32, 44.1, 48, 88.2, 96, 176.4 and 192 kHz; 384 and 768 kHz files; 5.1 DSD64; gapless; volume in Vespertine; Spatialize stereo; Dolby Digital and DTS CD bitstream; a speaker group with the Mac's speakers** | **Every channel reached its own HDMI channel, BIT-PERFECT, checked with a capture of each channel and by ear; see below** | **Tested (capture and developer listening), 2026-11-23** |
+| **Onkyo TX-NR717 (AV receiver)** | HDMI, exclusive (hog) mode, 5.1 speakers | **5.1 and 7.1 FLAC at 32, 44.1, 48, 88.2, 96, 176.4 and 192 kHz; 384 and 768 kHz files; 5.1 DSD64; gapless; volume in Vespertine; Spatialize stereo; Dolby Digital and DTS CD bitstream; a speaker group with the Mac's speakers** | **Every channel reached its own HDMI channel with its samples unchanged, checked with a capture of each channel and by ear; see below** | **Tested (capture and developer listening), 2026-11-23** |
 | **Sony TV (HDMI)** | HDMI, exclusive (hog) mode | **Six-channel 5.1 FLAC, 7.1 FLAC folded to 5.1, and 5.1 DSD64 converted to PCM, and Dolby Atmos rendered by macOS (tentative)** | **Each of the six channels went to its matching speaker position; BIT-PERFECT shown** | **Reported, 2026-10-19** |
 
 DACs known to decode DoP, with the source for each entry, are listed in [`dop-dacs.json`](../Packages/VespertineKit/Sources/VespertineAudio/Resources/dop-dacs.json); [DOP-AUTO-SETUP.md](DOP-AUTO-SETUP.md) explains the list, the one-tap DoP test for DACs that aren't on it, and how to add one.
@@ -25,14 +25,14 @@ DACs known to decode DoP, with the source for each entry, are listed in [`dop-da
 
 | Test | Result |
 |---|---|
-| 5.1 FLAC, 32 to 192 kHz | The output switched to each rate; every channel on its own HDMI channel, the back pair silent; BIT-PERFECT |
+| 5.1 FLAC, 32 to 192 kHz | The output switched to each rate; every channel on its own HDMI channel with its samples unchanged, the back pair silent. Badged CONVERTED, because six channels go out on an eight-channel link (requirement BPV-007 counts that as a change) |
 | 7.1 FLAC, 48 kHz | Side pair on 5 and 6, back pair on 7 and 8; BIT-PERFECT |
 | 5.1 at 384 kHz, stereo at 768 kHz | Converted to 192 kHz, badged RESAMPLED |
 | 5.1 DSD64 (DSF) | Converted to 176.4 kHz PCM, every channel in place; the receiver does not take DoP |
 | Three files played back to back | No discontinuity at either boundary |
 | Volume in Vespertine at -10 dB | Every channel exactly 10 dB lower, badged DIGITAL GAIN |
 | Spatialize stereo | Stereo upmixed to 5.1: left and right kept, centre and surrounds derived |
-| Dolby Digital, DTS CD (DTS in WAV) | Sent to the receiver untouched as IEC 61937 |
+| Dolby Digital, DTS CD (DTS in WAV) | Sent untouched as IEC 61937. Before the fix in #476 the burst went out inside an eight-channel link left by a surround song and the receiver played hiss; it now goes out on two channels |
 | Speaker group: the receiver plus the MacBook Pro speakers | Played as one 10-channel group; rates put back afterwards |
 
 **Things to know about receivers.**
