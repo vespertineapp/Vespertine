@@ -227,16 +227,36 @@ public final class NetworkPlaybackCache: @unchecked Sendable {
     /// VPN 100 ms away that was about 6.7 MB/s, so a 5.1 DSD song took a minute to copy ahead of its start and its next song's
     /// copy could not keep up. Several in flight fill the link instead; on a near share they cost nothing.
     static let readsInFlight = 4
-    /// A copy begins with reads this small, and reads whole blocks once `startBytes` of the file are local and `startSeconds`
-    /// have passed. A read that has been sent can't be taken back: the copy of a song skipped past (a press on the next one
-    /// cancels it) used to leave four reads of a megabyte each on their way, and on a link of about 1 MB/s to a share 100 ms
-    /// away the song landed on after six quick skips waited behind 24 MB of them (26 s of "Buffering from the network…", where
-    /// a start by itself takes a few seconds). Small reads cost a start nothing a listener notices (four lanes of them still
-    /// bring 5 MB/s over a 100 ms round trip, and a near share answers in a millisecond), and a song skipped past leaves at
-    /// most half a megabyte behind.
+    /// A copy begins with reads this small (or of one block, when blocks are smaller), and never reads less. A read that has been
+    /// sent can't be taken back: the copy of a song skipped past (a press on the next one cancels it) used to leave four reads of
+    /// a megabyte each on their way, and on a link of about 1 MB/s to a share 100 ms away the song landed on after six quick skips
+    /// waited behind 24 MB of them (26 s of "Buffering from the network…", where a start by itself takes a few seconds).
     static let startReadBytes = 128 << 10
-    static let startBytes: Int64 = 4 << 20
-    static let startSeconds: TimeInterval = 2
+    /// The largest read of a copy: one request to the share, covering several of the cache's blocks.
+    static let largestReadBytes = 8 << 20
+    /// Each copy lane's next read asks for what its last one showed the link brings in this long (its bytes over the time it took,
+    /// times this), growing at most `readGrowth`-fold a read, from `startReadBytes` to `largestReadBytes` (see `nextReadBytes`).
+    /// Every read pays a full round trip however few bytes it asks for, so small reads leave a link far away mostly idle: reads of
+    /// 128 KiB for the first two seconds and of 1 MiB after them, four in flight, copied 7.5 MB/s from a share 100 ms away on a
+    /// link of 30 MiB/s, and a DD+ Atmos song (copied whole before it plays) sat at "Buffering from the network… 34%" over a VPN
+    /// of 290 Mbit/s. A read that comes back in less than this grows the next one, so reads fill such a link within a few round
+    /// trips; one that takes longer (a slow link, shared by the lanes) shrinks it. What the lanes have on the link is so about this
+    /// long of its traffic, and a song skipped past leaves no more than that behind: on a link of 1 MB/s the reads stay at
+    /// `startReadBytes`.
+    static let linkSeconds: TimeInterval = 0.5
+    /// How much larger a lane's next read may be than its last: a read answered at once (a cached one, a share next door) is not
+    /// taken to mean the link carries megabytes in no time.
+    static let readGrowth = 4
+
+    /// What a copy lane asks for next after reading `bytes` in `seconds` with reads of `last` bytes (see `linkSeconds`), in whole
+    /// `least` (the smallest read: `startReadBytes`, or a block when blocks are smaller). A read that took no time on the cache's
+    /// clock (a clock that does not move, in tests) changes nothing.
+    static func nextReadBytes(last: Int, bytes: Int, seconds: TimeInterval, least: Int) -> Int {
+        guard seconds > 0, bytes > 0 else { return last }
+        let carried = Double(bytes) / seconds * linkSeconds
+        let next = min(Double(largestReadBytes), Double(last) * Double(readGrowth), carried)
+        return max(least, Int(next) / least * least)
+    }
 
     /// Seconds the Mac has been awake: a sleep is not silence from the share (a wall clock would count it, and a song paused
     /// over night would fail the moment the Mac woke).
@@ -919,95 +939,125 @@ public final class NetworkPlaybackCache: @unchecked Sendable {
             }
         }
 
-        private enum Claim { case block(Int), wait, over }
+        private enum Claim { case blocks(Range<Int>), wait, over }
 
-        /// The next block a lane should read, marked in flight: one a read waits for first, else the next in order from where the
-        /// decoder reads, else any still missing. `over` when the copy is (done, cancelled or failed). The first lane is the copy as
-        /// it always was; the others read ahead only while nothing waits, so the bytes a start or a read waits for never queue
-        /// behind read-ahead on a link short of bandwidth (they help fetch them instead). Under `condition`.
-        private func claimBlock(lane: Int) -> Claim {
+        /// Marks `count` blocks from `first` in flight, as many as follow it still missing and not in flight, at least `first`. Under `condition`.
+        private func take(from first: Int, upTo count: Int) -> Range<Int> {
+            var end = first + 1
+            while end - first < count, end < blocks, !ready.contains(end), !inFlight.contains(end) { end += 1 }
+            for block in first..<end { inFlight.insert(block) }
+            return first..<end
+        }
+
+        /// The next blocks a lane should read (consecutive, as many as one read of `readBytes` covers), marked in flight: ones a read
+        /// waits for first (no further than it asked, so a seek's bytes never wait behind megabytes it did not ask for), else the
+        /// next in order from where the decoder reads, else any still missing. `over` when the copy is (done, cancelled or failed).
+        /// The first lane is the copy as it always was; the others read ahead only while nothing waits, so the bytes a start or a
+        /// read waits for never queue behind read-ahead on a link short of bandwidth (they help fetch them instead). Under `condition`.
+        private func claimBlocks(lane: Int, readBytes: Int) -> Claim {
             if cancelled || error != nil { return .over }
-            if let demanded = requests.lazy.flatMap({ $0 }).first(where: { !ready.contains($0) && !inFlight.contains($0) }) {
-                inFlight.insert(demanded); return .block(demanded)
+            let wanted = max(1, (readBytes + chunk / 2) / chunk)
+            func missing(_ block: Int) -> Bool { !ready.contains(block) && !inFlight.contains(block) }
+            for request in requests {
+                if let demanded = request.first(where: missing) {
+                    return .blocks(take(from: demanded, upTo: min(wanted, request.upperBound - demanded)))
+                }
             }
             if lane > 0, waiters > 0 { return .wait }
             if let resumeAt { sequential = resumeAt; self.resumeAt = nil }
-            while sequential < blocks && (ready.contains(sequential) || inFlight.contains(sequential)) { sequential += 1 }
+            while sequential < blocks && !missing(sequential) { sequential += 1 }
             if sequential >= blocks {
-                guard let missing = (0..<blocks).first(where: { !ready.contains($0) && !inFlight.contains($0) }) else { return .over }
-                inFlight.insert(missing); return .block(missing)
+                guard let any = (0..<blocks).first(where: missing) else { return .over }
+                return .blocks(take(from: any, upTo: wanted))
             }
-            inFlight.insert(sequential)
-            return .block(sequential)
+            return .blocks(take(from: sequential, upTo: wanted))
         }
 
-        /// One copy lane: claims a block, reads it from the share, writes it to the local file, until the copy is over.
+        /// Gives back the blocks of `run` a lane claimed and did not finish. Under `condition`.
+        private func unclaim(_ run: Range<Int>) {
+            for block in run where !ready.contains(block) { inFlight.remove(block) }
+        }
+
+        /// One copy lane: claims blocks, reads them from the share, writes them to the local file, until the copy is over. A block
+        /// is local as soon as its bytes are written, before the rest of its read's blocks.
         private func copyLane(_ lane: Int) {
+            // This lane's next read (see `NetworkPlaybackCache.linkSeconds`): small at first, then what the link shows it carries.
+            let least = min(NetworkPlaybackCache.startReadBytes, chunk)
+            var ask = least
             while true {
                 let claim: Claim = condition.withLock {
-                    var claim = claimBlock(lane: lane)
+                    var claim = claimBlocks(lane: lane, readBytes: ask)
                     while case .wait = claim {
                         _ = condition.wait(until: Date().addingTimeInterval(0.025))
-                        claim = claimBlock(lane: lane)
+                        claim = claimBlocks(lane: lane, readBytes: ask)
                     }
                     // Ending is decided under the same lock as the claim, so `resumeAfterReadFailure` never counts a lane that is going.
-                    if case .block = claim {} else { activeLanes.remove(lane) }
+                    if case .blocks = claim {} else { activeLanes.remove(lane) }
                     return claim
                 }
-                guard case .block(let block) = claim else { return }
+                guard case .blocks(let run) = claim else { return }
+                // The blocks of the run that are local, from its start (`run.lowerBound..<written`).
+                var written = run.lowerBound
                 do {
-                    let offset = Int64(block) * Int64(chunk)
-                    let length = Int(min(Int64(chunk), size - offset))
-                    var data = Data()
-                    while data.count < length {
-                        // A copy that has only just begun asks for little at a time (see `startReadBytes`).
-                        let (stop, beginning) = condition.withLock {
-                            (cancelled, Int64(ready.count) * Int64(chunk) < NetworkPlaybackCache.startBytes
-                                || clock() - startedAt < NetworkPlaybackCache.startSeconds)
-                        }
-                        if stop { condition.withLock { _ = inFlight.remove(block); activeLanes.remove(lane) }; return }
-                        let ask = beginning ? min(length - data.count, NetworkPlaybackCache.startReadBytes) : length - data.count
-                        let part = try readPart(at: offset + Int64(data.count), count: ask)
-                        guard !part.isEmpty, part.count <= length - data.count else { throw Failure.unexpectedEOF }
+                    let end = min(size, Int64(run.upperBound) * Int64(chunk))
+                    var offset = Int64(run.lowerBound) * Int64(chunk)
+                    while offset < end {
+                        if condition.withLock({ cancelled }) { condition.withLock { unclaim(run); activeLanes.remove(lane) }; return }
+                        // Reads smaller than a block take it in parts; larger ones take the run (about `ask`) at once.
+                        let count = Int(ask < chunk ? min(Int64(ask), end - offset) : end - offset)
+                        let sent = clock()
+                        let part = try readPart(at: offset, count: count)
+                        guard !part.isEmpty, part.count <= count else { throw Failure.unexpectedEOF }
                         NetworkPlaybackCache.delivered.withLock { $0 = .now }
-                        condition.withLock { lastProgress = clock() }
-                        data.append(part)
-                    }
-                    // Rewritten on the server meanwhile? Asked every 16 blocks and before the last one, so a copy never
-                    // completes from two versions of the file.
-                    let (check, current) = condition.withLock { () -> (Bool, any PlaybackCacheReader) in
-                        sinceCheck += 1
-                        let due = sinceCheck >= 16 || ready.count + inFlight.count >= blocks
-                        if due { sinceCheck = 0 }
-                        return (due, reader)
-                    }
-                    if check, current.changedSinceOpen { throw Failure.changed }
-                    try data.withUnsafeBytes { bytes in
-                        var done = 0
-                        while done < bytes.count {
-                            let n = pwrite(file.fileDescriptor, bytes.baseAddress!.advanced(by: done), bytes.count - done, off_t(offset) + off_t(done))
-                            if n < 0, errno == EINTR { continue }
-                            guard n > 0 else { throw CocoaError(.fileWriteUnknown) }
-                            done += n
+                        let now = clock()
+                        condition.withLock { lastProgress = now }
+                        // A short read (the end of the file, the one block a decoder waits for) says little about the link.
+                        if count >= ask / 2 {
+                            ask = NetworkPlaybackCache.nextReadBytes(last: ask, bytes: part.count, seconds: now - sent, least: least)
                         }
+                        try part.withUnsafeBytes { bytes in
+                            var done = 0
+                            while done < bytes.count {
+                                let n = pwrite(file.fileDescriptor, bytes.baseAddress!.advanced(by: done), bytes.count - done, off_t(offset) + off_t(done))
+                                if n < 0, errno == EINTR { continue }
+                                guard n > 0 else { throw CocoaError(.fileWriteUnknown) }
+                                done += n
+                            }
+                        }
+                        offset += Int64(part.count)
+                        // The blocks this read completed.
+                        var complete = written
+                        while complete < run.upperBound, min(size, Int64(complete + 1) * Int64(chunk)) <= offset { complete += 1 }
+                        guard complete > written else { continue }
+                        // Rewritten on the server meanwhile? Asked every 16 blocks and before the last ones, so a copy never
+                        // completes from two versions of the file.
+                        let (check, current) = condition.withLock { () -> (Bool, any PlaybackCacheReader) in
+                            sinceCheck += complete - written
+                            let due = sinceCheck >= 16 || ready.count + inFlight.count >= blocks
+                            if due { sinceCheck = 0 }
+                            return (due, reader)
+                        }
+                        if check, current.changedSinceOpen { throw Failure.changed }
+                        condition.withLock {
+                            for block in written..<complete { inFlight.remove(block); ready.insert(block) }
+                            condition.broadcast()
+                        }
+                        written = complete
+                        // In order, never backwards, though lanes finish their blocks in any order.
+                        reporting.withLock {
+                            let (report, copied) = condition.withLock { (progress, min(size, Int64(ready.count) * Int64(chunk))) }
+                            report?(copied)
+                        }
+                        publishDemand()
                     }
-                    condition.withLock {
-                        inFlight.remove(block)
-                        ready.insert(block); condition.broadcast()
-                    }
-                    // In order, never backwards, though lanes finish their blocks in any order.
-                    reporting.withLock {
-                        let (report, copied) = condition.withLock { (progress, min(size, Int64(ready.count) * Int64(chunk))) }
-                        report?(copied)
-                    }
-                    publishDemand()
                 } catch {
+                    let stoppedAt = written
                     let current = condition.withLock { () -> (any PlaybackCacheReader)? in
-                        inFlight.remove(block)
+                        unclaim(stoppedAt..<run.upperBound)
                         activeLanes.remove(lane)
                         if self.error == nil {
                             self.error = error
-                            log.error("The song's copy stopped at block \(block, privacy: .public) of \(self.blocks, privacy: .public): \(ShareReadFailure.describe(error), privacy: .public)")
+                            log.error("The song's copy stopped at block \(stoppedAt, privacy: .public) of \(self.blocks, privacy: .public): \(ShareReadFailure.describe(error), privacy: .public)")
                         }
                         condition.broadcast()
                         return held

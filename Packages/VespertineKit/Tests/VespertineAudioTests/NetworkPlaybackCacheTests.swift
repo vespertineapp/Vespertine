@@ -103,6 +103,34 @@ private final class FarShare: PlaybackCacheReader, @unchecked Sendable {
     var mostAtOnce: Int { lock.withLock { most } }
 }
 
+/// A share at the end of a slow link: every read is answered a round trip after it is sent, and the answers share one link of
+/// `bytesPerSecond`, one after another. It notes every read's size.
+private final class FarLinkShare: PlaybackCacheReader, @unchecked Sendable {
+    let bytes: Data
+    let roundTrip: TimeInterval
+    let bytesPerSecond: Double
+    private let lock = NSLock()
+    private var linkFree: TimeInterval = 0
+    private var sizes: [Int] = []
+    var size: Int64 { Int64(bytes.count) }
+    init(count: Int, roundTrip: TimeInterval, bytesPerSecond: Double) {
+        bytes = Data((0..<count).map { UInt8(truncatingIfNeeded: $0 &* 53 &+ 1) }); self.roundTrip = roundTrip; self.bytesPerSecond = bytesPerSecond
+    }
+    func read(at offset: Int64, count: Int) throws -> Data {
+        let length = max(0, min(count, bytes.count - Int(offset)))
+        let sent = ProcessInfo.processInfo.systemUptime
+        let due: TimeInterval = lock.withLock {
+            sizes.append(count)
+            let done = max(sent + roundTrip, linkFree) + Double(length) / bytesPerSecond
+            linkFree = done
+            return done
+        }
+        waitPrecisely(until: due)
+        return bytes.subdata(in: Int(offset)..<Int(offset) + length)
+    }
+    var readSizes: [Int] { lock.withLock { sizes } }
+}
+
 /// A share that notes what it is asked for: every read's size, in order, and how many bytes were asked for in all. Each read
 /// takes `roundTrip`.
 private final class NotingShare: PlaybackCacheReader, @unchecked Sendable {
@@ -116,7 +144,7 @@ private final class NotingShare: PlaybackCacheReader, @unchecked Sendable {
     }
     func read(at offset: Int64, count: Int) throws -> Data {
         lock.withLock { sizes.append(count) }
-        if roundTrip > 0 { Thread.sleep(forTimeInterval: roundTrip) }
+        if roundTrip > 0 { waitPrecisely(until: ProcessInfo.processInfo.systemUptime + roundTrip) }
         return bytes.subdata(in: Int(offset)..<min(Int(offset) + count, bytes.count))
     }
     var readSizes: [Int] { lock.withLock { sizes } }
@@ -340,16 +368,13 @@ struct NetworkPlaybackCacheTests {
         #expect(try Data(contentsOf: entry.url) == share.bytes)
     }
 
-    @Test("A copy begins with small reads and goes on with whole blocks, byte for byte")
+    @Test("A copy begins with small reads and goes on with reads of several blocks once the link has shown it carries them, byte for byte")
     func smallReadsAtTheStart() throws {
         let dir = try directory(); defer { try? FileManager.default.removeItem(at: dir) }
-        // Blocks as large as the app's, a file that is no whole number of them, and a clock on which the start's two seconds are
-        // over in two microseconds (this copy from memory takes about a millisecond), so only how much is local decides. On that
-        // clock the share's silence is not timed.
-        let share = NotingShare(count: 9 * 1_048_576 + 70_001)
-        let begun = ProcessInfo.processInfo.systemUptime
-        let cache = NetworkPlaybackCache(directory: dir, budget: 64 << 20, chunk: 1 << 20, noProgressLimit: .greatestFiniteMagnitude,
-                                         clock: { (ProcessInfo.processInfo.systemUptime - begun) * 1_000_000 + 100 })
+        // Blocks as large as the app's, a file that is no whole number of them, and a share 20 ms away with no limit on bandwidth:
+        // its first reads bring 128 KiB per lane per round trip, about 25 MiB/s, and half a second of that is several megabytes.
+        let share = NotingShare(count: 24 * 1_048_576 + 70_001, roundTrip: 0.02)
+        let cache = NetworkPlaybackCache(directory: dir, budget: 64 << 20, chunk: 1 << 20)
         let entry = try cache.entry(key: "song", url: URL(fileURLWithPath: "/share/song.flac"), reader: share)
         try entry.prepare(full: true, lead: 0, cancelled: { false })
         #expect(entry.isComplete)
@@ -357,7 +382,21 @@ struct NetworkPlaybackCacheTests {
         let sizes = share.readSizes
         let lanes = NetworkPlaybackCache.readsInFlight
         #expect(sizes.prefix(lanes).allSatisfy { $0 <= NetworkPlaybackCache.startReadBytes }, "the first reads are small: \(sizes.prefix(lanes))")
-        #expect(sizes.contains(1 << 20), "whole blocks once the start is local: largest read \(sizes.max() ?? 0)")
+        #expect(sizes.contains { $0 > 1 << 20 }, "reads of more than a block once the link has shown it carries them: largest \(sizes.max() ?? 0)")
+        #expect(sizes.allSatisfy { $0 <= NetworkPlaybackCache.largestReadBytes }, "largest read \(sizes.max() ?? 0)")
+    }
+
+    @Test("On a slow link the reads stay small: what is on the link is never more than about half a second of what it carries")
+    func slowLinkKeepsSmallReads() throws {
+        let dir = try directory(); defer { try? FileManager.default.removeItem(at: dir) }
+        // 1 MiB/s, 100 ms away: the link of the quick skips (`SkipThroughShareTests`).
+        let share = FarLinkShare(count: 6 << 20, roundTrip: 0.1, bytesPerSecond: 1_048_576)
+        let cache = NetworkPlaybackCache(directory: dir, budget: 64 << 20, chunk: 1 << 20)
+        let entry = try cache.entry(key: "song", url: URL(fileURLWithPath: "/share/song.flac"), reader: share)
+        try entry.prepare(full: true, lead: 0, cancelled: { false })
+        #expect(try Data(contentsOf: entry.url) == share.bytes)
+        // Half a second of 1 MiB/s, in four lanes: 128 KiB each. A read twice that is a measuring hiccup at most; never megabytes.
+        #expect(share.readSizes.allSatisfy { $0 <= 2 * NetworkPlaybackCache.startReadBytes }, "largest read \(share.readSizes.max() ?? 0)")
     }
 
     @Test("A copy given up on as it begins leaves little on the link: no megabyte reads on their way")
@@ -373,6 +412,9 @@ struct NetworkPlaybackCacheTests {
         let entry = try cache.entry(key: "skipped", url: URL(fileURLWithPath: "/share/skipped.flac"), reader: share)
         // The copy's first reads go out, one a lane, and are answered; each lane sends its next and waits on it.
         try #require(share.waitForSent(lanes), "the copy sent \(share.readSizes.count) reads")
+        // Answered after 0.6 s: 512 KiB in that time is a link of under 1 MiB/s, on which half a second is no more than the
+        // lanes' small reads (see `NetworkPlaybackCache.linkSeconds`). A link that answers at once would earn larger ones.
+        Thread.sleep(forTimeInterval: 0.6)
         share.answer(lanes)
         try #require(share.waitForSent(2 * lanes), "the copy sent \(share.readSizes.count) reads")
         // Given up on now, with every lane's read on its way.
