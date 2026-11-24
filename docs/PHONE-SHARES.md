@@ -117,7 +117,9 @@ sockets only; no third-party code), because the libraries that exist are under l
   any order. A file read straight through (a song as it plays, a song being kept) is read ahead: the next pieces are asked for before
   they are wanted, starting at the size of the last read and doubling with each read in a row up to 8 MB, so a scan that reads a few
   kilobytes of tags is not made to fetch megabytes. A jump, closing the file or its end gives up what was read ahead. Read-ahead always
-  leaves two credits for requests that aren't reads.
+  leaves two credits for requests that aren't reads. A scan's open, read and close sent together (above) can share a connection with
+  a song's reads ahead: their answers are matched by message ID like any other, and answers that come chained in one message are
+  taken apart first (`SMBPipelineTests`).
 - It only ever opens folders for listing and files for reading. There is no code path that writes, renames or deletes a file. To list
   a server's shares it asks the server's share service (MS-SRVS NetrShareEnum over DCE/RPC on the `srvsvc` pipe of `IPC$`, with
   FSCTL_PIPE_TRANSCEIVE): a request and an answer on a pipe, allowed only on `IPC$` and only for `srvsvc`.
