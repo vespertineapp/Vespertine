@@ -279,8 +279,10 @@ struct DevicePicker: View {
                               symbol: model.airPlayChosen ? "airplay.audio" : "hifireceiver", selected: true)
                         .opacity(0.6)
                 } else {
+                    // The output playing in its place, as Now Playing and a phone name it (not only the one the next
+                    // song would pick: an output already standing in is kept).
                     deviceRow(uid, name: missing,
-                              detail: model.plannedDevice.map { String(localized: "NOT CONNECTED · USING \($0.name.localizedUppercase)", comment: "Output list: the chosen device is missing; %@ is the device playing in its place") }
+                              detail: model.standInDevice.map { String(localized: "NOT CONNECTED · USING \($0.name.localizedUppercase)", comment: "Output list: the chosen device is missing; %@ is the device playing in its place") }
                                   ?? String(localized: "NOT CONNECTED · WAITING FOR IT", comment: "Output list: the chosen device is missing and playback waits for it"),
                               symbol: "cable.connector.slash", selected: true)
                 }
