@@ -105,6 +105,9 @@ final class AdaptiveLayoutTests: XCTestCase {
         XCTAssertEqual(RemoteDestination.starting(at: "coverFlow"), .library)
         XCTAssertEqual(RemoteDestination.starting(at: "artists"), .artists)
         XCTAssertEqual(RemoteDestination.starting(at: nil), .nowPlaying)
+        // Sources is a tab of its own, not a page of the library.
+        XCTAssertEqual(RemoteDestination.starting(at: "sources"), .sources)
+        XCTAssertEqual(RemoteDestination.sources.compactTab, .sources)
     }
 }
 

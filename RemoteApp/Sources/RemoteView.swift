@@ -36,6 +36,8 @@ struct RemoteView: View {
         .sheet(isPresented: $showingSettings) { SettingsView() }
         .feedback(feedback)
         .onAppear { destination = .starting(at: model.startScreen) }
+        // A banner's or Settings' "Sources" button.
+        .onChange(of: model.sourcesAsked) { destination = .sources }
         // Again whenever a page is chosen: a heart or a scan since then shows in the counts.
         .task(id: "\(session.isConnected)#\(destination.id)#\(model.libraryRevision)") {
             if case .library(let loaded) = await session.send(.library) { overview = loaded }
@@ -64,8 +66,9 @@ struct RemoteView: View {
                     if !session.isShare { sidebarLink(.playlists, count: overview?.playlists) }
                     if !session.isDemo { sidebarLink(.kept) }
                 }
+                // The Mac's own folders, under its name: "Sources" is this app's Macs, shares and folders.
                 if !session.isShare, let sources = overview?.sources, !sources.isEmpty {
-                    Section("Sources") {
+                    Section(header: Text(verbatim: model.macInUse?.name ?? session.pairing.name)) {
                         ForEach(sources) { source in
                             NavigationLink(value: RemoteDestination.source(source.id)) { SourceLabel(source: source, selected: destination == .source(source.id)) }
                                 .accessibilityIdentifier("sidebar-source")
@@ -73,13 +76,10 @@ struct RemoteView: View {
                         }
                     }
                 }
-                Section(session.isFolder ? LocalizedStringKey("Folder") : session.isShare ? LocalizedStringKey("SMB Share") : LocalizedStringKey("Mac")) {
+                Section {
                     sidebarLink(.output)
-                    // Back to the list of Macs, shares and folders. A row with its name: the picture alone, in the
-                    // bar under the sidebar, said little.
-                    Button { model.leave() } label: { CountedLabel(title: String(localized: "Libraries"), symbol: "music.note.house") }
-                        .accessibilityIdentifier("sidebar-libraries")
-                        .hoverEffect(.highlight)
+                    // The Macs, shares and folders the library is made of, and adding more.
+                    sidebarLink(.sources)
                 }
             }
             .listStyle(.sidebar)
@@ -123,6 +123,9 @@ struct RemoteView: View {
         case .output:
             OutputsView(session: session).readablePane()
                 .miniPlayer(session: session) { destination = .nowPlaying }
+        case .sources:
+            SourcesView()
+                .miniPlayer(session: session) { destination = .nowPlaying }
         case .library, .artists, .songs, .genres, .recentlyAdded, .favorites, .playlists, .kept, .source:
             LibraryView(session: session, section: destination)
                 .id("\(destination.id)#\(model.libraryRevision)")
@@ -149,6 +152,10 @@ struct RemoteView: View {
                 .miniPlayer(session: session) { destination = .nowPlaying }
                 .tabItem { Label("Output", systemImage: "hifispeaker") }
                 .tag(RemoteDestination.output)
+            SourcesView()
+                .miniPlayer(session: session) { destination = .nowPlaying }
+                .tabItem { Label("Sources", systemImage: RemoteDestination.sources.symbol) }
+                .tag(RemoteDestination.sources)
         }
     }
 
@@ -158,6 +165,7 @@ struct RemoteView: View {
             Button("Library") { destination = .library }.keyboardShortcut("2")
             Button("Queue") { destination = .queue }.keyboardShortcut("3")
             Button("Output") { destination = .output }.keyboardShortcut("4")
+            Button("Sources") { destination = .sources }.keyboardShortcut("5")
             Divider()
             Button("Play / Pause") { feedback.run(session, .playPause) }.keyboardShortcut("p")
                 .disabled(!session.canControl)
@@ -341,7 +349,7 @@ struct ConnectionBanner: View {
                     Button("Try Again") { model.rescan(id) }.disabled(status?.scan.isRunning ?? false)
                     if !folder.isOwn { ChooseFolderAgainButton(folder: folder) }
                     Spacer(minLength: 0)
-                    Button("Libraries") { model.leave() }
+                    Button("Sources") { model.showSources() }
                 }
                 .font(.footnote.weight(.medium))
             }
@@ -354,7 +362,7 @@ struct ConnectionBanner: View {
             } buttons: {
                 Button("Try Again") { model.rescan(id) }.font(.footnote.weight(.medium))
                     .disabled(status?.scan.isRunning ?? false)
-                Button("Libraries") { model.leave() }.font(.footnote.weight(.medium))
+                Button("Sources") { model.showSources() }.font(.footnote.weight(.medium))
             }
             .accessibilityIdentifier("share-trouble")
         } else if let status, status.scanned == nil, case .scanning(let songs) = status.scan {
@@ -467,7 +475,7 @@ struct ConnectionBanner: View {
                     Button("Connection") { editing = true }
                 }
                 Spacer()
-                Button("Libraries") { model.leave() }
+                Button("Sources") { model.showSources() }
             }
             .font(.footnote.weight(.medium))
         }
@@ -495,7 +503,7 @@ struct ConnectionBanner: View {
             if busy { ProgressView() }
             text.font(.footnote)
         } buttons: {
-            Button("Libraries") { model.leave() }.font(.footnote.weight(.medium))
+            Button("Sources") { model.showSources() }.font(.footnote.weight(.medium))
         }
     }
 }

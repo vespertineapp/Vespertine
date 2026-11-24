@@ -25,7 +25,8 @@ final class RemoteAppModel {
     /// The Macs, shares and folders the library is made of, by their IDs. Kept between launches.
     private(set) var inUse: [String] = []
     /// The list of libraries is showing over the open library, to choose what it is made of.
-    var choosingLibraries = false
+    /// Asks the open library's screens to show Sources (a banner's or Settings' button). Counted, so every ask is seen.
+    private(set) var sourcesAsked = 0
     /// The SMB shares this device plays from by itself, without a Mac.
     private(set) var shares: [SavedShare]
     /// The folders of music on this device that were added from Files.
@@ -149,15 +150,21 @@ final class RemoteAppModel {
         if kept != inUse { use(kept) }
     }
 
-    /// A library in the list was tapped. While choosing what the library is made of, it is put in or taken out; from
-    /// the list with nothing open, it is opened by itself.
-    func tap(_ id: String) {
-        if choosingLibraries, let session, !session.isDemo {
-            use(isInUse(id) ? inUse.filter { $0 != id } : inUse + [id])
-        } else {
-            use([id], afresh: [id])
-        }
+    /// A library in the start screen's list was tapped: it is opened by itself.
+    func tap(_ id: String) { use([id], afresh: [id]) }
+
+    /// Sources' switch for a Mac, a share or a folder: on, its music is part of the library; off, it is taken out but kept.
+    /// One Mac at a time: turning a second one on takes the first one's place.
+    func setInLibrary(_ id: String, _ on: Bool) {
+        guard on != isInUse(id), SourceRules.canSwitch(id, on: on, inUse: inUse) else { return }
+        use(on ? inUse + [id] : inUse.filter { $0 != id })
     }
+
+    /// Shows Sources over the open library.
+    func showSources() { sourcesAsked += 1 }
+
+    /// The open session with a Mac, whether it is open by itself or as one of several libraries; nil when it isn't open.
+    func openMac(_ serverID: String) -> RemoteSession? { linkToMac(serverID) }
 
     /// Opens a Mac by itself.
     func choose(_ pairing: SavedPairing) { use([pairing.serverID], afresh: [pairing.serverID]) }
@@ -195,7 +202,6 @@ final class RemoteAppModel {
         if session?.isDemo == true { teardown() }
         guard let first = wanted.first else {
             teardown()
-            choosingLibraries = false
             return
         }
         if joinedForGood {
@@ -363,7 +369,6 @@ final class RemoteAppModel {
     /// Tries the remote on a pretend Mac inside the app (no network, no sound). Not saved as a pairing.
     func tryDemo() {
         teardown()
-        choosingLibraries = false
         let pairing = SavedPairing(serverID: DemoMac.serverID, name: String(localized: "Demo Mac"), device: "demo", key: Data())
         // One pretend Mac for the whole demo, so the queue survives the app going to the background and back.
         let mac = DemoMac(name: pairing.name, appVersion: Self.demoVersion(info: Bundle.main.infoDictionary)) { key, size in
@@ -387,14 +392,13 @@ final class RemoteAppModel {
         (info?["CFBundleShortVersionString"] as? String)?.trimmingCharacters(in: .whitespaces) ?? ""
     }
 
-    /// To the list of libraries. A real library stays open behind it (the music carries on) while what it is made of is
-    /// chosen; the demo is left, for the library that was open before it.
+    /// Leaves the demo, for the library that was open before it. From a real library, shows Sources.
     func leave() {
         if session?.isDemo == true {
             teardown()
             use(inUse)
         } else {
-            choosingLibraries = true
+            showSources()
         }
     }
 
