@@ -20,8 +20,10 @@ private final class StoppingShare: PlaybackCacheReader, @unchecked Sendable {
     func read(at offset: Int64, count: Int) throws -> Data {
         gate.lock()
         while let quietFrom, offset >= quietFrom { gate.wait() }
+        // A read that reaches past where the share goes quiet gets what was sent before it (a short read).
+        let ask = quietFrom.map { min(count, Int($0 - offset)) } ?? count
         gate.unlock()
-        return bytes.subdata(in: Int(offset)..<min(Int(offset) + count, bytes.count))
+        return bytes.subdata(in: Int(offset)..<min(Int(offset) + ask, bytes.count))
     }
     func openUp() { gate.withLock { quietFrom = nil; gate.broadcast() } }
 }

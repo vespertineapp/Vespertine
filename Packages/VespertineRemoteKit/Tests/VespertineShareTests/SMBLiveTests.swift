@@ -46,6 +46,12 @@ private let live: (host: String, port: Int, share: String, user: String, passwor
         #expect(try connection.read(file, offset: 2_999_990, length: 100) == Array(expected.suffix(10)))
         try connection.close(file)
         #expect(throws: SMBError.notFound) { _ = try connection.open("Music/nothing.flac", folder: false) }
+        // Open, read and close in one round trip; open, list and close in one.
+        let peeked = try connection.peek("Music/random.bin", length: 1000)
+        #expect(peeked.size == 3_000_000 && peeked.head == Array(expected.prefix(1000)))
+        #expect(throws: SMBError.notFound) { _ = try connection.peek("Music/nothing.flac", length: 10) }
+        #expect(try connection.list(folder: "").map(\.name).contains("Music"))
+        #expect(throws: SMBError.notFound) { _ = try connection.list(folder: "Nothing") }
         connection.disconnect()
     }
 

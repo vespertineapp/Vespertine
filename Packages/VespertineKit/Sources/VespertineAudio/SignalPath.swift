@@ -354,6 +354,25 @@ public struct SignalPath: Sendable, Hashable {
         public var downmix: Downmix?
     }
 
+    /// What the signal path says about the source's channels on the way out.
+    public enum ChannelHandling: Sendable, Equatable {
+        /// Nothing to say: stereo or mono as it is, or a bitstream (its two channels are IEC 61937 bursts that carry every
+        /// channel of the source for the receiver to decode; nothing is mixed down or routed).
+        case none
+        case spatial
+        /// Mixed down to `channels`.
+        case downmix(channels: Int)
+        /// Every channel to its own output.
+        case discrete
+    }
+
+    public var channelHandling: ChannelHandling {
+        if plan.mode == .bitstream { return .none }
+        if plan.spatial != .off { return .spatial }
+        if plan.channels < source.channels { return .downmix(channels: plan.channels) }
+        return source.channels > 2 ? .discrete : .none
+    }
+
     /// nil: neither happened.
     public var conversion: Conversion? {
         let from = ChannelLayouts.name(labels: source.channelLabels, channels: source.channels)

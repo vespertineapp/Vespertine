@@ -73,11 +73,14 @@ private final class SlowLink: @unchecked Sendable {
     }
 }
 
-/// The song's side of the link: every read of the staging copy is one request.
+/// The song's side of the link: every read of the staging copy is one request (of one block or of a run of them, see
+/// `NetworkPlaybackCache.linkSeconds`). It counts the bytes it sent.
 private final class LinkReader: PlaybackCacheReader, @unchecked Sendable {
     let size: Int64
     let link: SlowLink
     let gate: ShareIOGate
+    private let sent = Locked(0)
+    var bytesSent: Int { sent.withLock { $0 } }
     init(link: SlowLink, gate: ShareIOGate, chunks: Int, chunk: Int) {
         self.link = link; self.gate = gate; size = Int64(chunks * chunk)
     }
@@ -85,6 +88,7 @@ private final class LinkReader: PlaybackCacheReader, @unchecked Sendable {
         // Pressing play made the gate hold new scan requests before this read, so only those running now can still land.
         link.songStarts(scansInFlight: gate.running)
         link.request(.playback)
+        sent.withLock { $0 += count }
         return Data(repeating: 7, count: count)
     }
 }
@@ -152,13 +156,16 @@ struct NetworkPriorityTests {
         #expect(landed <= allowed, "\(landed) scan requests went over the link after the song's copy began, \(allowed) could: \(wire)")
     }
 
-    /// Press play: the staging copy of the song starts and the engine waits for all of it (output starts after).
-    private func copySong(link: SlowLink, gate: ShareIOGate) throws {
+    /// Press play: the staging copy of the song starts and the engine waits for all of it (output starts after). Returns the
+    /// bytes the song's reads brought over the link.
+    @discardableResult
+    private func copySong(link: SlowLink, gate: ShareIOGate) throws -> Int {
         let dir = try directory(); defer { try? FileManager.default.removeItem(at: dir) }
         let cache = NetworkPlaybackCache(directory: dir, budget: 1 << 20, chunk: Self.chunk, gate: gate)
         let reader = LinkReader(link: link, gate: gate, chunks: Self.chunks, chunk: Self.chunk)
         let entry = try cache.entry(key: "song", url: URL(fileURLWithPath: "/share/song.flac"), reader: reader)
         try entry.prepare(full: true, lead: 0, cancelled: { false })
+        return reader.bytesSent
     }
 
     @Test("With a scan in flight, the song's copy goes over the link without the scan's requests between (the scan makes way)")
@@ -180,12 +187,12 @@ struct NetworkPriorityTests {
         // Where on the wire play is pressed, and what goes over it until the song is local. Counted in requests,
         // not seconds: a starved test machine stretches every round trip, never the order they go in.
         let pressed = link.position
-        try copySong(link: link, gate: gate)
+        let copied = try copySong(link: link, gate: gate)
         let wire = link.sequence(from: pressed), counts = link.scansAfterSongStart
         await scan.stop()
 
-        // Before the fix the scan's requests alternate with the song's on the wire, ten of them in the copy.
-        #expect(wire.filter { $0 == .playback }.count == Self.chunks, "the song's copy didn't go over the link in full: \(wire)")
+        // Before the fix the scan's requests alternate with the song's on the wire, all through the copy.
+        #expect(copied == Self.chunks * Self.chunk, "the song's copy didn't go over the link in full: \(copied) bytes, \(wire)")
         expectScansMadeWay(counts, wire)
     }
 
@@ -196,20 +203,21 @@ struct NetworkPriorityTests {
         gate.maxInFlight = ShareIOGate.whileStreaming
 
         // One scan request has been admitted (the gate lets one through) but is stuck before the wire, as it is on
-        // a starved machine; it is let go once the song's fourth read is over.
+        // a starved machine; it is let go once the song's first read is over. The copy's other first reads are queued on
+        // the wire by then, and its later reads (of several blocks each, once the first have come back) go after it.
         let hold = link.holdNextScan()
-        link.afterEachPlayback { if $0 == 4 { hold.signal() } }
+        link.afterEachPlayback { if $0 == 1 { hold.signal() } }
         let scan = ScanLoad(link: link, gate: gate, width: 1)
         defer { Task { await scan.stop() } }
         link.waitUntilHeld()
         #expect(gate.running == 1)
 
         let pressed = link.position
-        try copySong(link: link, gate: gate)
+        let copied = try copySong(link: link, gate: gate)
         let wire = link.sequence(from: pressed), counts = link.scansAfterSongStart
         await scan.stop()
 
-        #expect(wire.filter { $0 == .playback }.count == Self.chunks, "the song's copy didn't go over the link in full: \(wire)")
+        #expect(copied == Self.chunks * Self.chunk, "the song's copy didn't go over the link in full: \(copied) bytes, \(wire)")
         #expect(wire.firstIndex(of: .scan).map { $0 > 0 && $0 < wire.count - 1 } == true, "the held scan request didn't land mid-copy: \(wire)")
         expectScansMadeWay(counts, wire)
     }

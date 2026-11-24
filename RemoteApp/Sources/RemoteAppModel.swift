@@ -39,6 +39,9 @@ final class RemoteAppModel {
     private(set) var statuses: [String: ShareStatus] = [:]
     /// Goes up when the open share's library changed under the screens (a scan found new or changed songs).
     private(set) var libraryRevision = 0
+    /// Where the Library is, kept here rather than on the screen: the screen is made anew each time the library changes
+    /// (a Mac connects again, a share's scan ends), and the page open stays open, its list loaded again.
+    var libraryPlace = LibraryPlace()
     /// A pairing link opened from the Camera app or scanned, waiting for its Mac to show up on Bonjour.
     var pendingLink: PairingLink?
     /// What went wrong with the last pairing attempt, for the pairing screen.
@@ -430,8 +433,10 @@ final class RemoteAppModel {
 
     /// A share's library, answering as a Mac would; watched while it is open.
     private func shareMac(for share: SavedShare) -> ShareMac {
-        // Two connections: a song being played never waits behind a scan or a cover.
-        let mac = ShareMac(id: share.id, name: share.name, files: share.files(), playback: share.files(), store: share.store,
+        // A connection for playing, so a song never waits behind a scan or a cover, and a few more a scan reads songs'
+        // tags over at once: each song costs round trips to the server, and one at a time a large library took hours.
+        let mac = ShareMac(id: share.id, name: share.name, files: share.files(), playback: share.files(),
+                           readers: (0..<ShareMac.scanReaders).map { _ in share.files() }, store: share.store,
                            sayings: ShareWording.sayings, decoders: PhoneDecoders(), shrink: { data, size in ShareCovers.shrink(data, to: size) })
         watch(mac, id: share.id, folder: false)
         return mac
@@ -843,9 +848,31 @@ final class RemoteAppModel {
 
     // MARK: Background
 
+    /// The app is on the screen (not when iOS started it in the background to give it time).
+    var isInFront: Bool { UIApplication.shared.applicationState == .active }
+
+    /// A share in use is being scanned right now.
+    var sharesScanning: Bool { shares.contains { statuses[$0.id]?.scan.isRunning ?? false } }
+
+    /// A share in use has never been read to the end.
+    var hasUnfinishedShare: Bool {
+        shares.contains { share in inUse.contains(share.id) && (statuses[share.id]?.scanned ?? share.store.library()?.scanned) == nil }
+    }
+
+    /// Opens what is in use (iOS gave the app time in the background: a share's scan carries on).
+    func openLibraries() { session?.connect() }
+
+    /// The app is away and nothing needs the libraries: they are let go, as when it leaves the screen (a scan under way
+    /// keeps what it has read). Not while music plays on this device.
+    func letLibrariesRest() {
+        guard !isInFront, !PlayTarget.shared.isBusy else { return }
+        session?.suspend()
+    }
+
     func scenePhaseChanged(_ phase: ScenePhase) {
         switch phase {
         case .active:
+            ShareBackgroundScan.shared.appCameBack()
             if !discoveryHeld { discovery.start() }
             searchChanged()
             // A connection kept while the app was away may have died without a word: ask, and connect if there is none.
@@ -860,10 +887,12 @@ final class RemoteAppModel {
         case .background:
             // iOS may end the app from here without telling it: the queue and the place in the song are written now.
             PlayTarget.shared.saveQueue()
-            // Music playing on this device needs its songs from the Mac: the connection stays while it plays.
+            // Music playing on this device needs its songs from the Mac: the connection stays while it plays. A share
+            // being scanned keeps its libraries open while iOS lets the app run (and asks for time later to go on).
             if !PlayTarget.shared.isBusy {
-                session?.suspend()
                 macSession?.suspend()
+                let scanning = ShareBackgroundScan.shared.appLeft { [weak self] in self?.letLibrariesRest() }
+                if !scanning { session?.suspend() }
             }
             discovery.stop()
             searchChanged()

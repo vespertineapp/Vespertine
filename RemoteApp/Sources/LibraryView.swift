@@ -14,12 +14,18 @@ struct LibraryView: View {
     let session: RemoteSession
     var section: RemoteDestination? = nil
     @State private var search = ""
-    @State private var path: [String] = []
+    /// What the pages pushed are kept under: the Library's tab, or the sidebar's section on an iPad.
+    private var placeKey: String { section?.id ?? "library" }
+    /// The pages pushed: places by name (`"albums"`, `"songs"`…) and sources (`SourceSummary`).
+    private var path: Binding<NavigationPath> {
+        Binding(get: { model.libraryPlace.key == placeKey ? model.libraryPlace.path : NavigationPath() },
+                set: { model.libraryPlace = LibraryPlace(key: placeKey, path: $0) })
+    }
     /// The library's counts and sources (nil until the Mac answers, and from a Mac too old to say).
     @State private var overview: LibraryOverview?
 
     var body: some View {
-        NavigationStack(path: $path) {
+        NavigationStack(path: path) {
             Group {
                 if let section {
                     sectionContent(section)
@@ -54,9 +60,9 @@ struct LibraryView: View {
                 #endif
                 guard section == nil else { return }
                 switch model.startScreen {
-                case "albums", "coverFlow", "album": path = ["albums"]; if model.startScreen != "album" { model.startScreen = nil }
+                case "albums", "coverFlow", "album": path.wrappedValue = NavigationPath(["albums"]); if model.startScreen != "album" { model.startScreen = nil }
                 case "artists", "songs", "genres", "recentlyAdded", "playlists", "favorites", "kept":
-                    if let screen = model.startScreen { path = [screen] }
+                    if let screen = model.startScreen { path.wrappedValue = NavigationPath([screen]) }
                     model.startScreen = nil
                 default: break
                 }
@@ -231,6 +237,8 @@ struct AlbumsGrid: View {
     @State private var sample: AlbumSummary?
     /// Why the list couldn't be loaded, in the Mac's words (an older Mac doesn't know the newer pages).
     @State private var problem: String?
+    /// The last ask got no list back.
+    @State private var failed = false
     @State private var feedback = CommandFeedback()
     var listing: Listing = .all
     /// How the page of every album is ordered and narrowed. The Mac does it; kept between launches.
@@ -341,6 +349,13 @@ struct AlbumsGrid: View {
                 if !loading, albums.isEmpty, let problem {
                     Text(problem).font(.callout).foregroundStyle(Palette.text2).multilineTextAlignment(.center).padding(.top, 60).padding(.horizontal, 32)
                 }
+                // Asked and not answered (the library is still connecting, or didn't answer in time): a page with
+                // nothing on it looked broken. It can be asked again.
+                if !loading, albums.isEmpty, total == nil, problem == nil, failed {
+                    Button { Task { await loadMore() } } label: { Label("Try Again", systemImage: "arrow.clockwise") }
+                        .padding(.top, 60)
+                        .accessibilityIdentifier("albums-try-again")
+                }
             }
             .clearsMiniPlayer()
             .accessibilityIdentifier("albums-grid")
@@ -354,9 +369,9 @@ struct AlbumsGrid: View {
             loading = true
             defer { loading = false }
             switch await session.send(command) {
-            case .albums(let items, _): albums = items; total = items.count; problem = nil
-            case .failed(let reason): problem = reason.isEmpty ? nil : reason
-            default: break
+            case .albums(let items, _): albums = items; total = items.count; problem = nil; failed = false
+            case .failed(let reason): problem = reason.isEmpty ? nil : reason; failed = true
+            default: failed = true
             }
             return
         }
@@ -698,4 +713,12 @@ struct AddToPlaylistSheet: View {
             }
         }
     }
+}
+
+/// The pages pushed in the Library, and which Library they were pushed in (its tab, or a section of the iPad's sidebar).
+/// A source is pushed as a `SourceSummary`, so this is a `NavigationPath`: a list of names alone can't hold one, and a
+/// tap on a source did nothing.
+struct LibraryPlace: Equatable {
+    var key = ""
+    var path = NavigationPath()
 }

@@ -88,6 +88,8 @@ public final class SMBConnection: @unchecked Sendable {
 
     private static let flagAsync: UInt32 = 0x2
     private static let flagSigned: UInt32 = 0x8
+    /// A request in a compound that acts on what the one before it opened.
+    private static let flagRelated: UInt32 = 0x4
     private static let headerSize = 64
     /// What goes in front of an encrypted message (MS-SMB2 2.2.41): its mark, the tag, the nonce, the size, the session.
     private static let sealedHeaderSize = 52
@@ -346,43 +348,55 @@ public final class SMBConnection: @unchecked Sendable {
     /// Opens a file or folder for reading. `path` is from the share's top, with `/` between names; empty is the top itself.
     public func open(_ path: String, folder: Bool) throws -> SMBHandle {
         try lock.withLock {
-            let name = path.split(separator: "/", omittingEmptySubsequences: true).joined(separator: "\\").utf16LE
-            var w = ByteWriter()
-            w.u16(57)
-            w.u8(0)
-            w.u8(0)                             // no oplock
-            w.u32(2)                            // impersonation
-            w.u64(0)
-            w.u64(0)
-            w.u32(0x0010_0081)                  // read data (or list), read attributes, synchronize
-            w.u32(0)
-            w.u32(0x7)                          // others may read, write and delete meanwhile
-            w.u32(1)                            // open only what exists
-            w.u32(folder ? 0x1 : 0x40)          // must be a folder / must not be one
-            w.u16(UInt16(Self.headerSize + 56))
-            w.u16(UInt16(name.count))
-            w.u32(0)
-            w.u32(0)
-            w.raw(name.isEmpty ? [0] : name)
-            let reply = try exchange(.create, w.bytes)
+            let reply = try exchange(.create, Self.createRequest(path, folder: folder))
             guard reply.status == Self.statusOK else { throw Self.error(for: reply.status) }
-            let r = ByteReader(reply.body)
-            guard try r.u16(0) == 89 else { throw SMBError.malformed }
-            return SMBHandle(id: try r.slice(64, 16), size: Int64(clamping: try r.u64(48)),
-                             modified: Self.date(fileTime: try r.u64(24)), isFolder: try r.u32(56) & 0x10 != 0)
+            return try Self.handle(reply)
         }
+    }
+
+    private static func createRequest(_ path: String, folder: Bool) -> [UInt8] {
+        let name = path.split(separator: "/", omittingEmptySubsequences: true).joined(separator: "\\").utf16LE
+        var w = ByteWriter()
+        w.u16(57)
+        w.u8(0)
+        w.u8(0)                             // no oplock
+        w.u32(2)                            // impersonation
+        w.u64(0)
+        w.u64(0)
+        w.u32(0x0010_0081)                  // read data (or list), read attributes, synchronize
+        w.u32(0)
+        w.u32(0x7)                          // others may read, write and delete meanwhile
+        w.u32(1)                            // open only what exists
+        w.u32(folder ? 0x1 : 0x40)          // must be a folder / must not be one
+        w.u16(UInt16(Self.headerSize + 56))
+        w.u16(UInt16(name.count))
+        w.u32(0)
+        w.u32(0)
+        w.raw(name.isEmpty ? [0] : name)
+        return w.bytes
+    }
+
+    private static func handle(_ reply: Reply) throws -> SMBHandle {
+        let r = ByteReader(reply.body)
+        guard try r.u16(0) == 89 else { throw SMBError.malformed }
+        return SMBHandle(id: try r.slice(64, 16), size: Int64(clamping: try r.u64(48)),
+                         modified: Self.date(fileTime: try r.u64(24)), isFolder: try r.u32(56) & 0x10 != 0)
     }
 
     public func close(_ handle: SMBHandle) throws {
         try lock.withLock {
-            var w = ByteWriter()
-            w.u16(24)
-            w.u16(0)
-            w.u32(0)
-            w.raw(handle.id)
-            let reply = try exchange(.close, w.bytes)
+            let reply = try exchange(.close, Self.closeRequest(handle.id))
             guard reply.status == Self.statusOK else { throw Self.error(for: reply.status) }
         }
+    }
+
+    private static func closeRequest(_ id: [UInt8]) -> [UInt8] {
+        var w = ByteWriter()
+        w.u16(24)
+        w.u16(0)
+        w.u32(0)
+        w.raw(id)
+        return w.bytes
     }
 
     /// Up to `length` bytes of `handle` from `offset`: fewer only at the end of the file.
@@ -407,20 +421,28 @@ public final class SMBConnection: @unchecked Sendable {
             charge = max(1, min((count + 65535) / 65536, credits))
             count = min(count, charge * 65536)
         }
+        let reply = try exchange(.read, Self.readRequest(handle.id, offset: offset, count: count), charge: charge)
+        return try Self.readData(reply)
+    }
+
+    private static func readRequest(_ id: [UInt8], offset: Int64, count: Int) -> [UInt8] {
         var w = ByteWriter()
         w.u16(49)
         w.u8(0x50)
         w.u8(0)
         w.u32(UInt32(count))
         w.u64(UInt64(offset))
-        w.raw(handle.id)
+        w.raw(id)
         w.u32(0)
         w.u32(0)
         w.u32(0)
         w.u16(0)
         w.u16(0)
         w.u8(0)
-        let reply = try exchange(.read, w.bytes, charge: charge)
+        return w.bytes
+    }
+
+    private static func readData(_ reply: Reply) throws -> [UInt8] {
         if reply.status == Self.statusEndOfFile { return [] }
         guard reply.status == Self.statusOK else { throw Self.error(for: reply.status) }
         let r = ByteReader(reply.body)
@@ -428,45 +450,102 @@ public final class SMBConnection: @unchecked Sendable {
         return try r.slice(at, got)
     }
 
+    /// The start of the file at `path` (up to `length` bytes, and no more than one read's worth: fewer at the end of
+    /// the file or past 64 KiB) and its size, in one round trip: open, read and close sent together as one compound
+    /// request (MS-SMB2 3.2.4.1.4). A scan reads most songs' tags from their first few kilobytes; one at a time over a
+    /// Wi-Fi line that wakes for each answer, the three round trips were most of the time a song took.
+    public func peek(_ path: String, length: Int) throws -> (head: [UInt8], size: Int64) {
+        try lock.withLock {
+            let count = max(0, min(length, maxRead, 65536))
+            // Three requests at once take three credits; with fewer granted, one after another.
+            guard credits >= 3 else {
+                let handle = try exchange(.create, Self.createRequest(path, folder: false))
+                guard handle.status == Self.statusOK else { throw Self.error(for: handle.status) }
+                let opened = try Self.handle(handle)
+                defer { _ = try? exchange(.close, Self.closeRequest(opened.id)) }
+                return (try Self.readData(try exchange(.read, Self.readRequest(opened.id, offset: 0, count: count))), opened.size)
+            }
+            // The read and the close name the file the open before them opened (all ones: "the one just opened").
+            let related = [UInt8](repeating: 0xff, count: 16)
+            let replies = try compound([(.create, Self.createRequest(path, folder: false)), (.read, Self.readRequest(related, offset: 0, count: count)),
+                                        (.close, Self.closeRequest(related))])
+            guard replies[0].status == Self.statusOK else { throw Self.error(for: replies[0].status) }
+            let opened = try Self.handle(replies[0])
+            return (try Self.readData(replies[1]), opened.size)
+        }
+    }
+
     /// Everything in an open folder, `.` and `..` left out.
     public func list(_ folder: SMBHandle) throws -> [SMBEntry] {
         try lock.withLock {
             var entries: [SMBEntry] = []
             var first = true
-            let pattern = "*".utf16LE
             while true {
-                var w = ByteWriter()
-                w.u16(33)
-                w.u8(1)                         // names, sizes and times
-                w.u8(first ? 0x1 : 0)           // from the start
-                w.u32(0)
-                w.raw(folder.id)
-                w.u16(UInt16(Self.headerSize + 32))
-                w.u16(UInt16(pattern.count))
-                w.u32(UInt32(min(maxTransact, 65536)))
-                w.raw(pattern)
+                let reply = try exchange(.queryDirectory, queryRequest(folder.id, first: first))
                 first = false
-                let reply = try exchange(.queryDirectory, w.bytes)
                 if reply.status == Self.statusNoMoreFiles { break }
                 guard reply.status == Self.statusOK else { throw Self.error(for: reply.status) }
-                let r = ByteReader(reply.body)
-                let buffer = try r.slice(Int(try r.u16(2)) - Self.headerSize, Int(try r.u32(4)))
-                let b = ByteReader(buffer)
-                var at = 0
-                while true {
-                    let next = Int(try b.u32(at))
-                    let attributes = try b.u32(at + 56)
-                    let name = String(utf16LE: try b.slice(at + 64, Int(try b.u32(at + 60))))
-                    if name != ".", name != ".." {
-                        entries.append(SMBEntry(name: name, isFolder: attributes & 0x10 != 0, size: Int64(clamping: try b.u64(at + 40)),
-                                                modified: Self.date(fileTime: try b.u64(at + 24)), hidden: attributes & 0x6 != 0))
-                    }
-                    if next == 0 { break }
-                    at += next
-                }
+                entries += try Self.entries(reply)
             }
             return entries
         }
+    }
+
+    private func queryRequest(_ id: [UInt8], first: Bool) -> [UInt8] {
+        let pattern = "*".utf16LE
+        var w = ByteWriter()
+        w.u16(33)
+        w.u8(1)                         // names, sizes and times
+        w.u8(first ? 0x1 : 0)           // from the start
+        w.u32(0)
+        w.raw(id)
+        w.u16(UInt16(Self.headerSize + 32))
+        w.u16(UInt16(pattern.count))
+        w.u32(UInt32(min(maxTransact, 65536)))
+        w.raw(pattern)
+        return w.bytes
+    }
+
+    private static func entries(_ reply: Reply) throws -> [SMBEntry] {
+        var entries: [SMBEntry] = []
+        let r = ByteReader(reply.body)
+        let buffer = try r.slice(Int(try r.u16(2)) - Self.headerSize, Int(try r.u32(4)))
+        let b = ByteReader(buffer)
+        var at = 0
+        while true {
+            let next = Int(try b.u32(at))
+            let attributes = try b.u32(at + 56)
+            let name = String(utf16LE: try b.slice(at + 64, Int(try b.u32(at + 60))))
+            if name != ".", name != ".." {
+                entries.append(SMBEntry(name: name, isFolder: attributes & 0x10 != 0, size: Int64(clamping: try b.u64(at + 40)),
+                                        modified: Self.date(fileTime: try b.u64(at + 24)), hidden: attributes & 0x6 != 0))
+            }
+            if next == 0 { break }
+            at += next
+        }
+        return entries
+    }
+
+    /// Everything in the folder at `path`, in one round trip for all but very large folders: open, list twice and close
+    /// sent together. The second listing says the first had it all; when it doesn't, the folder is listed again the
+    /// usual way.
+    public func list(folder path: String) throws -> [SMBEntry] {
+        let quick: [SMBEntry]? = try lock.withLock {
+            guard credits >= 4 else { return nil }
+            let related = [UInt8](repeating: 0xff, count: 16)
+            let replies = try compound([(.create, Self.createRequest(path, folder: true)), (.queryDirectory, queryRequest(related, first: true)),
+                                        (.queryDirectory, queryRequest(related, first: false)), (.close, Self.closeRequest(related))])
+            guard replies[0].status == Self.statusOK else { throw Self.error(for: replies[0].status) }
+            // An empty folder: nothing at all, even the first time.
+            if replies[1].status == Self.statusNoMoreFiles { return [] }
+            guard replies[1].status == Self.statusOK else { throw Self.error(for: replies[1].status) }
+            guard replies[2].status == Self.statusNoMoreFiles else { return nil }
+            return try Self.entries(replies[1])
+        }
+        if let quick { return quick }
+        let handle = try open(path, folder: true)
+        defer { try? close(handle) }
+        return try list(handle)
     }
 
     /// Ends the connection. The server closes whatever was open.
@@ -483,6 +562,94 @@ public final class SMBConnection: @unchecked Sendable {
         var body: [UInt8]
         /// The whole message, header and all.
         var raw: [UInt8]
+    }
+
+    /// Requests sent together, each acting on what the one before it opened, and their answers in the same order. Each
+    /// is signed on its own; encrypted, they go as one message.
+    private func compound(_ parts: [(Command, [UInt8])]) throws -> [Reply] {
+        let seals = encrypted
+        let signs = signingKey != nil && !seals
+        var whole: [UInt8] = []
+        var ids: [UInt64] = []
+        for (index, part) in parts.enumerated() {
+            let id = messageID
+            var w = ByteWriter()
+            w.raw([0xfe, 0x53, 0x4d, 0x42])
+            w.u16(64)
+            w.u16(dialect >= 0x0210 ? 1 : 0)
+            w.u32(0)
+            w.u16(part.0.rawValue)
+            w.u16(64)                               // credits asked for
+            w.u32((index > 0 ? Self.flagRelated : 0) | (signs ? Self.flagSigned : 0))
+            w.u32(0)                                // where the next request starts: filled in below
+            w.u64(id)
+            w.u32(0)
+            w.u32(treeID)
+            w.u64(sessionID)
+            w.zeros(16)
+            w.raw(part.1)
+            var message = w.bytes
+            if index < parts.count - 1 {
+                // Each request but the last starts the next on an 8-byte boundary, and says where.
+                while message.count % 8 != 0 { message.append(0) }
+                let next = UInt32(message.count)
+                message.replaceSubrange(20..<24, with: [UInt8(next & 0xff), UInt8(next >> 8 & 0xff), UInt8(next >> 16 & 0xff), UInt8(next >> 24)])
+            }
+            if signs, let signingKey {
+                message.replaceSubrange(48..<64, with: signature(of: message, key: signingKey))
+            }
+            whole += message
+            ids.append(id)
+            messageID += 1
+            credits -= 1
+        }
+        if seals { whole = try seal(whole) }
+        let length = whole.count
+        try transport.send([0, UInt8(length >> 16 & 0xff), UInt8(length >> 8 & 0xff), UInt8(length & 0xff)] + whole)
+
+        var replies: [UInt64: Reply] = [:]
+        while replies.count < parts.count {
+            let prefix = try transport.receive(4)
+            let size = Int(prefix[1]) << 16 | Int(prefix[2]) << 8 | Int(prefix[3])
+            guard prefix[0] == 0, size >= Self.headerSize, size <= 16 << 20 else { throw SMBError.malformed }
+            var frame = try transport.receive(size)
+            let sealed = frame.starts(with: Self.sealedMark)
+            if sealed { frame = try open(frame) }
+            // What was asked encrypted is answered encrypted. An answer in the clear didn't come from the server signed in to.
+            if seals != sealed { throw seals ? SMBError.badSignature : SMBError.malformed }
+            // The answers may come together, each saying where the next starts.
+            var at = 0
+            while true {
+                let r = ByteReader(Array(frame[at...]))
+                guard frame.count - at >= Self.headerSize, try r.slice(0, 4) == [0xfe, 0x53, 0x4d, 0x42] else { throw SMBError.malformed }
+                let next = Int(try r.u32(20))
+                let end = next == 0 ? frame.count : at + next
+                guard end <= frame.count, end - at >= Self.headerSize else { throw SMBError.malformed }
+                let message = Array(frame[at..<end])
+                let header = ByteReader(message)
+                let id = try header.u64(24)
+                if ids.contains(id), replies[id] == nil {
+                    credits += Int(try header.u16(14))
+                    let status = try header.u32(8), flags = try header.u32(16)
+                    // "Still working on it": the real answer follows under the same ID.
+                    if !(status == Self.statusPending && flags & Self.flagAsync != 0) {
+                        if !seals {
+                            if flags & Self.flagSigned != 0, signingKey != nil {
+                                guard signatureFits(message) else { throw SMBError.badSignature }
+                            } else if signs, status == Self.statusOK {
+                                throw SMBError.badSignature
+                            }
+                        }
+                        let tree = flags & Self.flagAsync != 0 ? treeID : try header.u32(36)
+                        replies[id] = Reply(status: status, flags: flags, sessionID: try header.u64(40), treeID: tree,
+                                            body: Array(message[Self.headerSize...]), raw: message)
+                    }
+                }
+                if next == 0 { break }
+                at = end
+            }
+        }
+        return ids.map { replies[$0]! }
     }
 
     private func exchange(_ command: Command, _ body: [UInt8], charge: Int = 1) throws -> Reply {
