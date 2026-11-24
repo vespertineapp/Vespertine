@@ -537,3 +537,35 @@ struct MultichannelDSDDeviceTests {
         #expect(carried == Array(0..<6) + Array(repeating: -1, count: 10), "\(ext) at \(rate) Hz: \(carried)")
     }
 }
+
+@Suite("What the signal path says about a song's channels")
+struct ChannelHandlingTests {
+    static func path(_ source: SourceFormat, mode: OutputPlan.Mode, channels: Int, spatial: SpatialMode = .off) -> SignalPath {
+        var plan = OutputPlan(mode: mode, deviceSampleRate: 48_000, decodedSampleRate: 48_000, physicalBitDepth: 24, channels: channels,
+                              dsdConvertedToPCM: false, reason: "")
+        plan.spatial = spatial
+        return SignalPath(source: source, decoderName: "test", plan: plan,
+                          applied: AppliedFormat(sampleRate: 48_000, physicalBitDepth: 24, physicalIsInteger: true, virtualChannels: 8,
+                                                 exclusive: true, bufferFrames: 512),
+                          deviceName: "Receiver", deviceUID: "test",
+                          deviceProfile: DeviceProfile(kind: .other, tag: "HDMI", canBeBitPerfect: true, symbol: "x"), volume: .fixed)
+    }
+
+    @Test("Dolby or DTS sent to a receiver is no downmix: its two channels carry every channel of the source")
+    func bitstreamIsNoDownmix() {
+        let atmos = SourceFormat(encoding: .lossy, codec: "Dolby Digital Plus", sampleRate: 48_000, bitDepth: nil, channels: 6)
+        let p = Self.path(atmos, mode: .bitstream, channels: 2)
+        #expect(p.channelHandling == .none)
+        #expect(p.conversion == nil)
+    }
+
+    @Test("PCM: a fold is a downmix, every channel on its own output is discrete, Spatial Audio is spatial")
+    func pcm() {
+        let fiveOne = SourceFormat(encoding: .pcm, codec: "FLAC", sampleRate: 48_000, bitDepth: 24, channels: 6)
+        #expect(Self.path(fiveOne, mode: .pcm, channels: 2).channelHandling == .downmix(channels: 2))
+        #expect(Self.path(fiveOne, mode: .pcm, channels: 8).channelHandling == .discrete)
+        #expect(Self.path(fiveOne, mode: .pcm, channels: 6, spatial: .fixed).channelHandling == .spatial)
+        let stereo = SourceFormat(encoding: .pcm, codec: "FLAC", sampleRate: 48_000, bitDepth: 24, channels: 2)
+        #expect(Self.path(stereo, mode: .pcm, channels: 2).channelHandling == .none)
+    }
+}
