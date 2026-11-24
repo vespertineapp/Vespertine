@@ -59,6 +59,8 @@ private final class FaultyShare: @unchecked Sendable {
             let s = share
             s.state.lock()
             while s.held, offset >= s.holdFrom { s.state.wait() }
+            // A read that reaches past the held part gets what comes before it (a short read).
+            let count = s.held ? min(count, Int(s.holdFrom - offset)) : count
             var failure: POSIXErrorCode?
             var empty = false
             if offset + Int64(count) > s.faultAt {
