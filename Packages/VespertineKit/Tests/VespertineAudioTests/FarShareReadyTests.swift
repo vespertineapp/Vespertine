@@ -109,6 +109,9 @@ struct FarShareReadyTests {
         print(String(format: "far share, 64 MiB: %.2f s, %.1f MiB/s of a 30 MiB/s link, %d reads, largest %d KiB",
                      seconds, rate, sizes.count, (sizes.max() ?? 0) >> 10))
         #expect(sizes.contains { $0 >= 4 << 20 }, "reads of several megabytes once the link has shown it carries them: largest \((sizes.max() ?? 0) >> 10) KiB")
-        #expect(rate > 21, "the copy carried \(String(format: "%.1f", rate)) MiB/s of the link's 30")
+        // Wall-clock rate swings on a loaded CI runner (21-26 MiB/s here, 19 on CI 11-24), so the rate bar sits above
+        // the old code's 16 MiB/s with room, and the read count (old code: 134) is what proves one read per round trip is gone.
+        #expect(sizes.count < 60, "\(sizes.count) reads for 64 MiB")
+        #expect(rate > 17.5, "the copy carried \(String(format: "%.1f", rate)) MiB/s of the link's 30")
     }
 }
