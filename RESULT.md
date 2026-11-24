@@ -6,7 +6,7 @@ Branch `feat/ios-smb-offline` (worktree `~/Workspace/vt-ios-smb`). Every commit 
 
 ## Finishing for the PR (24 November 2026)
 
-- **PR:** PR_URL_HERE (open, not merged). No build bump, nothing uploaded to TestFlight, App Store Connect untouched.
+- **PR:** https://github.com/vespertineapp/Vespertine/pull/490 (open, not merged). No build bump, nothing uploaded to TestFlight, App Store Connect untouched.
 - **Favorites UI test: it was already failing on main.** `AdaptiveNavigationTests.testAFavoriteInTwoCopiesIsOneRowWithItsCopies`
   fails on a clean build of origin/main (bfa65c0b, its own worktree `~/Workspace/vt-ios-smb-main`). It was run alone on simulator
   VT-SMB-Test (64374B85…, iOS 27.0), which was shut down afterwards. It fails at the same line (80: "2 COPIES" never appears within
