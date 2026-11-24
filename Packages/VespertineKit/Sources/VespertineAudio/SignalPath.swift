@@ -232,20 +232,12 @@ public struct SignalPath: Sendable, Hashable {
         return false
     }
 
-    /// Every channel of the source goes out unmixed: as many channels as it has, or a multichannel file placed channel for
-    /// channel on a larger speaker setup (5.1 on an HDMI receiver's eight outputs, the two it has no channels for silent).
-    /// A fold onto fewer speakers sets `foldedOnto`; an upmix makes channels the source doesn't have.
-    var channelsUnmixed: Bool {
-        if plan.channels == source.channels { return true }
-        return source.channels > 2 && plan.channels > source.channels && !plan.upmix && foldedOnto == nil
-    }
-
     /// True only when every sample reaches the DAC unaltered.
     public var isBitPerfect: Bool {
         if renderer != nil || convertedByServer { return false }
         if let group { return groupIsBitPerfect(group) }
         guard transition?.audible != true, !faderRamping, foldedOnto == nil, deviceProfile.canBeBitPerfect, applied.physicalFormatKnown, applied.exclusive || !otherAppsPlaying, !modifiesSamples,
-              plan.spatial == .off, concealedFrames == 0, channelsUnmixed, applied.virtualChannels >= source.channels
+              plan.spatial == .off, concealedFrames == 0, plan.channels == source.channels, applied.virtualChannels >= source.channels
         else { return false }
         switch plan.mode {
         case .dop:

@@ -60,3 +60,39 @@ struct GroupMemberFormatTests {
         #expect(!DeviceControl.isSameFormat(Self.pcm(16, rate: 48_000).mFormat, best))
     }
 }
+
+@Suite("Bitstream to an HDMI receiver")
+struct BitstreamLinkTests {
+    /// An HDMI receiver's formats: 2 to 8 channels of 16 and 24-bit integer at 48 and 192 kHz.
+    static func receiver() -> [AudioStreamRangedDescription] {
+        var formats: [AudioStreamRangedDescription] = []
+        for channels: UInt32 in [2, 6, 8] {
+            for bits: UInt32 in [16, 24] {
+                for rate: Double in [48_000, 192_000] {
+                    var f = AudioStreamBasicDescription()
+                    f.mSampleRate = rate
+                    f.mFormatID = kAudioFormatLinearPCM
+                    f.mFormatFlags = kAudioFormatFlagIsSignedInteger
+                    f.mBytesPerFrame = 4 * channels
+                    f.mBytesPerPacket = 4 * channels
+                    f.mFramesPerPacket = 1
+                    f.mChannelsPerFrame = channels
+                    f.mBitsPerChannel = bits
+                    formats.append(AudioStreamRangedDescription(mFormat: f, mSampleRateRange: AudioValueRange(mMinimum: rate, mMaximum: rate)))
+                }
+            }
+        }
+        return formats
+    }
+
+    @Test("A Dolby or DTS burst goes out on a two-channel link even when a surround song left the receiver at eight")
+    func twoChannelLink() throws {
+        var eight = Self.receiver().first { $0.mFormat.mChannelsPerFrame == 8 && $0.mFormat.mBitsPerChannel == 24 }!.mFormat
+        eight.mSampleRate = 48_000
+        let burst = try #require(DeviceControl.bestPhysicalFormat(Self.receiver(), rate: 192_000, channels: 2, bitDepth: 24, current: eight, exactChannels: true))
+        #expect(burst.mChannelsPerFrame == 2 && burst.mBitsPerChannel == 24 && burst.mSampleRate == 192_000)
+        // PCM keeps the link it found (no renegotiation between songs).
+        let pcm = try #require(DeviceControl.bestPhysicalFormat(Self.receiver(), rate: 48_000, channels: 2, bitDepth: 24, current: eight))
+        #expect(pcm.mChannelsPerFrame == 8)
+    }
+}

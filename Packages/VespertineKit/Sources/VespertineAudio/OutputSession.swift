@@ -512,20 +512,23 @@ public enum DeviceControl {
 
     /// The physical format to ask for at `rate`: linear PCM with at least `channels` channels, integer before float, the
     /// song's word length (`bitDepth`) before any other, then the deepest; the current channel count, mixable. Nil: none fits.
+    /// `exactChannels`: bitstream. Its words go out on two channels, and an HDMI receiver reads an IEC 61937 burst
+    /// (Dolby, DTS) only from a two-channel signal: sent inside an eight-channel link left over from a surround song, it was
+    /// taken as PCM and played as hiss. So the link is set to exactly that many channels when the device offers it.
     static func bestPhysicalFormat(_ available: [AudioStreamRangedDescription], rate: Double, channels: Int, bitDepth: Int,
-                                   current: AudioStreamBasicDescription?) -> AudioStreamBasicDescription? {
+                                   current: AudioStreamBasicDescription?, exactChannels: Bool = false) -> AudioStreamBasicDescription? {
         let candidates = available.filter {
             $0.mFormat.mFormatID == kAudioFormatLinearPCM
                 && rate >= $0.mSampleRateRange.mMinimum - 0.5 && rate <= $0.mSampleRateRange.mMaximum + 0.5
                 && $0.mFormat.mChannelsPerFrame >= channels
         }
-        let wantedChannels = max(current?.mChannelsPerFrame ?? 0, UInt32(max(channels, 0)))
+        let wantedChannels = exactChannels ? UInt32(max(channels, 0)) : max(current?.mChannelsPerFrame ?? 0, UInt32(max(channels, 0)))
         func score(_ r: AudioStreamRangedDescription) -> Int {
             var s = 0
             if r.mFormat.mFormatFlags & kAudioFormatFlagIsSignedInteger != 0 { s += 1000 }
             if Int(r.mFormat.mBitsPerChannel) == bitDepth { s += 500 }
             s += Int(r.mFormat.mBitsPerChannel)
-            if r.mFormat.mChannelsPerFrame == wantedChannels { s += 200 }
+            if r.mFormat.mChannelsPerFrame == wantedChannels { s += exactChannels ? 5000 : 200 }
             if r.mFormat.mFormatFlags & kAudioFormatFlagIsNonMixable == 0 { s += 50 } // we render Float32 through the mixer-less HAL path
             return s
         }
@@ -541,9 +544,10 @@ public enum DeviceControl {
 
     /// Puts one stream in `bestPhysicalFormat` (if it isn't already) and waits for the hardware to report it. A refusal is logged,
     /// not thrown: the stream then plays in the format it had, and the path says so from what is read back.
-    static func applyBestPhysicalFormat(stream: AudioStreamID, rate: Double, channels: Int, bitDepth: Int) {
+    static func applyBestPhysicalFormat(stream: AudioStreamID, rate: Double, channels: Int, bitDepth: Int, exactChannels: Bool = false) {
         let current = try? HAL.get(stream, .global(kAudioStreamPropertyPhysicalFormat), initial: AudioStreamBasicDescription())
-        guard let best = bestPhysicalFormat(DeviceQuery.physicalFormats(stream), rate: rate, channels: channels, bitDepth: bitDepth, current: current),
+        guard let best = bestPhysicalFormat(DeviceQuery.physicalFormats(stream), rate: rate, channels: channels, bitDepth: bitDepth, current: current,
+                                            exactChannels: exactChannels),
               !(current.map { isSameFormat($0, best) } ?? false) else { return }
         do {
             try HAL.set(stream, .global(kAudioStreamPropertyPhysicalFormat), best)
@@ -551,7 +555,8 @@ public enum DeviceControl {
             let deadline = Date().addingTimeInterval(2)
             while Date() < deadline {
                 let now = try? HAL.get(stream, .global(kAudioStreamPropertyPhysicalFormat), initial: AudioStreamBasicDescription())
-                if let now, now.mBitsPerChannel == best.mBitsPerChannel, abs(now.mSampleRate - rate) < 0.5 { break }
+                if let now, now.mBitsPerChannel == best.mBitsPerChannel, now.mChannelsPerFrame == best.mChannelsPerFrame,
+                   abs(now.mSampleRate - rate) < 0.5 { break }
                 usleep(10_000)
             }
             settle()
@@ -568,7 +573,8 @@ public enum DeviceControl {
         let rate = plan.deviceSampleRate
         let streams = DeviceQuery.outputStreams(device)
         if streams.count == 1, let stream = streams.first {
-            applyBestPhysicalFormat(stream: stream, rate: rate, channels: plan.deviceChannels, bitDepth: plan.physicalBitDepth)
+            applyBestPhysicalFormat(stream: stream, rate: rate, channels: plan.deviceChannels, bitDepth: plan.physicalBitDepth,
+                                    exactChannels: plan.mode == .bitstream)
         }
 
         try setNominalRate(rate, on: device)
