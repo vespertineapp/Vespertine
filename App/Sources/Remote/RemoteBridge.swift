@@ -12,6 +12,28 @@ import VespertineLibrary
 import VespertineRemoteProtocol
 import VespertineUPnP
 
+/// A phone's list of the Mac's outputs ticks the output the Mac plays to now, as Now Playing names it: the chosen one,
+/// or while that isn't connected, the one standing in for it (Settings → Playback). The chosen one stays in the list,
+/// saying what plays in its place, and is ticked only while nothing does (playback waits for it). Ticking the chosen one
+/// whatever played had a phone show an unplugged DAC as the output while a receiver played (tf-1269c12fc7).
+nonisolated enum RemoteOutputRows {
+    /// The output that has the tick: nil for System Default.
+    static func ticked(chosen: String?, standIn: String?) -> String? { standIn ?? chosen }
+
+    /// The chosen output's row while it isn't connected. `standIn` is the name of the output playing in its place.
+    static func missing(uid: String, name: String, group: Bool, network: Bool, standIn: String?) -> OutputSummary {
+        let detail = if network {
+            String(localized: "NOT RESPONDING", comment: "Output list: the chosen network player doesn't answer (short, uppercase)")
+        } else if let standIn {
+            String(localized: "NOT CONNECTED · USING \(standIn.localizedUppercase)", bundle: ReplyWords.bundle,
+                   comment: "Output list: the chosen device is missing; %@ is the device playing in its place")
+        } else {
+            String(localized: "NOT CONNECTED · WAITING FOR IT", bundle: ReplyWords.bundle, comment: "Output list: the chosen device is missing and playback waits for it")
+        }
+        return OutputSummary(uid: uid, name: name, detail: detail, kind: group ? .speakerGroup : .device, selected: standIn == nil, ready: false)
+    }
+}
+
 /// The app as the remote server drives it.
 @MainActor
 struct RemoteBridge {
@@ -110,17 +132,16 @@ struct RemoteBridge {
     }
 
     /// The outputs as the Mac's output list shows them: System Default, the chosen output while it's missing, every
-    /// device, then the speaker groups.
+    /// device, then the speaker groups. The tick is on the output that plays now (`RemoteOutputRows`).
     func outputsState() -> OutputsState {
-        let selected = settings.selectedDeviceUID
+        let chosen = settings.selectedDeviceUID
+        let standIn = model.standInDevice
+        let selected = RemoteOutputRows.ticked(chosen: chosen, standIn: standIn?.uid)
         var outputs = [OutputSummary(uid: nil, name: String(localized: "System Default"), detail: String(localized: "FOLLOWS SOUND SETTINGS"),
                                      kind: .systemDefault, selected: selected == nil, ready: true)]
-        if let missing = model.missingChosenOutput, let uid = selected {
-            let detail = model.networkOutputChosen
-                ? String(localized: "NOT RESPONDING", comment: "Output list: the chosen network player doesn't answer (short, uppercase)")
-                : String(localized: "NOT CONNECTED · WAITING FOR IT", bundle: ReplyWords.bundle, comment: "Output list: the chosen device is missing and playback waits for it")
-            outputs.append(OutputSummary(uid: uid, name: missing, detail: detail,
-                                         kind: model.chosenGroup == nil ? .device : .speakerGroup, selected: true, ready: false))
+        if let missing = model.missingChosenOutput, let uid = chosen {
+            outputs.append(RemoteOutputRows.missing(uid: uid, name: missing, group: model.chosenGroup != nil, network: model.networkOutputChosen,
+                                                    standIn: standIn?.name))
         }
         for device in model.devices.devices where !outputs.contains(where: { $0.uid == device.uid }) {
             outputs.append(OutputSummary(uid: device.uid, name: device.name, detail: "\(device.profile.tag) · \(device.rangeSummary)",

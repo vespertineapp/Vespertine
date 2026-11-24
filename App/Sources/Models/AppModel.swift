@@ -490,6 +490,19 @@ final class AppModel {
         return OutputChoice.substitute(among: devices.devices, fallback: settings.outputFallback)
     }
 
+    /// The output that plays in place of the chosen one while that isn't connected: the one playing now (what Now
+    /// Playing names), else the one the next song would play on. nil while the chosen one is there, while playback waits
+    /// for it, and for a network player or a speaker group, which nothing stands in for.
+    var standInDevice: OutputDevice? {
+        Self.standIn(activeDevice, chosenMissing: missingChosenOutput != nil, networkChosen: networkOutputChosen, groupChosen: chosenGroup != nil)
+    }
+
+    /// `standInDevice`'s rule, given the output that plays (or would play) now.
+    nonisolated static func standIn<Output>(_ playing: Output?, chosenMissing: Bool, networkChosen: Bool, groupChosen: Bool) -> Output? {
+        guard chosenMissing, !networkChosen, !groupChosen else { return nil }
+        return playing
+    }
+
     /// The chosen output's name while it isn't connected.
     var missingChosenOutput: String? {
         if networkOutputChosen {
