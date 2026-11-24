@@ -10,9 +10,40 @@ What Vespertine has been run on, and what each test did and did not show. A **re
 | iBasso DC07 Pro | USB-C | DSD64 (DSDIFF) with DoP switched on, Vespertine 1.0.1 on macOS 27.2.1 | Played as native DSD over DoP; with DoP off it was converted to PCM (user report, [#247](https://github.com/vespertineapp/Vespertine/issues/247)). DoP is on by default for it, see [`dop-dacs.json`](../Packages/VespertineKit/Sources/VespertineAudio/Resources/dop-dacs.json) | Reported (user), 2026-11-11 |
 | AirPods Max | USB-C and Bluetooth | 48 kHz lossless over USB-C; AAC reported over Bluetooth | As documented in [FEATURES](FEATURES.md) | Tested |
 | MacBook Pro speakers | Built in | Stereo playback | Plays | Tested |
+| **Onkyo TX-NR717 (AV receiver)** | HDMI, exclusive (hog) mode, 5.1 speakers | **5.1 and 7.1 FLAC at 32, 44.1, 48, 88.2, 96, 176.4 and 192 kHz; 384 and 768 kHz files; 5.1 DSD64; gapless; volume in Vespertine; Spatialize stereo; Dolby Digital, Dolby Digital Plus and DTS bitstream; a speaker group with the Mac's speakers** | **Every channel reached its own HDMI channel with its samples unchanged, checked with a capture of each channel and by ear; see below** | **Tested (capture and developer listening), 2026-11-23** |
 | **Sony TV (HDMI)** | HDMI, exclusive (hog) mode | **Six-channel 5.1 FLAC, 7.1 FLAC folded to 5.1, and 5.1 DSD64 converted to PCM, and Dolby Atmos rendered by macOS (tentative)** | **Each of the six channels went to its matching speaker position; BIT-PERFECT shown** | **Reported, 2026-10-19** |
 
 DACs known to decode DoP, with the source for each entry, are listed in [`dop-dacs.json`](../Packages/VespertineKit/Sources/VespertineAudio/Resources/dop-dacs.json); [DOP-AUTO-SETUP.md](DOP-AUTO-SETUP.md) explains the list, the one-tap DoP test for DACs that aren't on it, and how to add one.
+
+## Onkyo TX-NR717 AV receiver over HDMI (first receiver)
+
+**Setup.** MacBook Pro (Apple M5 Pro) on HDMI to an Onkyo TX-NR717 with 5.1 speakers (left, centre, right, two surrounds and a subwoofer). Exclusive (hog) mode on, volume in Vespertine off unless a row says otherwise. Test files were generated for the purpose: a different tone or a spoken speaker name on each channel.
+
+**How it was checked.** A macOS process tap recorded exactly what Vespertine sent on each of the eight HDMI channels, and the channel each tone arrived on was identified. Separately, a voice was played straight onto each raw HDMI channel and the developer noted which speaker it came from: 1 front left, 2 front right, 3 subwoofer, 4 centre, 5 surround left, 6 surround right (7 and 8 are the surround back pair, which this setup doesn't have). That is the order macOS names (L R LFE C Ls Rs Lrs Rrs), so the capture shows which speaker each channel reached.
+
+**What the receiver advertises.** Linear PCM up to 8 channels, 16, 20 and 24 bit, at 32, 44.1, 48, 88.2, 96, 176.4 and 192 kHz. The list of sample rates macOS shows also says 768 kHz, but there is no format at that rate; Vespertine does not use it.
+
+| Test | Result |
+|---|---|
+| 5.1 FLAC, 32 to 192 kHz | The output switched to each rate; every channel on its own HDMI channel with its samples unchanged, the back pair silent. Badged CONVERTED, because six channels go out on an eight-channel link (requirement BPV-007 counts that as a change) |
+| 7.1 FLAC, 48 kHz | Side pair on 5 and 6, back pair on 7 and 8; BIT-PERFECT |
+| 5.1 at 384 kHz, stereo at 768 kHz | Converted to 192 kHz, badged RESAMPLED |
+| 5.1 DSD64 (DSF) | Converted to 176.4 kHz PCM, every channel in place; the receiver does not take DoP |
+| Three files played back to back | No discontinuity at either boundary |
+| Volume in Vespertine at -10 dB | Every channel exactly 10 dB lower, badged DIGITAL GAIN |
+| Spatialize stereo | Stereo upmixed to 5.1: a centred voice went to the centre channel only, side sounds stayed on the fronts, ambience to the surrounds |
+| Dolby Digital, Dolby Digital Plus | Sent untouched as IEC 61937; the receiver's display showed Dolby D and Dolby D+. Before the fix in #476 the burst went out inside an eight-channel link left by a surround song and the receiver played hiss; it now goes out on two channels |
+| DTS in WAV (DTS CD format, 14-bit, and 16-bit) | Sent as stored; the receiver's display showed DTS for both |
+| Speaker group: the receiver plus the MacBook Pro speakers | Played as one 10-channel group; rates put back afterwards |
+
+**Things to know about receivers.**
+
+- macOS reports an HDMI output's speakers for the channel count the link is at now. Before November 2026, a receiver left at 2 or 6 channels by another app read as a stereo or 5.1 setup and surround was folded down; Vespertine now always uses an 8-channel receiver's 8-channel layout.
+- With the receiver's Audio TV Out, HDMI CEC or HDMI Through switched on, it sometimes renegotiated the HDMI link by itself and offered the Mac only 2 channels, and 8-channel audio was silent until it offered 8 again. With all three off it stayed at 8 channels.
+- The receiver takes a second or two to lock onto a new stream, so the first moment of a song can be lost when the format changes.
+- Speakers wired to the wrong terminals (surrounds on the surround back terminals) sound like a channel-mapping fault. The receiver's own level calibration test tone tells them apart.
+
+**What this does not show.** One receiver, one Mac. The Speakers sheet, Fill the Room, Mac Sound Output, the equalizer and room correction were not exercised on it, and the measured timing between the receiver and another output in a group was not obtained.
 
 ## Sony TV over HDMI (first multichannel result)
 
