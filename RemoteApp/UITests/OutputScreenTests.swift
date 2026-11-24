@@ -31,7 +31,10 @@ final class OutputScreenTests: XCTestCase {
         // The Mac's outputs, the demo DAC ticked; no row for this device among them.
         XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Desk DAC'")).firstMatch.waitForExistence(timeout: 10))
         XCTAssertFalse(element("output-this-device").exists, "no This iPhone row while the Mac plays")
-        XCTAssertEqual(app.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH 'Plays through this device'")).count, 0)
+        // The switch's own "This iPhone" is the only one on the screen, and nothing offers to play through this device.
+        XCTAssertEqual(app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'This iP'")).count, 1, "This iPhone is chosen only with the switch")
+        XCTAssertEqual(app.descendants(matching: .any).matching(
+            NSPredicate(format: "label CONTAINS 'Plays through this device' OR label CONTAINS 'made-up songs'")).count, 0)
 
         // The switch moves who plays, and the list follows it both ways.
         element("play-mode-device").tap()
