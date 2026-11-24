@@ -11,14 +11,18 @@ import Foundation
 import Testing
 @testable import VespertineAudio
 
-/// Waits until `uptime` (on `ProcessInfo.systemUptime`) on a strict timer. A sleep (`Thread.sleep`, `usleep`, a condition's timed
-/// wait) may be woken late by timer coalescing: on a busy Mac a sleep of 100 ms took about 240 ms, which turns a share 100 ms away
-/// into one 240 ms away. A strict dispatch timer isn't coalesced.
+/// Where `waitPrecisely`'s timers fire: a queue of its own, which always gets a thread. On a global queue the timer waited for one
+/// as long as other tests held them all (220 s once, with the scan-priority tests' blocking reads in the same run).
+private let preciseTimers = DispatchQueue(label: "test.precise-wait", qos: .userInitiated)
+
+/// Waits until `uptime` (on `ProcessInfo.systemUptime`) on a strict timer. A sleep (`Thread.sleep`, `usleep`, `mach_wait_until`, a
+/// condition's timed wait) may be woken late by timer coalescing: on a busy Mac a sleep of 100 ms took about 240 ms, which turns a
+/// share 100 ms away into one 240 ms away. A strict dispatch timer isn't coalesced.
 func waitPrecisely(until uptime: TimeInterval) {
     let wait = uptime - ProcessInfo.processInfo.systemUptime
     guard wait > 0 else { return }
     let done = DispatchSemaphore(value: 0)
-    let timer = DispatchSource.makeTimerSource(flags: .strict, queue: .global(qos: .userInitiated))
+    let timer = DispatchSource.makeTimerSource(flags: .strict, queue: preciseTimers)
     timer.schedule(deadline: .now() + wait, leeway: .nanoseconds(0))
     timer.setEventHandler { done.signal() }
     timer.resume()

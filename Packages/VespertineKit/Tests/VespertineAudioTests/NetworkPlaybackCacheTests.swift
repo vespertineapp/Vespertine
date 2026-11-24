@@ -9,19 +9,23 @@ private final class SlowShare: PlaybackCacheReader, @unchecked Sendable {
     let bytes: Data
     let gate = NSCondition()
     var stalled = false
+    /// Reads from here on wait (see `goQuiet`); a read reaching past it gets the bytes before it (a short read).
+    var quietFrom: Int64?
     var reads = 0
     var size: Int64 { Int64(bytes.count) }
     init(count: Int) { bytes = Data((0..<count).map { UInt8(truncatingIfNeeded: $0 * 31) }) }
     init(data: Data) { bytes = data }
     func read(at offset: Int64, count: Int) throws -> Data {
         gate.lock()
-        while stalled { gate.wait() }
+        while stalled || quietFrom.map({ offset >= $0 }) == true { gate.wait() }
+        let count = quietFrom.map { min(count, Int($0 - offset)) } ?? count
         reads += 1
         gate.unlock()
         Thread.sleep(forTimeInterval: 0.001)
         return bytes[Int(offset)..<min(Int(offset) + count, bytes.count)]
     }
     func stall(_ value: Bool) { gate.lock(); stalled = value; gate.broadcast(); gate.unlock() }
+    func goQuiet(from offset: Int64?) { gate.lock(); quietFrom = offset; gate.broadcast(); gate.unlock() }
     var readCount: Int { gate.withLock { reads } }
 }
 
@@ -435,6 +439,9 @@ struct NetworkPlaybackCacheTests {
     func progressiveLead() throws {
         let dir = try directory(); defer { try? FileManager.default.removeItem(at: dir) }
         let share = SlowShare(count: 1024 * 1024)
+        // The share sends the first 128 KiB and then nothing: a copy whose reads grow (see `NetworkPlaybackCache.linkSeconds`)
+        // would otherwise bring the whole megabyte from this share in milliseconds, before the lead is even looked at.
+        share.goQuiet(from: 131072); defer { share.goQuiet(from: nil) }
         let cache = NetworkPlaybackCache(directory: dir, budget: 2 << 20, chunk: 4096)
         let entry = try cache.entry(key: "dsd", url: URL(fileURLWithPath: "/share/song.dsf"), reader: share)
         try entry.prepare(full: false, lead: 65536, cancelled: { false })
@@ -685,6 +692,8 @@ struct NetworkPlaybackCacheTests {
         var data = try Data(contentsOf: url)
         data.append(Data(repeating: 0, count: 2 << 20)) // uncached tail forces the guarded AVIO path
         let share = SlowShare(data: data)
+        // Nothing past 128 KiB arrives, so the tail stays uncached however large the copy's reads grow.
+        share.goQuiet(from: 131072); defer { share.goQuiet(from: nil) }
         let cache = NetworkPlaybackCache(directory: dir.appendingPathComponent("cache"), budget: 4 << 20, chunk: 1024)
         let entry = try cache.entry(key: "dsd", url: url, reader: share)
         try entry.prepare(full: false, lead: 65536, cancelled: { false })
