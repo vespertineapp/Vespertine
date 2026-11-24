@@ -350,14 +350,19 @@ public enum ShareScanner {
         let tags: SongTags?
         do {
             if item.decoded, let decoders {
-                switch try decoders.open(type: item.type, size: size, read: { offset, length in try files.read(path, offset: offset, length: length) }) {
+                switch try decoders.open(type: item.type, size: size, read: { offset, length in
+                    offset == 0 ? try files.head(path, length: length) : try files.read(path, offset: offset, length: length)
+                }) {
                 case .opened(let decoder) where decoder.info.playsHere: tags = SongTagReader.tags(decoder.info, size: size)
                 case .opened(let decoder): return .needs(decoder.info.channels > 2 ? .surround : .other)
                 case .needsTheMac: return .needs(.other)
                 case .unreadable: tags = nil
                 }
             } else {
-                tags = try SongTagReader.read(name: item.entry.name, size: size) { offset, length in try files.read(path, offset: offset, length: length) }
+                // The start of the file in one round trip (most tags are there); anything further the usual way.
+                tags = try SongTagReader.read(name: item.entry.name, size: size) { offset, length in
+                    offset == 0 ? try files.head(path, length: length) : try files.read(path, offset: offset, length: length)
+                }
             }
         } catch let error as SMBError where !SMBShare.lineIsGone(error) && error != .unreachable {
             tags = nil

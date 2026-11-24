@@ -10,8 +10,10 @@ First screen › **Add an SMB Share**. Type the share as `smb://server/share/fol
 and password empty. The app signs in once before it keeps the share, so a wrong address or password is said in the form. The share then appears under **Your Shares** next to the paired Macs.
 
 Opening a share scans it: the app walks the folders, reads each song's tags (a few kilobytes per file, never the whole file) and keeps
-the list on the phone. Tags are read over six connections at once while a seventh lists the folders: each song costs a few round trips
-to the server, and over Tailscale or a busy Wi-Fi one at a time spent nearly all its time waiting. The first scan of a large library
+the list on the phone. Each song is one round trip to the server: the app opens the file, reads its first 64 KiB and closes it in a
+single compound request, and stops reading a FLAC once it has the tags and the front cover. Each folder is one round trip too (open,
+list, list again to see that was all, close). Songs are read over six connections at once while a seventh lists the folders. Before
+this, a song took about five round trips one after another, and an iPhone's Wi-Fi, which naps between answers, made that about a second. The first scan of a large library
 still takes a while; what has been found so far is kept every few seconds and can be browsed and played while it runs, and a scan cut
 short (the app closed, the line dropped) carries on from where it stopped. When the app leaves the screen mid-scan, the scan keeps
 going for as long as iOS lets the app run, and the app asks iOS for background time to carry on later (iOS picks when, mostly with the

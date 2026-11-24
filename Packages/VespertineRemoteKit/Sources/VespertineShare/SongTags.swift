@@ -193,6 +193,7 @@ public enum SongTagReader {
         var tags: SongTags?
         var comments: [UInt8] = []
         var picture: (Int64, Int)?
+        var frontCover = false
         for _ in 0..<128 {
             let header = try file.bytes(at, 4)
             guard header.count == 4 else { break }
@@ -220,11 +221,15 @@ public enum SongTagReader {
                 let front = be32(start, 0) == 3
                 if lengthAt + 4 <= start.count, count > 0, lengthAt + 4 + count <= length, picture == nil || front {
                     picture = (at + 4 + Int64(lengthAt + 4), count)
+                    frontCover = front
                 }
             default: break
             }
             at += Int64(4 + length)
             if header[0] & 0x80 != 0 { break }
+            // Everything wanted is in hand: the block after a large picture (padding, mostly) would cost another read
+            // from the share for nothing.
+            if tags != nil, !comments.isEmpty, frontCover { break }
         }
         guard var tags else { return nil }
         apply(vorbisComments: comments, to: &tags)
