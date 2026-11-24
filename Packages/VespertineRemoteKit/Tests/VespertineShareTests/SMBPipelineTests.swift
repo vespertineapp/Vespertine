@@ -49,8 +49,52 @@ final class LatencyServer: SMBTransport, @unchecked Sendable {
         balance = credits
     }
 
+    /// Requests sent together (one message with several, each saying where the next starts) seen so far.
+    private(set) var compounds = 0
+
     func send(_ bytes: [UInt8]) throws {
-        let message = Array(bytes.dropFirst(4))
+        let whole = Array(bytes.dropFirst(4))
+        // Requests sent together are answered together, in one message, as Samba does: each answer but the last padded
+        // to 8 bytes and saying where the next starts.
+        var parts: [[UInt8]] = []
+        var at = 0
+        while true {
+            let next = Int(try ByteReader(whole).u32(at + 20))
+            parts.append(Array(whole[at..<(next == 0 ? whole.count : at + next)]))
+            if next == 0 { break }
+            at += next
+        }
+        if parts.count > 1 { compounds += 1 }
+        let arrives = now + line.roundTrip / 2
+        var chained: [UInt8] = []
+        for (index, part) in parts.enumerated() {
+            var answer = try answer(part)
+            if index < parts.count - 1 {
+                while answer.count % 8 != 0 { answer.append(0) }
+                let next = UInt32(answer.count)
+                answer.replaceSubrange(20..<24, with: [UInt8(next & 0xff), UInt8(next >> 8 & 0xff), UInt8(next >> 16 & 0xff), UInt8(next >> 24)])
+            }
+            chained += answer
+        }
+        let start = max(arrives, serverFree)
+        serverFree = start + Double(chained.count) / line.bandwidth
+        let framed = [0, UInt8(chained.count >> 16 & 0xff), UInt8(chained.count >> 8 & 0xff), UInt8(chained.count & 0xff)] + chained
+        let entry = (ready: serverFree + line.roundTrip / 2, bytes: framed)
+        if reorder {
+            if let first = held {
+                answers.append(entry)
+                answers.append(first)
+                held = nil
+            } else {
+                held = entry
+            }
+        } else {
+            answers.append(entry)
+        }
+    }
+
+    /// The answer to one request, header and all.
+    private func answer(_ message: [UInt8]) throws -> [UInt8] {
         let r = ByteReader(message)
         let charge = max(1, Int(try r.u16(6)))
         let command = try r.u16(12), id = try r.u64(24)
@@ -58,7 +102,6 @@ final class LatencyServer: SMBTransport, @unchecked Sendable {
         balance -= charge
         inFlight += 1
         mostInFlight = max(mostInFlight, inFlight)
-        let arrives = now + line.roundTrip / 2
         var body = ByteWriter()
         var status: UInt32 = 0
         switch command {
@@ -91,22 +134,7 @@ final class LatencyServer: SMBTransport, @unchecked Sendable {
         let granted = max(0, min(grant, creditLimit - balance))
         balance += granted
         header.u16(UInt16(granted)); header.u32(1); header.u32(0); header.u64(id); header.u32(0); header.u32(1); header.u64(1); header.zeros(16)
-        let answer = header.bytes + body.bytes
-        let start = max(arrives, serverFree)
-        serverFree = start + Double(answer.count) / line.bandwidth
-        let framed = [0, UInt8(answer.count >> 16 & 0xff), UInt8(answer.count >> 8 & 0xff), UInt8(answer.count & 0xff)] + answer
-        let entry = (ready: serverFree + line.roundTrip / 2, bytes: framed)
-        if reorder {
-            if let first = held {
-                answers.append(entry)
-                answers.append(first)
-                held = nil
-            } else {
-                held = entry
-            }
-        } else {
-            answers.append(entry)
-        }
+        return header.bytes + body.bytes
     }
 
     func receive(_ count: Int) throws -> [UInt8] {
@@ -118,7 +146,7 @@ final class LatencyServer: SMBTransport, @unchecked Sendable {
             guard !answers.isEmpty else { throw SMBError.timedOut }
             let next = answers.removeFirst()
             now = max(now, next.ready)
-            inFlight -= 1
+            inFlight -= Self.answerCount(next.bytes)
             pending.removeFirst(taken)
             taken = 0
             pending += next.bytes
@@ -128,6 +156,17 @@ final class LatencyServer: SMBTransport, @unchecked Sendable {
     }
 
     func close() {}
+
+    /// How many answers a framed message holds.
+    private static func answerCount(_ framed: [UInt8]) -> Int {
+        let message = ByteReader(Array(framed.dropFirst(4)))
+        var count = 1, at = 0
+        while let next = try? message.u32(at + 20), next != 0 {
+            count += 1
+            at += Int(next)
+        }
+        return count
+    }
 }
 
 /// A file's bytes: a pattern no two nearby megabytes share.
@@ -258,6 +297,32 @@ private let mebibyte = 1 << 20
         try connection.close(handle)
         let again = try connection.open("song.flac", folder: false)
         #expect(try connection.read(again, offset: 0, length: 100) == Array(file[0..<100]))
+        #expect(server.overdrawn == 0)
+    }
+
+    @Test(arguments: [false, true])
+    func aPeekWhileASongIsReadAheadLeavesEveryAnswerWithItsRequest(reorder: Bool) throws {
+        // A scan's open-read-close sent together, on the connection a song is being read ahead on: the song's answers may
+        // come before, between or after the peek's, and every byte still goes where it was asked for.
+        let file = patterned(12 * mebibyte)
+        let server = LatencyServer(file: file, line: .init(roundTrip: 0.020, bandwidth: 50_000_000))
+        server.reorder = reorder
+        let connection = signedIn(server)
+        let handle = try connection.open("song.flac", folder: false)
+        var offset = 0
+        for _ in 0..<6 {
+            #expect(try connection.read(handle, offset: Int64(offset), length: 256 * 1024) == Array(file[offset..<(offset + 256 * 1024)]))
+            offset += 256 * 1024
+        }
+        let peeked = try connection.peek("other.flac", length: 4096)
+        #expect(peeked.head == Array(file[0..<4096]))
+        #expect(peeked.size == Int64(file.count))
+        #expect(server.compounds == 1)
+        for _ in 0..<6 {
+            #expect(try connection.read(handle, offset: Int64(offset), length: 256 * 1024) == Array(file[offset..<(offset + 256 * 1024)]))
+            offset += 256 * 1024
+        }
+        try connection.close(handle)
         #expect(server.overdrawn == 0)
     }
 
