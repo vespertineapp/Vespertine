@@ -62,6 +62,8 @@ struct SourcesView: View {
     var body: some View {
         NavigationStack {
             List {
+                // With nothing added yet (or in the demo, whose Mac is made up) there is nothing to list or turn off.
+                if hasSources {
                 Section {
                     ForEach(model.pairings) { saved in
                         row(id: saved.serverID, name: saved.name, symbol: SavedPairing.symbol(portable: saved.portable),
@@ -88,8 +90,10 @@ struct SourcesView: View {
                 } footer: {
                     Text("Everything turned on here is in your Library. Turn one off to take its music out of the Library without forgetting it.")
                 }
+                }
                 Section("Add") {
-                    ForEach(model.unpairedMacs) { mac in
+                    // Not in the demo: its pictures are for showing the app, and a real Mac's name has no place in them.
+                    ForEach(model.session?.isDemo == true ? [] : model.unpairedMacs) { mac in
                         Button { pairing = mac } label: { Label(mac.name, systemImage: SavedPairing.symbol(portable: mac.portable)) }
                     }
                     Button { scanning = true } label: { Label("Scan the Pairing Code", systemImage: "qrcode.viewfinder") }
@@ -133,6 +137,8 @@ struct SourcesView: View {
             }
         }
     }
+
+    private var hasSources: Bool { !model.pairings.isEmpty || !model.shares.isEmpty || !model.shownFolders.isEmpty }
 
     /// A source: its name and how it is doing, its settings, and the switch that puts it in the library or takes it out.
     private func row(id: String, name: String, symbol: String, line: String?, info: Text, open: @escaping () -> Void) -> some View {
