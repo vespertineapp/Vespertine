@@ -50,7 +50,7 @@ struct RemoteReaderRegistryTests {
         let outcome = await EngineOutcome.ofPlaying(item, on: rig.engine)
         #expect(outcome == .started, "plays: \(outcome), \(rig.engine.snapshot.lastError ?? "-")")
         // Started is said as the song's first frames go out; they are heard a moment later.
-        #expect(Patience.until { rig.audibleFrames > 0 })
+        #expect(await Patience.until { rig.audibleFrames > 0 })
         #expect(Self.opened.withLock { $0.contains(track) })
         // The engine's staged copy is the entry under its key; decoding it gives the local file's PCM.
         let staged = try rig.cache.entry(key: "stream:1", url: track)
@@ -148,7 +148,7 @@ struct RemoteEarlyStartTests {
         defer { rig.share.goQuiet(from: nil) }
         let outcome = await EngineOutcome.ofPlaying(PlayableItem(url: URL(string: "remote-early://track/1")!, cacheKey: "remote-early:1"), on: rig.engine)
         #expect(outcome == .started, "plays on its prefix: \(outcome), \(rig.engine.snapshot.lastError ?? "-")")
-        #expect(Patience.until { rig.audibleFrames > 0 })
+        #expect(await Patience.until { rig.audibleFrames > 0 })
         let entry = try rig.cache.entry(key: "remote-early:1", url: URL(string: "remote-early://track/1")!)
         #expect(!entry.isComplete && entry.url.pathExtension == "flac", "the rest is still to come")
         rig.engine.stop()
@@ -366,11 +366,24 @@ enum EngineOutcome: Equatable, CustomStringConvertible {
 /// Waits for something that will happen, without a deadline it could miss on a busy machine.
 enum Patience {
     /// True once `condition` holds. The long stop only ends a run that would never end.
+    /// This one sleeps on its thread: for tests that aren't async. An async test gets the overload below.
     static func until(giveUpAfter: TimeInterval = 600, _ condition: () -> Bool) -> Bool {
         let end = Date().addingTimeInterval(giveUpAfter)
         while !condition() {
             if Date() > end { return condition() }
             Thread.sleep(forTimeInterval: 0.005)
+        }
+        return true
+    }
+
+    /// The same for an async test (Swift picks it there, and asks for `await`): it sleeps as a task, so the shared thread
+    /// it ran on is free meanwhile. The one above held it, and a wait for work that needs one of those threads (a `Task`)
+    /// could then stall the whole run: on a three-core runner the pool has three, and every other test waited with it.
+    static func until(giveUpAfter: TimeInterval = 600, _ condition: () -> Bool) async -> Bool {
+        let end = Date().addingTimeInterval(giveUpAfter)
+        while !condition() {
+            if Date() > end { return condition() }
+            try? await Task.sleep(for: .milliseconds(5))
         }
         return true
     }
