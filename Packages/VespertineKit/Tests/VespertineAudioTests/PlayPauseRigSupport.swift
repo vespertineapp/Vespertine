@@ -26,15 +26,17 @@ final class ControlledShare: PlaybackCacheReader, @unchecked Sendable {
     func read(at offset: Int64, count: Int) throws -> Data {
         gate.lock()
         while stalled || silentFrom.map({ offset >= $0 }) == true { blocked += 1; gate.wait(); blocked -= 1 }
+        // A read that reaches past where the share goes quiet gets what was sent before it (a short read).
+        let ask = silentFrom.map { min(count, Int($0 - offset)) } ?? count
         let start = started ?? Date()
         started = start
-        delivered += Double(min(count, bytes.count - Int(offset)))
-        asked += Int64(min(count, bytes.count - Int(offset)))
+        delivered += Double(min(ask, bytes.count - Int(offset)))
+        asked += Int64(min(ask, bytes.count - Int(offset)))
         let due = start.addingTimeInterval(delivered / bytesPerSecond)
         gate.unlock()
         let wait = due.timeIntervalSinceNow
         if wait > 0 { Thread.sleep(forTimeInterval: wait) }
-        return bytes.subdata(in: Int(offset)..<min(Int(offset) + count, bytes.count))
+        return bytes.subdata(in: Int(offset)..<min(Int(offset) + ask, bytes.count))
     }
     /// How many reads are held up right now by a stall or by silence: the share is being waited on, whatever the machine's speed.
     var readsWaiting: Int { gate.lock(); defer { gate.unlock() }; return blocked }

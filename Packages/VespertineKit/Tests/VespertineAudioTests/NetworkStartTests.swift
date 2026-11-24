@@ -24,14 +24,16 @@ private final class ThrottledShare: PlaybackCacheReader, @unchecked Sendable {
     func read(at offset: Int64, count: Int) throws -> Data {
         gate.lock()
         while stalled || silentFrom.map({ offset >= $0 }) == true { gate.wait() }
+        // A read that reaches past where the share goes quiet gets what was sent before it (a short read).
+        let ask = silentFrom.map { min(count, Int($0 - offset)) } ?? count
         let start = started ?? Date()
         started = start
-        delivered += Double(min(count, bytes.count - Int(offset)))
+        delivered += Double(min(ask, bytes.count - Int(offset)))
         let due = start.addingTimeInterval(delivered / bytesPerSecond)
         gate.unlock()
         let wait = due.timeIntervalSinceNow
         if wait > 0 { Thread.sleep(forTimeInterval: wait) }
-        return bytes.subdata(in: Int(offset)..<min(Int(offset) + count, bytes.count))   // a memcpy: a debug build's Data(slice) is slow
+        return bytes.subdata(in: Int(offset)..<min(Int(offset) + ask, bytes.count))   // a memcpy: a debug build's Data(slice) is slow
     }
     func stall(_ value: Bool) { gate.lock(); stalled = value; gate.broadcast(); gate.unlock() }
     func goQuiet(from offset: Int64?) { gate.lock(); silentFrom = offset; gate.broadcast(); gate.unlock() }

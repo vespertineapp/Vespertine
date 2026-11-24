@@ -254,17 +254,20 @@ struct SignalPathView: View {
                               value: String(localized: "\(SampleRate.format(path.applied.sampleRate)) kHz · native"), tone: .good))
             }
         }
-        if path.plan.spatial != .off {
+        switch path.channelHandling {
+        case .spatial:
             s.append(Step(title: String(localized: "Spatial Audio"),
                           detail: String(localized: "\(ChannelLayouts.name(labels: src.channelLabels, channels: src.channels)) as virtual speakers · Apple spatial renderer, personalized profile if set up"),
                           value: path.plan.spatial == .headTracked ? String(localized: "head tracked")
                               : String(localized: "fixed", comment: "Spatial Audio without head tracking"), tone: .changed))
-        } else if path.plan.channels < src.channels {
+        case .downmix(let channels):
             s.append(Step(title: String(localized: "Downmix"), detail: String(localized: "Standard channel-layout mix (centre and surrounds folded in)"),
-                          value: "\(ChannelLayouts.name(channels: src.channels)) → \(ChannelLayouts.name(channels: path.plan.channels))", tone: .changed))
-        } else if src.channels > 2 {
+                          value: "\(ChannelLayouts.name(channels: src.channels)) → \(ChannelLayouts.name(channels: channels))", tone: .changed))
+        case .discrete:
             s.append(Step(title: String(localized: "Channels"), detail: String(localized: "Every channel to its speaker (device layout)"),
                           value: String(localized: "\(ChannelLayouts.name(channels: src.channels)) discrete"), tone: .good))
+        case .none:
+            break
         }
         if let rg = path.replayGainDB, rg != 0 {
             s.append(Step(title: "ReplayGain", detail: String(localized: "Loudness normalisation"),
