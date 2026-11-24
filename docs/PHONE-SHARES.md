@@ -10,8 +10,12 @@ First screen › **Add an SMB Share**. Type the share as `smb://server/share/fol
 and password empty. The app signs in once before it keeps the share, so a wrong address or password is said in the form. The share then appears under **Your Shares** next to the paired Macs.
 
 Opening a share scans it: the app walks the folders, reads each song's tags (a few kilobytes per file, never the whole file) and keeps
-the list on the phone. The first scan of a large library over a slow line takes a while; what has been found so far can be browsed and
-played while it runs, and a scan cut short (the app closed, the line dropped) carries on from where it stopped. Later scans read only
+the list on the phone. Tags are read over six connections at once while a seventh lists the folders: each song costs a few round trips
+to the server, and over Tailscale or a busy Wi-Fi one at a time spent nearly all its time waiting. The first scan of a large library
+still takes a while; what has been found so far is kept every few seconds and can be browsed and played while it runs, and a scan cut
+short (the app closed, the line dropped) carries on from where it stopped. When the app leaves the screen mid-scan, the scan keeps
+going for as long as iOS lets the app run, and the app asks iOS for background time to carry on later (iOS picks when, mostly with the
+phone idle and charging). Later scans read only
 new and changed files. A scan runs by itself when a share is opened and its list is more than a day old, and from Output › **Scan
 Again**.
 
