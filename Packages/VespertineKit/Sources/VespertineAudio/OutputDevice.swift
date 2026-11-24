@@ -112,8 +112,25 @@ enum DeviceQuery {
         let raw = UnsafeMutableRawPointer.allocate(byteCount: Int(size), alignment: MemoryLayout<AudioChannelLayout>.alignment)
         defer { raw.deallocate() }
         guard AudioObjectGetPropertyData(device, &address, 0, nil, &size, raw) == noErr else { return nil }
-        let layout = AVAudioChannelLayout(layout: raw.assumingMemoryBound(to: AudioChannelLayout.self))
+        let layout = hdmiCorrected(AVAudioChannelLayout(layout: raw.assumingMemoryBound(to: AudioChannelLayout.self)), device: device)
         return ChannelLayouts.isPlaceholder(layout) ? nil : layout
+    }
+
+    /// macOS reports an HDMI or DisplayPort output's speakers for the channel count the link is at now, so a receiver left at
+    /// 2 or 6 channels (by another app, or by its own handshake) read as a stereo or 5.1 setup and multichannel music was
+    /// folded down to it. An output that takes eight channels is given its eight-channel speakers, whatever the link is at.
+    static func hdmiCorrected(_ layout: AVAudioChannelLayout, device: AudioObjectID) -> AVAudioChannelLayout {
+        guard layout.channelCount != 8 else { return layout }
+        let transport = (try? HAL.get(device, .global(kAudioDevicePropertyTransportType), initial: UInt32(0))) ?? 0
+        let maxChannels = outputStreams(device).flatMap(physicalFormats).map { Int($0.mFormat.mChannelsPerFrame) }.max() ?? 0
+        let labels = speakers(reported: layout.channelLabels, transport: Transport(transport), maxChannels: maxChannels)
+        return labels == layout.channelLabels ? layout : ChannelLayouts.layout(labels: labels) ?? layout
+    }
+
+    /// The pure rule of `hdmiCorrected`.
+    static func speakers(reported: [AudioChannelLabel], transport: Transport, maxChannels: Int) -> [AudioChannelLabel] {
+        guard transport == .hdmi || transport == .displayPort, maxChannels == 8, reported.count != 8 else { return reported }
+        return ChannelLayouts.hdmiEightChannelLabels
     }
 
     /// The device's speaker arrangement (Audio MIDI Setup → Configure Speakers) for `channels` channels.

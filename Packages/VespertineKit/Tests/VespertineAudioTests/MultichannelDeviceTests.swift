@@ -261,6 +261,7 @@ struct SpeakerSetupDeviceTests {
         Case(name: "5.1 (WAV 0x3F) on 7.1 speakers in HDMI order", channels: 6, mask: 0x3F, speakers: hdmi71, carries: [0, 1, 3, 2, 4, 5, -1, -1]),
         Case(name: "5.1 (no mask) on 7.1 speakers in HDMI order", channels: 6, mask: 0, speakers: hdmi71, carries: [0, 1, 3, 2, 4, 5, -1, -1]),
         Case(name: "7.1 (WAV 0x63F) on 7.1 speakers in HDMI order", channels: 8, mask: 0x63F, speakers: hdmi71, carries: [0, 1, 3, 2, 6, 7, 4, 5]),
+        Case(name: "5.1 side (WAV 0x60F) on 7.1 speakers in HDMI order", channels: 6, mask: 0x60F, speakers: hdmi71, carries: [0, 1, 3, 2, 4, 5, -1, -1]),
         Case(name: "5.1 (no mask) on 5.1 speakers", channels: 6, mask: 0, speakers: mpeg51, carries: [0, 1, 2, 3, 4, 5]),
         Case(name: "quad (FL FR BL BR) on 5.1 speakers", channels: 4, mask: 0x33, speakers: mpeg51, carries: [0, 1, -1, -1, 2, 3]),
         // Folded (a speaker for every channel there isn't): front four untouched, the surrounds carry a mix (nil), nothing silent.
@@ -277,6 +278,19 @@ struct SpeakerSetupDeviceTests {
         Case(name: "7.1 (no mask) on 7.1 speakers named the WAVE way", channels: 8, mask: 0,
              speakers: [L, R, C, LFE, Ls, Rs, kAudioChannelLabel_LeftSurroundDirect, kAudioChannelLabel_RightSurroundDirect], carries: Array(0..<8)),
     ]
+
+    @Test("An HDMI receiver keeps its 7.1 speakers when the link was left at 2 or 6 channels; other outputs are read as they are")
+    func hdmiLinkLeftNarrow() {
+        let stereo = [Self.L, Self.R], six = [Self.L, Self.R, Self.LFE, Self.C, Self.Ls, Self.Rs]
+        for reported in [stereo, six] {
+            #expect(DeviceQuery.speakers(reported: reported, transport: .hdmi, maxChannels: 8) == Self.hdmi71)
+            #expect(DeviceQuery.speakers(reported: reported, transport: .displayPort, maxChannels: 8) == Self.hdmi71)
+            #expect(DeviceQuery.speakers(reported: reported, transport: .usb, maxChannels: 8) == reported)
+        }
+        // A TV that takes six channels at most keeps its 5.1, and an eight-channel report is taken as it is.
+        #expect(DeviceQuery.speakers(reported: six, transport: .hdmi, maxChannels: 6) == six)
+        #expect(DeviceQuery.speakers(reported: Self.mpeg71, transport: .hdmi, maxChannels: 8) == Self.mpeg71)
+    }
 
     @Test("A driver's placeholder layout (channel n named label n) is no speaker setup; a real one is")
     func placeholder() throws {
@@ -315,8 +329,13 @@ struct SpeakerSetupDeviceTests {
         #expect(lr.routes[2].map(\.bed) == [0, 1] && lr.routes[2].allSatisfy { abs($0.gain - 0.70710677) < 1e-6 })
     }
 
+    @Test("Exclusive integer mode places each channel on its own speaker the same way", arguments: cases.filter { !$0.carries.contains(nil) })
+    func placedInteger(_ c: Case) throws { try placed(c, integer: true) }
+
     @Test("Each channel reaches its own speaker, bit for bit, whatever order the device names them in", arguments: cases)
-    func placed(_ c: Case) throws {
+    func placed(_ c: Case) throws { try placed(c, integer: false) }
+
+    func placed(_ c: Case, integer: Bool) throws {
         let url = FileManager.default.temporaryDirectory.appendingPathComponent("spk-\(UUID()).wav")
         defer { try? FileManager.default.removeItem(at: url) }
         let frames = 9600
@@ -335,20 +354,41 @@ struct SpeakerSetupDeviceTests {
         let decoder = try SourceOpener.decoder(for: probed, plan: plan, item: PlayableItem(url: url))
         let path = SignalPath(source: probed.format, decoderName: "test", plan: plan,
                               applied: AppliedFormat(sampleRate: 48_000, physicalBitDepth: 24, physicalIsInteger: true, virtualChannels: 8,
-                                                     exclusive: true, bufferFrames: 512),
+                                                     exclusive: true, bufferFrames: 512, integerMode: integer),
                               deviceName: "Receiver", deviceUID: "test",
                               deviceProfile: DeviceProfile(kind: .usbDAC, tag: "", canBeBitPerfect: true, symbol: "x"), volume: .fixed)
         let decoding = try Decoding(item: PlayableItem(url: url), probed: probed, decoder: decoder, path: path, chunk: 4096, layout: layout)
         var out: [Float] = []
         while true {
             let chunk = decoding.convertChunk()
-            if let data = chunk.data { out += UnsafeBufferPointer(start: data, count: Int(chunk.frames) * plan.channels) }
+            if let data = chunk.data {
+                // Integer mode hands out 32-bit integers in the same buffer: read them back as samples.
+                out += integer ? UnsafeBufferPointer(start: UnsafeRawPointer(data).assumingMemoryBound(to: Int32.self), count: Int(chunk.frames) * plan.channels)
+                    .map { Float($0) / 2_147_483_648 } : Array(UnsafeBufferPointer(start: data, count: Int(chunk.frames) * plan.channels))
+            }
             if chunk.ended { break }
         }
         let n = plan.channels
         let carried = ChannelID.identify(out, stride: n, frames: out.count / n, firstFrame: 0)
         #expect(out.count / n == frames)
         #expect(carried == c.carries, "\(c.name): \(carried.map { $0.map(String.init) ?? "✗" }) on \(layout.shortNames)")
+        // Placed channel for channel on more speakers than it has, nothing mixed: every channel unmixed, as the badge says.
+        if !c.carries.contains(nil) { #expect(decoding.path.channelsUnmixed, "\(c.name)") }
+        else { #expect(!decoding.path.channelsUnmixed, "\(c.name) is folded") }
+    }
+
+    @Test("A stereo song upmixed onto a receiver's speakers is never counted as channels passed unmixed")
+    func upmixIsNotUnmixed() throws {
+        let source = SourceFormat(encoding: .pcm, codec: "FLAC", sampleRate: 48_000, bitDepth: 24, channels: 2)
+        var plan = OutputPlan(mode: .pcm, deviceSampleRate: 48_000, decodedSampleRate: 48_000, physicalBitDepth: 24, channels: 8,
+                              dsdConvertedToPCM: false, reason: "")
+        plan.upmix = true
+        let path = SignalPath(source: source, decoderName: "test", plan: plan,
+                              applied: AppliedFormat(sampleRate: 48_000, physicalBitDepth: 24, physicalIsInteger: true, virtualChannels: 8,
+                                                     exclusive: true, bufferFrames: 512),
+                              deviceName: "Receiver", deviceUID: "test",
+                              deviceProfile: DeviceProfile(kind: .usbDAC, tag: "", canBeBitPerfect: true, symbol: "x"), volume: .fixed)
+        #expect(!path.channelsUnmixed && !path.isBitPerfect)
     }
 }
 

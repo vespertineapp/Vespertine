@@ -730,6 +730,16 @@ settings.deviceUID = device.uid
 settings.exclusive = true
 if let forcedSpatial { settings.spatialModes[device.uid] = forcedSpatial }
 if let forcedRate { settings.ratePolicies[device.uid] = .fixed(forcedRate) }
+// Settings as the app would set them for this output, for checking each on real hardware:
+// VESPERTINE_UPMIX=1 (Spatialize stereo), VESPERTINE_VOLUME_DB=-10 (volume in Vespertine), VESPERTINE_BALANCE=-0.5,
+// VESPERTINE_DOP=1, VESPERTINE_BITSTREAM=1, VESPERTINE_INTEGER=1.
+let env = ProcessInfo.processInfo.environment
+if env["VESPERTINE_UPMIX"] != nil { settings.spatializeStereoUIDs.insert(device.uid) }
+if let db = env["VESPERTINE_VOLUME_DB"].flatMap(Double.init) { settings.deviceDigitalVolumes[device.uid] = db }
+if let balance = env["VESPERTINE_BALANCE"].flatMap(Double.init) { settings.deviceBalances[device.uid] = balance }
+if env["VESPERTINE_DOP"] != nil { settings.dopDeviceUIDs.insert(device.uid) }
+if env["VESPERTINE_BITSTREAM"] != nil { settings.bitstreamDeviceUIDs.insert(device.uid) }
+if env["VESPERTINE_INTEGER"] != nil { settings.integerMode = true }
 engine.update(settings: settings)
 let queue = items
 engine.nextItemProvider = { finished in
@@ -749,7 +759,7 @@ for (index, item) in items.enumerated() {
     print(String(format: "%2d. %@", index + 1, name))
     if let path {
         print("    source \(path.source.codec) \(path.source.shortDescription) → plan \(SampleRate.format(path.plan.deviceSampleRate))k/\(path.plan.physicalBitDepth)b \(path.plan.mode.rawValue)\(path.plan.resamples ? " SRC" : "")\(path.plan.dsdConvertedToPCM ? " DSD→PCM" : "")")
-        print("    applied \(path.deviceFormatShort) excl=\(path.applied.exclusive) · HW readback rate \(SampleRate.format(hw.rate))k phys \(hw.physical) hog=\(hw.hogPID == getpid() ? "us" : String(hw.hogPID))")
+        print("    applied \(path.deviceFormatShort) excl=\(path.applied.exclusive) int=\(path.applied.integerMode) · HW readback rate \(SampleRate.format(hw.rate))k phys \(hw.physical) hog=\(hw.hogPID == getpid() ? "us" : String(hw.hogPID))")
         print("    verdict: \(path.statusLine)\(path.isBitPerfect ? " ✓" : "") · \(path.plan.reason)")
     } else {
         print("    no signal path (state \(snap.state.rawValue)) error: \(snap.lastError ?? "-")")
@@ -763,7 +773,20 @@ for (index, item) in items.enumerated() {
         let lit = peaks.enumerated().filter { $0.element > 0.003 }.map { "\($0.offset < names.count ? names[$0.offset] : "\($0.offset + 1)") \(String(format: "%.0f", 20 * log10($0.element))) dB" }
         print("    bed \(names.joined(separator: " ")) · sounding: \(lit.isEmpty ? "nothing" : lit.joined(separator: ", "))")
     }
-    Thread.sleep(forTimeInterval: max(0, seconds - 1.7))
+    if ProcessInfo.processInfo.environment["VESPERTINE_PROBE_METERS"] != nil, let path {
+        // Which output is sounding, once a second (a channel-ident file names its speaker in turn).
+        let names = path.applied.channelNames
+        print("    outputs \(names.joined(separator: " "))")
+        _ = engine.takeChannelPeaks()
+        for second in 0..<Int(max(0, seconds - 1.7)) {
+            Thread.sleep(forTimeInterval: 1)
+            let peaks = engine.takeChannelPeaks()
+            let lit = peaks.enumerated().filter { $0.element > 0.003 }.map { "\($0.offset + 1):\($0.offset < names.count ? names[$0.offset] : "?")" }
+            print("    \(second + 1)s sounding: \(lit.isEmpty ? "nothing" : lit.joined(separator: ", "))")
+        }
+    } else {
+        Thread.sleep(forTimeInterval: max(0, seconds - 1.7))
+    }
     let after = engine.snapshot
     print(String(format: "    position %.2fs, state %@, underruns %d", after.position, after.state.rawValue, after.underruns))
 }

@@ -227,6 +227,13 @@ public enum ChannelLayouts {
         return labels.count > 2 && labels.enumerated().allSatisfy { $0.element == AudioChannelLabel($0.offset + 1) }
     }
 
+    /// The speakers macOS names on an HDMI output carrying eight channels (CEA-861 order: L R LFE C, the surround pair, then
+    /// the surround back pair), checked by ear on a receiver channel by channel.
+    public static let hdmiEightChannelLabels: [AudioChannelLabel] = [
+        kAudioChannelLabel_Left, kAudioChannelLabel_Right, kAudioChannelLabel_LFEScreen, kAudioChannelLabel_Center,
+        kAudioChannelLabel_LeftSurround, kAudioChannelLabel_RightSurround, kAudioChannelLabel_RearSurroundLeft, kAudioChannelLabel_RearSurroundRight,
+    ]
+
     /// A multichannel file on a configured speaker setup (any count of either): the source channel each speaker output
     /// carries (-1: none), when every channel has a speaker of its own, its own position or the nearest single one, and so
     /// can go out unmixed. nil when one would have to be folded onto others (7.1 into a 5.1 room, a centre onto L and R).
