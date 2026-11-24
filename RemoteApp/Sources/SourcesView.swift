@@ -18,7 +18,8 @@ nonisolated enum SourceRules {
 }
 
 /// The line under a source's name on Sources: how it is doing, in a few words.
-nonisolated enum SourceLine {
+/// On the main actor, as the share status it reads is.
+enum SourceLine {
     /// A Mac: connected or connecting while it is open; otherwise how it could be reached.
     static func mac(_ phase: RemoteSession.Phase?, onThisNetwork: Bool, address: RemoteAddress?) -> String {
         switch phase {
