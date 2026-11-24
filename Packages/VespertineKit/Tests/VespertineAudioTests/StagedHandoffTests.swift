@@ -40,17 +40,17 @@ struct StagedHandoffTests {
             let result = Result { try StagedRemoteFile.stage(item, in: cache, cancelled: { playerLetGo.withLock { $0 } }) != nil }
             staged.withLock { $0 = result }
         }
-        #expect(Patience.until { rig.share.readsWaiting > 0 }, "the player's copy never began")
+        #expect(await Patience.until { rig.share.readsWaiting > 0 }, "the player's copy never began")
 
         // The listener switches to the Mac: the engine plays the same song, from the same copy.
         let outcome = Task { await EngineOutcome.ofPlaying(item, on: rig.engine) }
         do {
             let shared = try rig.cache.entry(key: url.absoluteString, url: url)
-            #expect(Patience.until { shared.readsWaiting >= 2 }, "the engine isn't waiting on the player's copy")
+            #expect(await Patience.until { shared.readsWaiting >= 2 }, "the engine isn't waiting on the player's copy")
         }
         // The player is let go of: its preparation gives up.
         playerLetGo.withLock { $0 = true }
-        #expect(Patience.until { staged.withLock { $0 } != nil })
+        #expect(await Patience.until { staged.withLock { $0 } != nil })
         if case .success? = staged.withLock({ $0 }) { Issue.record("the player's preparation didn't give up") }
 
         // The rest of the song arrives: the Mac plays it.
