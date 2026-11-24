@@ -69,6 +69,13 @@ public protocol ShareFiles: Sendable {
     func info(_ path: String) throws -> (size: Int64, modified: Date)
     /// Lets go of the connection, if there is one (it is made again when next needed).
     func rest()
+    /// The first `length` bytes of the file at `path` (fewer only at its end), as `read` from 0 gives them; a share
+    /// opens, reads and closes the file in one round trip.
+    func head(_ path: String, length: Int) throws -> Data
+}
+
+extension ShareFiles {
+    public func head(_ path: String, length: Int) throws -> Data { try read(path, offset: 0, length: length) }
 }
 
 /// What `SMBShare` needs of a connection (so its reconnecting can be tested without a server).
@@ -78,6 +85,24 @@ protocol SMBSession: AnyObject, Sendable {
     func read(_ handle: SMBHandle, offset: Int64, length: Int) throws -> [UInt8]
     func list(_ folder: SMBHandle) throws -> [SMBEntry]
     func disconnect()
+    /// The start of a file (no more than one read's worth) and its size, opened and closed around it.
+    func peek(_ path: String, length: Int) throws -> (head: [UInt8], size: Int64)
+    /// What is in the folder at `path`, opened and closed around it.
+    func list(folder path: String) throws -> [SMBEntry]
+}
+
+extension SMBSession {
+    func peek(_ path: String, length: Int) throws -> (head: [UInt8], size: Int64) {
+        let handle = try open(path, folder: false)
+        defer { try? close(handle) }
+        return (try read(handle, offset: 0, length: length), handle.size)
+    }
+
+    func list(folder path: String) throws -> [SMBEntry] {
+        let handle = try open(path, folder: true)
+        defer { try? close(handle) }
+        return try list(handle)
+    }
 }
 
 extension SMBConnection: SMBSession {}
@@ -154,11 +179,7 @@ public final class SMBShare: ShareFiles, @unchecked Sendable {
     public func rest() { lock.withLock { drop() } }
 
     public func list(_ folder: String) throws -> [SMBEntry] {
-        try onLine { line in
-            let handle = try line.open(full(folder), folder: true)
-            defer { try? line.close(handle) }
-            return try line.list(handle)
-        }
+        try onLine { line in try line.list(folder: full(folder)) }
     }
 
     private func handle(_ path: String, on line: any SMBSession) throws -> SMBHandle {
@@ -177,6 +198,18 @@ public final class SMBShare: ShareFiles, @unchecked Sendable {
         try onLine { line in
             Data(try line.read(try handle(path, on: line), offset: offset, length: length))
         }
+    }
+
+    public func head(_ path: String, length: Int) throws -> Data {
+        guard length > 0 else { return Data() }
+        // A file being read in pieces already (a song playing) is read on the handle it has.
+        if lock.withLock({ open.contains { $0.path == path } }) { return try read(path, offset: 0, length: length) }
+        var (head, size) = try onLine { line in try line.peek(full(path), length: length) }
+        // One compound read gives at most 64 KiB (or what the server allows): the rest the usual way.
+        if head.count < length, Int64(head.count) < size {
+            head += [UInt8](try read(path, offset: Int64(head.count), length: length - head.count))
+        }
+        return Data(head)
     }
 
     public func info(_ path: String) throws -> (size: Int64, modified: Date) {

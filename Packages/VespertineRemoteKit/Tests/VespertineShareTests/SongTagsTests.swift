@@ -135,4 +135,48 @@ final class CountedFile: @unchecked Sendable {
         #expect(ShareCatalog.titleAndNumber(fileName: "Lanterns.m4a") == ("Lanterns", nil))
         #expect(ShareCatalog.titleAndNumber(fileName: "1999.flac") == ("1999", nil))
     }
+
+    /// A FLAC as most taggers write one: stream info, comments, a large front cover, then padding.
+    private static func flacWithCover(type: Int, coverSize: Int = 200_000) -> Data {
+        func block(_ kind: UInt8, _ body: [UInt8], last: Bool = false) -> [UInt8] {
+            [kind | (last ? 0x80 : 0), UInt8(body.count >> 16 & 0xff), UInt8(body.count >> 8 & 0xff), UInt8(body.count & 0xff)] + body
+        }
+        func be32(_ x: Int) -> [UInt8] { [UInt8(x >> 24 & 0xff), UInt8(x >> 16 & 0xff), UInt8(x >> 8 & 0xff), UInt8(x & 0xff)] }
+        let plain = [UInt8](FlacMaker.file(["TITLE": "Covered"]))
+        // FlacMaker's stream info and comments, re-marked as not the last blocks.
+        var blocks: [UInt8] = []
+        var at = 4
+        while at + 4 <= plain.count {
+            let kind = plain[at] & 0x7f, length = Int(plain[at + 1]) << 16 | Int(plain[at + 2]) << 8 | Int(plain[at + 3])
+            let last = plain[at] & 0x80 != 0
+            blocks += block(kind, Array(plain[(at + 4)..<(at + 4 + length)]))
+            at += 4 + length
+            if last { break }
+        }
+        let mime = Array("image/jpeg".utf8)
+        let picture = be32(type) + be32(mime.count) + mime + be32(0) + [UInt8](repeating: 0, count: 16) + be32(coverSize) + [UInt8](repeating: 7, count: coverSize)
+        return Data(Array("fLaC".utf8) + blocks + block(6, picture) + block(1, [UInt8](repeating: 0, count: 8192), last: true) + Array(plain[at...]))
+    }
+
+    @Test func aFlacIsReadNoFurtherThanItsFrontCover() throws {
+        let file = Self.flacWithCover(type: 3)
+        var fetches = 0
+        let tags = try #require(try SongTagReader.read(name: "a.flac", size: Int64(file.count)) { offset, length in
+            fetches += 1
+            return file.subdata(in: Int(offset)..<min(file.count, Int(offset) + length))
+        })
+        #expect(tags.title == "Covered")
+        #expect(tags.pictureLength == 200_000)
+        // The padding after the cover, 200 KB on, is never asked for: one read from the share in all.
+        #expect(fetches == 1)
+
+        // A cover that isn't the front one: the blocks after it may hold the front, so they are looked at.
+        let back = Self.flacWithCover(type: 4)
+        fetches = 0
+        _ = try SongTagReader.read(name: "a.flac", size: Int64(back.count)) { offset, length in
+            fetches += 1
+            return back.subdata(in: Int(offset)..<min(back.count, Int(offset) + length))
+        }
+        #expect(fetches == 2)
+    }
 }

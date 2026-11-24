@@ -9,8 +9,15 @@ import VespertineRemoteProtocol
 
 @main
 struct VespertineRemoteApp: App {
-    @State private var model = RemoteAppModel()
+    @State private var model: RemoteAppModel
     @Environment(\.scenePhase) private var scenePhase
+
+    init() {
+        let model = RemoteAppModel()
+        _model = State(initialValue: model)
+        // Before launch ends, as iOS asks: a share's scan can then carry on in time iOS gives the app later.
+        ShareBackgroundScan.shared.register(model)
+    }
 
     var body: some Scene {
         WindowGroup {

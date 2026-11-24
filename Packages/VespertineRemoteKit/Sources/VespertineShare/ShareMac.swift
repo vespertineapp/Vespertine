@@ -111,6 +111,8 @@ final class StopFlag: @unchecked Sendable {
 @MainActor
 public final class ShareMac: RemoteChannel {
     public nonisolated static let prefix = "share-"
+    /// How many connections a share's scan reads songs over at once (`readers`).
+    public nonisolated static let scanReaders = 6
 
     public enum Scan: Equatable, Sendable {
         case idle
@@ -133,14 +135,17 @@ public final class ShareMac: RemoteChannel {
     public private(set) var revision = 0
     /// How old an index may be before a connection looks at the share again by itself.
     public var rescanAfter: TimeInterval = 24 * 3600
-    /// How many songs a first scan reads between showing (and keeping) what it has found so far.
+    /// How many songs a first scan reads between showing (and keeping) what it has found so far, or how many seconds
+    /// pass, whichever comes first. A scan cut short by the app going away loses no more than that.
     public var glimpseEvery = 200
+    public var glimpseAfter: TimeInterval = 5
     /// A song asked for whose file is gone is taken off the lists there and then, and one whose file changed has the
     /// library looked at again, without being asked. For a folder on the phone, where looking again costs nothing.
     public var mendsItself = false
 
     private let files: any ShareFiles
     private let playback: any ShareFiles
+    private let readers: [any ShareFiles]
     private let store: ShareStore
     private let sayings: ShareSayings
     private let shrink: @Sendable (Data, Int) -> Data?
@@ -185,15 +190,18 @@ public final class ShareMac: RemoteChannel {
 
     /// - Parameters:
     ///   - files: the share for browsing: scans and covers. `playback`: the same share on a connection of its own, so
-    ///     a song being played never waits behind a scan.
+    ///     a song being played never waits behind a scan. `readers`: more connections a scan reads songs' tags over,
+    ///     all at once (none: one song at a time over `files`).
     ///   - shrink: makes a cover no larger than a size in pixels (nil: use it as it is).
     ///   - decoders: the kinds of file the app opens with a decoder library (APE, WavPack, Ogg Vorbis, Opus).
-    public init(id: String, name: String, files: any ShareFiles, playback: any ShareFiles, store: ShareStore, sayings: ShareSayings = .english,
+    public init(id: String, name: String, files: any ShareFiles, playback: any ShareFiles, readers: [any ShareFiles] = [], store: ShareStore,
+                sayings: ShareSayings = .english,
                 appVersion: String = "", decoders: (any ShareDecoders)? = nil, now: @escaping @Sendable () -> Date = { Date() },
                 shrink: @escaping @Sendable (Data, Int) -> Data? = { data, _ in data }) {
         info = ServerInfo(name: name, serverID: id, appVersion: appVersion)
         self.files = files
         self.playback = playback
+        self.readers = readers
         self.store = store
         self.sayings = sayings
         self.shrink = shrink
@@ -216,10 +224,11 @@ public final class ShareMac: RemoteChannel {
     /// once instead of waiting out a dead line. A scan that had failed is tried again.
     public func lineChanged() {
         guard isOpen else { return }
-        let files = files, playback = playback
+        let files = files, playback = playback, readers = readers
         DispatchQueue.global(qos: .utility).async {
             playback.rest()
             files.rest()
+            for reader in readers { reader.rest() }
         }
         if case .failed = scan { rescan() }
     }
@@ -232,6 +241,7 @@ public final class ShareMac: RemoteChannel {
         streams.removeAll()
         files.rest()
         playback.rest()
+        for reader in readers { reader.rest() }
         onClose?(nil)
     }
 
@@ -299,11 +309,18 @@ public final class ShareMac: RemoteChannel {
         onChange?()
         let stop = StopFlag()
         self.stop = stop
-        let files = files, previous = library, started = now(), store = store, glimpseEvery = glimpseEvery, decoders = decoders
+        let files = files, readers = readers, previous = library, started = now(), store = store, decoders = decoders
+        let glimpseEvery = glimpseEvery, glimpseAfter = glimpseAfter
         let moved: @Sendable (Int) -> Void = { [weak self] songs in Task { @MainActor in self?.scanMoved(songs) } }
-        // Kept at once, on the scan's own thread: a scan cut short (the app closed, the share gone) carries on from it.
+        // Kept at once, on the scan's own thread: a scan cut short (the app went to the background or closed, the share
+        // went away) carries on from it. The last one comes as the scan stops; it is kept unless the share was forgotten
+        // meanwhile (its folder is gone), and shown only while the scan still runs.
         let glimpsed: @Sendable (ShareLibrary) -> Void = { [weak self] partial in
-            guard !stop.isSet else { return }
+            if stop.isSet {
+                guard FileManager.default.fileExists(atPath: store.directory.path) else { return }
+                store.save(partial)
+                return
+            }
             store.save(partial)
             Task { @MainActor in self?.glimpse(partial) }
         }
@@ -311,7 +328,8 @@ public final class ShareMac: RemoteChannel {
             let result: Result<ShareLibrary, Error>
             do {
                 let scanned = try await libraryWorker.run {
-                    try ShareScanner.scan(files, previous: previous, now: started, glimpseEvery: glimpseEvery, decoders: decoders, progress: { moved($0.songs) }, glimpse: glimpsed, cancelled: { stop.isSet })
+                    try ShareScanner.scan(files, readers: readers, previous: previous, now: started, glimpseEvery: glimpseEvery, glimpseAfter: glimpseAfter,
+                                          decoders: decoders, progress: { moved($0.songs) }, glimpse: glimpsed, cancelled: { stop.isSet })
                 }
                 result = .success(scanned)
             } catch {

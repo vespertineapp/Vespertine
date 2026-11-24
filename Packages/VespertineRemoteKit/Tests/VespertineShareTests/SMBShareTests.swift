@@ -48,6 +48,15 @@ final class FakeSession: SMBSession, @unchecked Sendable {
     }
 
     func disconnect() { log.append("disconnect") }
+
+    /// At most this many bytes in one peek, as a server gives at most one read's worth.
+    var peekLimit = Int.max
+
+    func peek(_ path: String, length: Int) throws -> (head: [UInt8], size: Int64) {
+        log.append("peek \(path)")
+        guard let data = files[path] else { throw SMBError.notFound }
+        return (Array(data.prefix(min(length, peekLimit))), Int64(data.count))
+    }
 }
 
 @Suite struct SMBShareTests {
@@ -124,6 +133,25 @@ final class FakeSession: SMBSession, @unchecked Sendable {
         #expect(sessions()[0].log.last == "disconnect")
         _ = try share.read("a.flac", offset: 0, length: 1)
         #expect(sessions().count == 2)
+    }
+
+    @Test func theStartOfAFileComesInOnePeekAndNothingIsLeftOpen() throws {
+        let (share, sessions) = share()
+        #expect(try share.head("a.flac", length: 10) == Data(0..<10))
+        #expect(try share.head("a.flac", length: 1000) == Data(0..<100))
+        #expect(sessions()[0].log == ["peek Music/a.flac", "peek Music/a.flac"])
+        #expect(throws: SMBError.notFound) { _ = try share.head("nothing.flac", length: 10) }
+    }
+
+    @Test func moreThanOnePeekGivesIsReadTheUsualWay() throws {
+        let (share, sessions) = share()
+        _ = try share.list("")
+        sessions()[0].peekLimit = 30
+        #expect(try share.head("a.flac", length: 50) == Data(0..<50))
+        #expect(sessions()[0].log.suffix(3) == ["peek Music/a.flac", "open Music/a.flac", "read Music/a.flac 30"])
+        // A file being read already (a song playing) is read on its own handle.
+        #expect(try share.head("a.flac", length: 5) == Data(0..<5))
+        #expect(sessions()[0].log.last == "read Music/a.flac 0")
     }
 
     @Test func listingOpensTheFolderAndClosesIt() throws {
