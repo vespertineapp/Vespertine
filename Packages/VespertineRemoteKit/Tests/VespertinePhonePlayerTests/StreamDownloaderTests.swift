@@ -200,11 +200,16 @@ private final class FakeReader: @unchecked Sendable {
         // until the song is asked for again (or the list is removed, which clears it: see KeptTests).
         let data = Data((0..<50_000).map { UInt8(truncatingIfNeeded: $0 &* 11) })
         let reader = FakeReader(data: data)
-        reader.delays = { offset in offset < 4000 ? .zero : .milliseconds(400) }
+        // The rest takes far longer than the test waits: it is cancelled once the first 4000 bytes are in, however busy
+        // the machine is (a fixed 100 ms wait failed on a loaded one).
+        reader.delays = { offset in offset < 4000 ? .zero : .seconds(60) }
         let url = tmp(); defer { try? FileManager.default.removeItem(at: url); try? FileManager.default.removeItem(at: StreamDownloader.progressFile(for: url)) }
         let downloader = StreamDownloader(descriptor: descriptor(size: 50_000), destination: url, read: reader.read)
-        let task = Task { try await downloader.run() }
-        try await Task.sleep(for: .milliseconds(100))
+        let seen = Seen()
+        let task = Task { try await downloader.run { seen.add($0) } }
+        let deadline = ContinuousClock.now + .seconds(30)
+        while (seen.values.last ?? 0) < 4000, ContinuousClock.now < deadline { try await Task.sleep(for: .milliseconds(5)) }
+        #expect(seen.values.last == 4000)
         task.cancel()
         _ = try? await task.value
         let again = StreamDownloader(descriptor: descriptor(size: 50_000), destination: url, read: FakeReader(data: data).read)
