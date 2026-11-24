@@ -196,7 +196,11 @@ jobs:
       # the share target (minutes of arithmetic each in a debug build) held every thread the tests share for 30 to 55
       # seconds, and the tests that talk over the loopback in the other targets ran out of their own five-second waits
       # with nothing wrong (#421 and #429 on main). The targets are read from the folder, so a new one is run too.
+      # Those DSD tests print nothing for over two minutes on GitHub's runner, so the watchdog's quiet-spell stacks are
+      # off here: they would show that arithmetic every run, and the 300 s limit still prints stacks for a hang.
       - name: Remote protocol tests (macOS)
+        env:
+          WATCHDOG_QUIET: 0
         run: |
           status=0
           for dir in Packages/VespertineRemoteKit/Tests/*/; do
