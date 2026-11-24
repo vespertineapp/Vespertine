@@ -138,7 +138,9 @@ struct B2BadgeVerdict: BadgeVerdict {
         if plan.spatial != .off {
             return "Spatial audio is on"
         }
-        if plan.channels != source.channels {
+        // The one exception: a multichannel file spread unmixed over more outputs, the rest of them silent.
+        let spreadUnmixed = plan.placedUnmixed && source.channels > 2 && plan.channels > source.channels
+        if plan.channels != source.channels && !spreadUnmixed {
             return "Channels sent differ from the file"
         }
         if readback.deviceChannels < source.channels {

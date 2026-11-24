@@ -94,10 +94,15 @@ struct BitPerfectVerdict: BadgeVerdict {
         }
     }
 
+    /// BPV-007's one exception: a multichannel file on more outputs than it has, every channel unmixed on its own.
+    static func placedUnmixed(_ input: VerdictInput) -> Bool {
+        input.plan.placedUnmixed && input.source.channels > 2 && input.plan.channels > input.source.channels
+    }
+
     static func sharedReason(_ input: VerdictInput) -> String? {
         // BPV-007
         if input.plan.spatial != .off { return Reason.spatial }
-        if input.plan.channels != input.source.channels { return Reason.channelsChanged }
+        if input.plan.channels != input.source.channels, !placedUnmixed(input) { return Reason.channelsChanged }
         if input.readback.deviceChannels < input.source.channels { return Reason.deviceChannels }
 
         // BPV-006: only an exact 0 dB gain is allowed.

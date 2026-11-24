@@ -372,6 +372,9 @@ struct SpeakerSetupDeviceTests {
         let carried = ChannelID.identify(out, stride: n, frames: out.count / n, firstFrame: 0)
         #expect(out.count / n == frames)
         #expect(carried == c.carries, "\(c.name): \(carried.map { $0.map(String.init) ?? "✗" }) on \(layout.shortNames)")
+        // Placed channel for channel on more speakers than it has, nothing mixed: every channel unmixed (BPV-007).
+        if !c.carries.contains(nil) { #expect(decoding.path.channelsUnmixed, "\(c.name)") }
+        else { #expect(!decoding.path.channelsUnmixed, "\(c.name) is folded") }
     }
 
     @Test("A stereo song upmixed onto a receiver's speakers is never BIT-PERFECT")
@@ -385,7 +388,7 @@ struct SpeakerSetupDeviceTests {
                                                      exclusive: true, bufferFrames: 512),
                               deviceName: "Receiver", deviceUID: "test",
                               deviceProfile: DeviceProfile(kind: .usbDAC, tag: "", canBeBitPerfect: true, symbol: "x"), volume: .fixed)
-        #expect(!path.isBitPerfect)
+        #expect(!path.channelsUnmixed && !path.isBitPerfect)
     }
 }
 

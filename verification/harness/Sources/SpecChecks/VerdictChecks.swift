@@ -396,6 +396,35 @@ public enum VerdictChecks {
         },
 
         // REQ: BPV-007
+        Check("a multichannel file placed unmixed on more outputs keeps its untouched badge; the same channels made any other way don't",
+              requirements: ["BPV-007"]) { subject, checker in
+            for x0 in everyModeBases() where x0.plan.mode == .pcm && x0.source.channels > 2 && claimsUntouched(subject.verdict(x0)) {
+                for outputs in [x0.source.channels + 1, 8, 16] where outputs > x0.source.channels {
+                    var x = x0
+                    x.plan.channels = outputs
+                    x.readback.deviceChannels = max(x0.readback.deviceChannels, outputs)
+                    x.plan.placedUnmixed = true
+                    let placed = subject.verdict(x)
+                    checker.expect(claimsUntouched(placed), "BPV-007",
+                                   "\(x0.source.channels) channels placed unmixed on \(outputs) outputs: \(report(placed, x))")
+                    x.plan.placedUnmixed = false
+                    let made = subject.verdict(x)
+                    checker.expect(!claimsUntouched(made), "BPV-007",
+                                   "\(outputs) channels made from a \(x0.source.channels)-channel file: \(report(made, x))")
+                }
+            }
+            // A stereo or mono file is never "placed" on more outputs: more channels than two are always made.
+            for x0 in everyModeBases() where x0.plan.mode == .pcm && x0.source.channels <= 2 {
+                var x = x0
+                x.plan.channels = 8
+                x.readback.deviceChannels = max(x0.readback.deviceChannels, 8)
+                x.plan.placedUnmixed = true
+                let b = subject.verdict(x)
+                checker.expect(!claimsUntouched(b), "BPV-007", "\(x0.source.channels)-channel file on 8 outputs: \(report(b, x))")
+            }
+        },
+
+        // REQ: BPV-007
         Check("a device carrying fewer channels than the file rules out every untouched badge",
               requirements: ["BPV-007"]) { subject, checker in
             for x0 in everyModeBases() {
