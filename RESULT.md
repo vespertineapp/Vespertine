@@ -1,8 +1,41 @@
 # Vespertine iOS: shares at speed, and keeping music offline (M1 and M3)
 
-Branch `feat/ios-smb-offline` (worktree `~/Workspace/vt-ios-smb`), off `origin/main`. Every commit is signed. Nothing has been
-pushed and there is no PR. Plan: `~/Workspace/scratch/2026-11-23-vtios-smb/PLAN.md`. Logs: the `logs/` folder beside it.
-Everything below was run on dormhub on 23 November 2026.
+Branch `feat/ios-smb-offline` (worktree `~/Workspace/vt-ios-smb`). Every commit is signed. Plan:
+`~/Workspace/scratch/2026-11-23-vtios-smb/PLAN.md`. Logs: the `logs/` folder beside it (23 Nov) and
+`~/Workspace/scratch/2026-11-24-vtios-pr/` (24 Nov).
+
+## Finishing for the PR (24 November 2026)
+
+- **PR:** PR_URL_HERE (open, not merged). No build bump, nothing uploaded to TestFlight, App Store Connect untouched.
+- **Favorites UI test: it was already failing on main.** `AdaptiveNavigationTests.testAFavoriteInTwoCopiesIsOneRowWithItsCopies`
+  fails on a clean build of origin/main (bfa65c0b, its own worktree `~/Workspace/vt-ios-smb-main`). It was run alone on simulator
+  VT-SMB-Test (64374B85…, iOS 27.0), which was shut down afterwards. It fails at the same line (80: "2 COPIES" never appears within
+  15 s), the same way as on this branch before and after the rebase (`main-ui-fav.log`, `branch-ui-fav.log`). The PR says so. It is
+  left as it is.
+- **Rebased on origin/main** (#483 to #489). Two conflicts, both with #487 (iPhone share scan):
+  - `SMBConnection`: #487's compound requests (`peek`, `list(folder:)`) read the answers straight off the socket. With this branch's
+    read-ahead, that would have thrown away read-ahead answers arriving at the same time. `compound()` now sends its parts and
+    collects each one with `receive(_:)` by message ID. `arrival()` splits a frame carrying chained answers. New test
+    `SMBPipelineTests.aPeekWhileASongIsReadAheadLeavesEveryAnswerWithItsRequest`, with answers in order and swapped. The fake
+    server now answers compound requests in one chained message.
+  - Background tasks: both `share-scan` (#487) and `keep.overnight`/`keep.continued.*` are registered and permitted.
+    `letLibrariesRest()` does nothing while a keep run is active. When a keep run ends, it leaves the share session open if a scan
+    is still running.
+- **Flaky test fixed:** `cancellingKeepsWhatArrivedForNextTime` (from this branch) failed once in the first full run, at load
+  average ~300 on the hub. It cancelled after a fixed 100 ms. It now waits for the 4000-byte progress mark. It passed 5 of 5 alone
+  before the change and 3 of 3 after.
+- **Tests after the rebase:**
+  - VespertineRemoteKit `swift test`: **787 passed, 0 failed** (`pkg-tests-2.log`).
+  - Live Samba 4.19.9, `SMBLiveTests`, 7 modes (3.1.1 signed, 3.1.1 AES-128-GCM, AES-256-GCM only, AES-256-CCM only, 3.0.2 CCM, 2.0.2,
+    guest): **all 9 passed in each mode**, including #487's compound `peek`/`list(folder:)` and a 64 MiB file compared byte for byte
+    (`live.log`).
+  - iOS build-for-testing: **succeeded**. iOS unit tests: **132 Swift Testing + 18 XCTest passed, 0 failed** (`ios-unit.log`).
+  - The full UI suite was not run again after the rebase. Only the Favorites test was.
+- **Store text:** `STORE-TEXT.md` in this worktree (gitignored, not in the PR) has three What's New options and a feature blurb for
+  Alex to approve.
+- **Real-phone test pending** (bench B9/B11), as below.
+
+The sections below are from 23 November, before the rebase.
 
 ## M1: share throughput
 
@@ -82,7 +115,7 @@ What Keep on This Device now does (`VespertinePhonePlayer`, app `Kept.swift` and
 | VespertineRemoteKit package (`swift test`, 13:03, HEAD code) | **778 passed, 0 failed**, across 6 test bundles: 188 share tests (VespertineShareTests), 304 phone-player tests (Keep on This Device: KeptTests, KeptCheckTests, KeptAdoptTests, Downloader, KeepingRunTests), plus 111, 156, 15 and 4 in the other bundles. The branch adds about 21 share tests and 18 keeping tests. |
 | Live against Samba 4.19.9 (`SMBLiveTests`, 9 tests per mode) | **All passed** for 5 modes: SMB 3.1.1 signed, 3.1.1 AES-256-GCM only, 3.1.1 AES-256-CCM only, 2.0.2, and 3.1.1 guest. Covers share list `archive,music`, a 64 MiB file compared byte for byte, and a 3 MB file (`logs/live-samba.log`) |
 | iOS app unit tests (one simulator, `VT-SMB-Test` 64374B85…, iOS 27.0) | **132 Swift Testing + 18 XCTest passed, 0 failed** (includes the new KeepInBackgroundTests) |
-| iOS app UI tests (same simulator) | **19 passed, 2 skipped (iPad/capture-only), 1 failed**: `AdaptiveNavigationTests.testAFavoriteInTwoCopiesIsOneRowWithItsCopies`. It fails the same way when run alone (`logs/ios-ui-favorites.log`). The accessibility snapshot shows the demo Favorites list sorted by title, with only Allegro…Evergreen on screen. "Harbor Lights" and its "2 COPIES" button sit below the fold, so the 15 s wait never finds them. The branch changes nothing in Favorites, sorting, copies or the demo library, so this looks like it was already broken (screen size or sort order), but it has **not been checked on origin/main** (unverified). After printing its results, xcodebuild hung until the simulator was shut down, then exited with TEST FAILED (exit 65, that one test). |
+| iOS app UI tests (same simulator) | **19 passed, 2 skipped (iPad/capture-only), 1 failed**: `AdaptiveNavigationTests.testAFavoriteInTwoCopiesIsOneRowWithItsCopies`. It fails the same way when run alone (`logs/ios-ui-favorites.log`). The accessibility snapshot shows the demo Favorites list sorted by title, with only Allegro…Evergreen on screen. "Harbor Lights" and its "2 COPIES" button sit below the fold, so the 15 s wait never finds them. The branch changes nothing in Favorites, sorting, copies or the demo library, so this looks like it was already broken (screen size or sort order), (24 Nov: confirmed, it fails on origin/main too; see the top). After printing its results, xcodebuild hung until the simulator was shut down, then exited with TEST FAILED (exit 65, that one test). |
 
 Rerun the live tests with `scripts/samba-test/run.sh MODE`, then `VESPERTINE_SMB=…` (see docs/PHONE-SHARES.md, "Testing").
 
@@ -95,4 +128,4 @@ Rerun the live tests with `scripts/samba-test/run.sh MODE`, then `VESPERTINE_SMB
 - **Real servers:** only Samba in Docker has been tested. Synology, QNAP, TrueNAS, macOS and Windows file sharing are not yet tried.
 - **Store text:** the App Store description and What's New don't yet mention choosing a share from a list, AES-256, or keeping
   music in the background. That copy still needs writing and Alex's approval.
-- Not pushed and no PR, as the brief asked.
+- (24 Nov) Pushed and PR opened: see the top. The store text is drafted in `STORE-TEXT.md` and needs Alex's approval.
