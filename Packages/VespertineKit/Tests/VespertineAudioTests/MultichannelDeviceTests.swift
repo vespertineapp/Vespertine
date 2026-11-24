@@ -390,6 +390,20 @@ struct SpeakerSetupDeviceTests {
                               deviceProfile: DeviceProfile(kind: .usbDAC, tag: "", canBeBitPerfect: true, symbol: "x"), volume: .fixed)
         #expect(!path.channelsUnmixed && !path.isBitPerfect)
     }
+
+    @Test("A stereo song upmixed onto a receiver's speakers is never BIT-PERFECT")
+    func upmixIsNotUnmixed() throws {
+        let source = SourceFormat(encoding: .pcm, codec: "FLAC", sampleRate: 48_000, bitDepth: 24, channels: 2)
+        var plan = OutputPlan(mode: .pcm, deviceSampleRate: 48_000, decodedSampleRate: 48_000, physicalBitDepth: 24, channels: 8,
+                              dsdConvertedToPCM: false, reason: "")
+        plan.upmix = true
+        let path = SignalPath(source: source, decoderName: "test", plan: plan,
+                              applied: AppliedFormat(sampleRate: 48_000, physicalBitDepth: 24, physicalIsInteger: true, virtualChannels: 8,
+                                                     exclusive: true, bufferFrames: 512),
+                              deviceName: "Receiver", deviceUID: "test",
+                              deviceProfile: DeviceProfile(kind: .usbDAC, tag: "", canBeBitPerfect: true, symbol: "x"), volume: .fixed)
+        #expect(!path.isBitPerfect)
+    }
 }
 
 @Suite("Spatial Audio on the I/O thread")
