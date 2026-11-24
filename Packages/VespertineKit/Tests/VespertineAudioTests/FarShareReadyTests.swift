@@ -90,7 +90,10 @@ struct FarShareReadyTests {
         print(String(format: "far share, copied whole: %.1f MB ready in %.2f s (%.1f MB/s) in %d reads, largest %d KiB",
                      Double(entry.size) / 1e6, seconds, Double(entry.size) / 1e6 / seconds, sizes.count, (sizes.max() ?? 0) >> 10))
         // All of it crosses the link in about 0.9 s at 30 MiB/s; the round trips are what is left of the two seconds.
-        #expect(seconds < 2, "ready after \(String(format: "%.2f", seconds)) s in \(sizes.count) reads")
+        // The read count is what proves the round trips are gone (old code: 96 reads); the wall clock only guards
+        // against a hang, because a loaded CI runner stretched the same 20 reads to 3.2 s (11-24).
+        #expect(sizes.count < 40, "\(sizes.count) reads for the song")
+        #expect(seconds < 6, "ready after \(String(format: "%.2f", seconds)) s in \(sizes.count) reads")
     }
 
     @Test("From a share 100 ms away the copy fills the link: large reads, several in flight, not one small read per round trip")
@@ -109,6 +112,9 @@ struct FarShareReadyTests {
         print(String(format: "far share, 64 MiB: %.2f s, %.1f MiB/s of a 30 MiB/s link, %d reads, largest %d KiB",
                      seconds, rate, sizes.count, (sizes.max() ?? 0) >> 10))
         #expect(sizes.contains { $0 >= 4 << 20 }, "reads of several megabytes once the link has shown it carries them: largest \((sizes.max() ?? 0) >> 10) KiB")
-        #expect(rate > 21, "the copy carried \(String(format: "%.1f", rate)) MiB/s of the link's 30")
+        // Wall-clock rate swings on a loaded CI runner (21-26 MiB/s here, 19 on CI 11-24), so the rate bar sits above
+        // the old code's 16 MiB/s with room, and the read count (old code: 134) is what proves one read per round trip is gone.
+        #expect(sizes.count < 60, "\(sizes.count) reads for 64 MiB")
+        #expect(rate > 17.5, "the copy carried \(String(format: "%.1f", rate)) MiB/s of the link's 30")
     }
 }
