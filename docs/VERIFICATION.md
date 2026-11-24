@@ -27,7 +27,7 @@ Vespertine shows **BIT-PERFECT** only when every sample of the file reaches the 
   - Volume is either the DAC's own hardware control or fixed.
   - Digital volume must be off or at exactly 0 dB.
   - ReplayGain must be off or at 0 dB.
-- **No spatial or channel processing is applied.** The device has at least as many channels as the file.
+- **No spatial or channel processing is applied.** Every channel of the file goes out unmixed (a 5.1 file may go to eight outputs, the two it has nothing for silent), and the device has at least as many channels as the file.
 - **Nothing else is mixed in.**
   - Either Vespertine has the device to itself (exclusive "hog" mode),
   - or no other app is playing to it at the same moment.

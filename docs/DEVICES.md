@@ -25,7 +25,7 @@ DACs known to decode DoP, with the source for each entry, are listed in [`dop-da
 
 | Test | Result |
 |---|---|
-| 5.1 FLAC, 32 to 192 kHz | The output switched to each rate; every channel on its own HDMI channel with its samples unchanged, the back pair silent. Badged CONVERTED, because six channels go out on an eight-channel link (requirement BPV-007 counts that as a change) |
+| 5.1 FLAC, 32 to 192 kHz | The output switched to each rate; every channel on its own HDMI channel with its samples unchanged, the back pair silent; BIT-PERFECT |
 | 7.1 FLAC, 48 kHz | Side pair on 5 and 6, back pair on 7 and 8; BIT-PERFECT |
 | 5.1 at 384 kHz, stereo at 768 kHz | Converted to 192 kHz, badged RESAMPLED |
 | 5.1 DSD64 (DSF) | Converted to 176.4 kHz PCM, every channel in place; the receiver does not take DoP |

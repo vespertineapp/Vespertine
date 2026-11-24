@@ -58,9 +58,14 @@ public struct VerdictInput: Sendable, Hashable {
         /// the player holds the device exclusively (`readback.hogOwnerPID == readback.ownPID`; BPV-018): inputs
         /// with `integerMode` true and the device not held don't occur.
         public var integerMode: Bool
+        /// A multichannel file (more than two channels) placed on more outputs than it has, each channel on an output of
+        /// its own with nothing mixed, the outputs it has no channel for silent (5.1 on an HDMI receiver's eight outputs).
+        /// False for an upmix, a fold, and anything else that makes or mixes channels.
+        public var placedUnmixed: Bool = false
 
         public init(mode: Mode, requestedRate: Double, requestedBitDepth: Int, channels: Int, resampling: Bool,
-                    dsdConvertedToPCM: Bool, spatial: Spatial, integerMode: Bool) {
+                    dsdConvertedToPCM: Bool, spatial: Spatial, integerMode: Bool, placedUnmixed: Bool = false) {
+            self.placedUnmixed = placedUnmixed
             self.mode = mode
             self.requestedRate = requestedRate
             self.requestedBitDepth = requestedBitDepth

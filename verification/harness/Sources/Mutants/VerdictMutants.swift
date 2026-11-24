@@ -368,6 +368,11 @@ public enum VerdictMutants {
             overlook(base, when: { $0.inPCM && $0.plan.channels > $0.source.channels },
                      fix: { i in i.plan.channels = i.source.channels })
         },
+        Mutant("C-BPV-007-g", targets: ["BPV-007"],
+               summary: "PCM mode: a stereo file spread over more outputs counts as placed unmixed") { base in
+            overlook(base, when: { $0.inPCM && $0.plan.placedUnmixed && $0.source.channels <= 2 && $0.plan.channels > $0.source.channels },
+                     fix: { i in i.plan.channels = i.source.channels })
+        },
         Mutant("C-BPV-007-d", targets: ["BPV-007"],
                summary: "PCM mode: the device's channel count is checked only for files with more than two channels") { base in
             overlook(base, when: { i in

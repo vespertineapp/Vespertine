@@ -208,6 +208,8 @@ struct SignalPathVerdict: BadgeVerdict {
         plan.spatial = switch i.plan.spatial { case .off: .off; case .fixed: .fixed; case .headTracked: .headTracked }
         if plan.spatial != .off { plan.deviceChannelCount = 2 }
         plan.integerSamples = i.plan.integerMode
+        // More channels than the file, not placed unmixed: made by an upmix (the only other way Vespertine sends more).
+        if i.plan.channels > i.source.channels, !i.plan.placedUnmixed { plan.upmix = true }
 
         let hogged = (i.readback.hogOwnerPID ?? -1) == i.readback.ownPID
         let rate = i.readback.nominalRate ?? plan.deviceSampleRate

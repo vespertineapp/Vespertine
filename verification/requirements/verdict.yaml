@@ -100,8 +100,8 @@
     section: "line 30"
     availability: repository
     cache: { repo: docs/VERIFICATION.md, lines: 30, from: "No spatial or channel processing is applied.", to: "at least as many channels as the file." }
-  requirement: "The badge is not BIT-PERFECT, NATIVE DSD · DoP or BITSTREAM when spatial audio is on, when the channels sent differ from the file's channels, or when the device carries fewer channels than the file."
-  quote_sha256: 41175a697c57567fa7f61465467c539516eaa6e554b501669489c96cc8e63e92
+  requirement: "No BIT-PERFECT, NATIVE DSD · DoP or BITSTREAM badge with spatial audio on, channels sent differing from the file's (except a multichannel file placed unmixed on more outputs), or a device carrying fewer channels."
+  quote_sha256: 009a9b6b26466c0e980a16c9e12671ba6dcfb066284c468f1b9c8eccbee83e77
   kind: vespertine-rule
   testable: true
   gap: ""
