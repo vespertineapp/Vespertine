@@ -121,9 +121,11 @@ enum DeviceQuery {
     /// folded down to it. An output that takes eight channels is given its eight-channel speakers, whatever the link is at.
     static func hdmiCorrected(_ layout: AVAudioChannelLayout, device: AudioObjectID) -> AVAudioChannelLayout {
         guard layout.channelCount != 8 else { return layout }
-        let transport = (try? HAL.get(device, .global(kAudioDevicePropertyTransportType), initial: UInt32(0))) ?? 0
+        // The transport first: only HDMI and DisplayPort outputs have their stream formats read here.
+        let transport = Transport((try? HAL.get(device, .global(kAudioDevicePropertyTransportType), initial: UInt32(0))) ?? 0)
+        guard transport == .hdmi || transport == .displayPort else { return layout }
         let maxChannels = outputStreams(device).flatMap(physicalFormats).map { Int($0.mFormat.mChannelsPerFrame) }.max() ?? 0
-        let labels = speakers(reported: layout.channelLabels, transport: Transport(transport), maxChannels: maxChannels)
+        let labels = speakers(reported: layout.channelLabels, transport: transport, maxChannels: maxChannels)
         return labels == layout.channelLabels ? layout : ChannelLayouts.layout(labels: labels) ?? layout
     }
 

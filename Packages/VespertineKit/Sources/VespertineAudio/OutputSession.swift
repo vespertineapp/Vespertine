@@ -555,7 +555,9 @@ public enum DeviceControl {
             let deadline = Date().addingTimeInterval(2)
             while Date() < deadline {
                 let now = try? HAL.get(stream, .global(kAudioStreamPropertyPhysicalFormat), initial: AudioStreamBasicDescription())
-                if let now, now.mBitsPerChannel == best.mBitsPerChannel, now.mChannelsPerFrame == best.mChannelsPerFrame,
+                // The channel count only when bitstream asked for it: a device that keeps its own (a virtual one) would
+                // otherwise hold every song for the whole wait.
+                if let now, now.mBitsPerChannel == best.mBitsPerChannel, !exactChannels || now.mChannelsPerFrame == best.mChannelsPerFrame,
                    abs(now.mSampleRate - rate) < 0.5 { break }
                 usleep(10_000)
             }
