@@ -43,12 +43,18 @@ final class AdaptiveNavigationTests: XCTestCase {
             XCTAssertTrue(firstAlbum.waitForExistence(timeout: 10))
             sidebar("output").tap()
             XCTAssertTrue(app.navigationBars["Output"].waitForExistence(timeout: 5))
+            sidebar("sources").tap()
+            XCTAssertTrue(app.navigationBars["Sources"].waitForExistence(timeout: 5))
         } else {
             XCTAssertTrue(element("compact-layout").exists)
             tab("Queue").tap()
             XCTAssertTrue(app.navigationBars["Queue"].waitForExistence(timeout: 5))
             tab("Library").tap()
             XCTAssertTrue(app.navigationBars["Library"].waitForExistence(timeout: 5))
+            // Macs, shares and folders are added and turned on or off in a tab of their own.
+            tab("Sources").tap()
+            XCTAssertTrue(app.navigationBars["Sources"].waitForExistence(timeout: 5))
+            XCTAssertTrue(element("sources-add-share").exists)
         }
     }
 
@@ -140,7 +146,7 @@ final class AdaptiveNavigationTests: XCTestCase {
         XCTAssertTrue(app.buttons["Pause"].exists)
     }
 
-    /// The last row of a list stops above the mini player, not under it, and Settings is reached from the top of Output.
+    /// The last row of a list stops above the mini player, not under it, and Settings is one tap from the top of Output.
     func testOutputsLastRowClearsTheMiniPlayerAndSettingsIsAtTheTop() throws {
         try XCTSkipIf(UIDevice.current.userInterfaceIdiom == .pad, "The phone's tab layout.")
         launch(screen: "output")
@@ -153,8 +159,7 @@ final class AdaptiveNavigationTests: XCTestCase {
         XCTAssertLessThanOrEqual(row.frame.maxY, mini.frame.minY + 1, "the last row is under the mini player")
         for _ in 0..<4 { app.swipeDown() }
         element("output-gear").tap()
-        XCTAssertTrue(app.buttons["Settings"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.buttons["Choose Another Library"].exists)
+        XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 5))
     }
 
     func testRotationRetainsQueueAndControlsRemainReachable() {

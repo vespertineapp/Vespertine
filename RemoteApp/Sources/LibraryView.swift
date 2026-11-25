@@ -91,8 +91,9 @@ struct LibraryView: View {
             if !session.isDemo {
                 Section { rootLink("kept", .kept, count: KeptShelf.shared.keeper(for: session)?.store.lists.count) }
             }
+            // The Mac's own folders, under its name: "Sources" is this app's Macs, shares and folders.
             if !session.isShare, let sources = overview?.sources, !sources.isEmpty {
-                Section("Sources") {
+                Section(header: Text(verbatim: model.macInUse?.name ?? session.pairing.name)) {
                     ForEach(sources) { source in
                         NavigationLink(value: source) { SourceLabel(source: source) }
                     }

@@ -41,7 +41,7 @@ struct MacConnectionView: View {
 
     private var pairing: SavedPairing? { model.pairing(serverID: serverID) }
     private var entry: AddressEntry { AddressEntry(text) }
-    private var session: RemoteSession? { model.session?.pairing.serverID == serverID ? model.session : nil }
+    private var session: RemoteSession? { model.openMac(serverID) }
 
     var body: some View {
         NavigationStack {

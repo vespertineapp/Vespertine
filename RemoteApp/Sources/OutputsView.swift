@@ -139,9 +139,6 @@ struct OutputsView: View {
                         }
                     }
                 }
-                // Each folder and share the songs come from; with several libraries open as one, all of them.
-                ForEach(model.openFolders) { folder in folderSection(folder) }
-                ForEach(model.openShares) { share in shareSection(share) }
                 }
             .obsidianList()
             // Above the list, not a row of it: a row is cut to the list's own rounded corners, which sliced the ends off
@@ -152,17 +149,13 @@ struct OutputsView: View {
             // A small title: under a large one the pinned switch sat below a tall, empty band.
             .navigationTitle("Output").navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                // On an iPad's wide window the gear and "Libraries" are in the window's own bars.
+                // On an iPad's wide window the gear is in the window's own bar.
                 if sizeClass != .regular {
+                    // Shares, folders and Macs are in Sources, a tab of their own.
                     ToolbarItem(placement: .topBarTrailing) {
-                        Menu {
-                            Button { showingSettings = true } label: { Label("Settings", systemImage: "gearshape") }
-                            Button { model.leave() } label: { Label("Choose Another Library", systemImage: "music.note.house") }
-                        } label: {
-                            Image(systemName: "gearshape")
-                        }
-                        .accessibilityLabel(Text("Settings"))
-                        .accessibilityIdentifier("output-gear")
+                        Button { showingSettings = true } label: { Image(systemName: "gearshape") }
+                            .accessibilityLabel(Text("Settings"))
+                            .accessibilityIdentifier("output-gear")
                     }
                 }
             }
@@ -201,104 +194,6 @@ struct OutputsView: View {
     private var switchNote: String {
         if mac.isConnected, !PlayTarget.shared.canPlayHere(session) { return String(localized: "Update Vespertine on the Mac to play here.") }
         return PlayModeSwitch.explanation(PlayMode.current(playsHere: playsHere), mac: macName)
-    }
-
-    /// The share the songs come from: where it is, whether it answers, what the last scan found, and scanning again.
-    @ViewBuilder private func shareSection(_ share: SavedShare) -> some View {
-        let status = model.statuses[share.id] ?? ShareStatus()
-        Section {
-            LabeledContent("SMB Share", value: share.address.display)
-            LabeledContent("Connection") {
-                HStack(spacing: 6) {
-                    Circle().fill(status.reachable == false ? Palette.text3 : Palette.brass).frame(width: 7, height: 7)
-                    Text(status.reachable == false ? String(localized: "Not connected") : ShareWording.network(share.address))
-                }
-            }
-            LabeledContent("Songs", value: status.songs.formatted())
-            if status.needTheMac > 0 {
-                if status.needs.isEmpty {
-                    LabeledContent("Files that need the Mac", value: status.needTheMac.formatted())
-                } else {
-                    NavigationLink {
-                        MacNeededView(needs: status.needs)
-                    } label: {
-                        LabeledContent("Files that need the Mac", value: status.needTheMac.formatted())
-                    }
-                    .accessibilityIdentifier("share-mac-needed")
-                }
-            }
-            if status.unreadable > 0 {
-                LabeledContent("Files that couldn’t be read", value: status.unreadable.formatted())
-            }
-            if let scanned = status.scanned {
-                LabeledContent("Last scanned", value: scanned.formatted(date: .abbreviated, time: .shortened))
-            }
-            Button {
-                model.rescan(share.id)
-            } label: {
-                HStack {
-                    Text("Scan Again")
-                    Spacer()
-                    if status.scan.isRunning { ProgressView() }
-                }
-            }
-            .disabled(status.scan.isRunning)
-            .accessibilityIdentifier("share-rescan")
-        } footer: {
-            VStack(alignment: .leading, spacing: 6) {
-                if let trouble = status.trouble { Text(trouble) }
-                Text("A scan reads only new and changed files, and runs by itself once a day when the share is opened. This device opens FLAC, ALAC, WAV, AIFF, MP3 and AAC files itself; DTS, TrueHD and other formats need Vespertine on a Mac to convert them, so they aren’t listed here.")
-            }
-        }
-    }
-
-    /// The folder the songs come from: what the last look found, looking again, and choosing the folder again.
-    @ViewBuilder private func folderSection(_ folder: SavedFolder) -> some View {
-        let status = model.statuses[folder.id] ?? ShareStatus()
-        Section {
-            LabeledContent("Folder", value: folder.name)
-            LabeledContent("Songs", value: status.songs.formatted())
-            if status.needTheMac > 0 {
-                if status.needs.isEmpty {
-                    LabeledContent("Files that need the Mac", value: status.needTheMac.formatted())
-                } else {
-                    NavigationLink {
-                        MacNeededView(needs: status.needs)
-                    } label: {
-                        LabeledContent("Files that need the Mac", value: status.needTheMac.formatted())
-                    }
-                    .accessibilityIdentifier("folder-mac-needed")
-                }
-            }
-            if status.unreadable > 0 {
-                LabeledContent("Files that couldn’t be read", value: status.unreadable.formatted())
-            }
-            if let scanned = status.scanned {
-                LabeledContent("Last scanned", value: scanned.formatted(date: .abbreviated, time: .shortened))
-            }
-            Button {
-                model.rescan(folder.id)
-            } label: {
-                HStack {
-                    Text("Scan Again")
-                    Spacer()
-                    if status.scan.isRunning { ProgressView() }
-                }
-            }
-            .disabled(status.scan.isRunning)
-            .accessibilityIdentifier("folder-rescan")
-            if !folder.isOwn { ChooseFolderAgainButton(folder: folder) }
-        } footer: {
-            VStack(alignment: .leading, spacing: 6) {
-                if let trouble = status.trouble { Text(trouble) }
-                if folder.isOwn {
-                    Text("Music you open in Vespertine from another app is copied into Vespertine’s folder in the Files app and stays there until you delete it in Files. You can put music there yourself, too.")
-                } else {
-                    Text("Vespertine looks at the folder each time it is opened and reads only new and changed files. The music stays where it is; nothing is copied.")
-                }
-                Text("This device opens FLAC, ALAC, WAV, AIFF, MP3 and AAC files itself; DTS, TrueHD and other formats need Vespertine on a Mac to convert them, so they aren’t listed here.")
-            }
-        }
     }
 
     /// Where this device's sound goes now: the output's name as iOS gives it.

@@ -40,13 +40,15 @@ nonisolated enum FlowRows {
 
 nonisolated enum RemoteDestination: Hashable, Sendable {
     case nowPlaying, library, artists, songs, genres, recentlyAdded, favorites, playlists, queue, output
+    /// The Macs, shares and folders the library is made of.
+    case sources
     /// What is kept on this device, playable without the Mac.
     case kept
     /// One of the Mac's sources (`SourceSummary.id`), listed in the sidebar as on the Mac.
     case source(Int64)
 
     /// Every destination but the sources, which the Mac lists.
-    static let fixed: [RemoteDestination] = [.nowPlaying, .library, .artists, .songs, .genres, .recentlyAdded, .favorites, .playlists, .kept, .queue, .output]
+    static let fixed: [RemoteDestination] = [.nowPlaying, .library, .artists, .songs, .genres, .recentlyAdded, .favorites, .playlists, .kept, .queue, .output, .sources]
 
     /// A name for the destination (accessibility identifiers, launch options).
     var id: String {
@@ -61,6 +63,7 @@ nonisolated enum RemoteDestination: Hashable, Sendable {
         case .playlists: "playlists"
         case .queue: "queue"
         case .output: "output"
+        case .sources: "sources"
         case .kept: "kept"
         case .source(let id): "source-\(id)"
         }
@@ -68,7 +71,7 @@ nonisolated enum RemoteDestination: Hashable, Sendable {
 
     var isLibrary: Bool {
         switch self {
-        case .nowPlaying, .queue, .output: false
+        case .nowPlaying, .queue, .output, .sources: false
         default: true
         }
     }
@@ -86,6 +89,7 @@ nonisolated enum RemoteDestination: Hashable, Sendable {
         case .playlists: "music.note.list"
         case .queue: "list.bullet"
         case .output: "hifispeaker"
+        case .sources: "externaldrive.connected.to.line.below"
         case .kept: "arrow.down.circle"
         case .source: "folder"
         }
@@ -102,6 +106,7 @@ nonisolated enum RemoteDestination: Hashable, Sendable {
         case .playlists: String(localized: "Playlists")
         case .queue: String(localized: "Queue")
         case .output: String(localized: "Output")
+        case .sources: String(localized: "Sources")
         case .kept: String(localized: "On This Device")
         case .source: String(localized: "Source")
         }
@@ -118,6 +123,7 @@ nonisolated enum RemoteDestination: Hashable, Sendable {
         case "kept": .kept
         case "queue": .queue
         case "output": .output
+        case "sources": .sources
         default: .nowPlaying
         }
     }

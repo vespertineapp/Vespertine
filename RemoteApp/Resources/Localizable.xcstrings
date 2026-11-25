@@ -37699,544 +37699,6 @@
         }
       }
     },
-    "Libraries": {
-      "comment": "Button and title on the iPhone and iPad: the screen that lists the Macs, shares and folders this device plays music from. Each of them is a library.",
-      "localizations": {
-        "am": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ቤተ-መጻሕፍቶች"
-          }
-        },
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "المكتبات"
-          }
-        },
-        "bn": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "লাইব্রেরি"
-          }
-        },
-        "cs": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Knihovny"
-          }
-        },
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Biblioteker"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mediatheken"
-          }
-        },
-        "el": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Βιβλιοθήκες"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bibliotecas"
-          }
-        },
-        "fa": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "کتابخانه‌ها"
-          }
-        },
-        "fi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kirjastot"
-          }
-        },
-        "fil": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mga Library"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bibliothèques"
-          }
-        },
-        "gu": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "લાઇબ્રેરીઓ"
-          }
-        },
-        "ha": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Laburori"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ספריות"
-          }
-        },
-        "hi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "लाइब्रेरी"
-          }
-        },
-        "hu": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Könyvtárak"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Perpustakaan"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Librerie"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ライブラリ"
-          }
-        },
-        "kn": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ಲೈಬ್ರರಿಗಳು"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "보관함"
-          }
-        },
-        "ml": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ലൈബ്രറികൾ"
-          }
-        },
-        "mr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "लायब्ररी"
-          }
-        },
-        "ms": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pustaka"
-          }
-        },
-        "nb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Biblioteker"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bibliotheken"
-          }
-        },
-        "pa": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ਲਾਇਬ੍ਰੇਰੀਆਂ"
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Biblioteki"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bibliotecas"
-          }
-        },
-        "pt-PT": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bibliotecas"
-          }
-        },
-        "ro": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Biblioteci"
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bibliotek"
-          }
-        },
-        "sw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Maktaba"
-          }
-        },
-        "ta": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "லைப்ரரிகள்"
-          }
-        },
-        "te": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "లైబ్రరీలు"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "คลัง"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Arşivler"
-          }
-        },
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Медіатеки"
-          }
-        },
-        "ur": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "لائبریریاں"
-          }
-        },
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Thư viện"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "资料库"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "資料庫"
-          }
-        },
-        "zh-HK": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "資料庫"
-          }
-        }
-      }
-    },
-    "Choose Another Library": {
-      "comment": "Menu item on the iPhone's Output screen: goes back to the list of Macs, shares and folders.",
-      "localizations": {
-        "am": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ሌላ ቤተ-መጻሕፍት ምረጥ"
-          }
-        },
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "اختيار مكتبة أخرى"
-          }
-        },
-        "bn": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "অন্য লাইব্রেরি বেছে নিন"
-          }
-        },
-        "cs": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Vybrat jinou knihovnu"
-          }
-        },
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Vælg et andet bibliotek"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Andere Mediathek wählen"
-          }
-        },
-        "el": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Επιλογή άλλης βιβλιοθήκης"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Elegir otra biblioteca"
-          }
-        },
-        "fa": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "انتخاب کتابخانه دیگر"
-          }
-        },
-        "fi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Valitse toinen kirjasto"
-          }
-        },
-        "fil": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pumili ng Ibang Library"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Choisir une autre bibliothèque"
-          }
-        },
-        "gu": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "બીજી લાઇબ્રેરી પસંદ કરો"
-          }
-        },
-        "ha": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Zaɓi Wata Laburare"
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "בחר ספריה אחרת"
-          }
-        },
-        "hi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "कोई और लाइब्रेरी चुनें"
-          }
-        },
-        "hu": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Másik könyvtár kiválasztása"
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pilih Perpustakaan Lain"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Scegli un’altra libreria"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "別のライブラリを選択"
-          }
-        },
-        "kn": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ಬೇರೆ ಲೈಬ್ರರಿ ಆರಿಸಿ"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "다른 보관함 선택"
-          }
-        },
-        "ml": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "മറ്റൊരു ലൈബ്രറി തിരഞ്ഞെടുക്കുക"
-          }
-        },
-        "mr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "दुसरी लायब्ररी निवडा"
-          }
-        },
-        "ms": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pilih Pustaka Lain"
-          }
-        },
-        "nb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Velg et annet bibliotek"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kies een andere bibliotheek"
-          }
-        },
-        "pa": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ਕੋਈ ਹੋਰ ਲਾਇਬ੍ਰੇਰੀ ਚੁਣੋ"
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wybierz inną bibliotekę"
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Escolher Outra Biblioteca"
-          }
-        },
-        "pt-PT": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Escolher outra biblioteca"
-          }
-        },
-        "ro": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Alege altă bibliotecă"
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Välj ett annat bibliotek"
-          }
-        },
-        "sw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Chagua Maktaba Nyingine"
-          }
-        },
-        "ta": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "வேறொரு லைப்ரரியைத் தேர்வுசெய்"
-          }
-        },
-        "te": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "మరొక లైబ్రరీని ఎంచుకో"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "เลือกคลังอื่น"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Başka Bir Arşiv Seç"
-          }
-        },
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Вибрати іншу медіатеку"
-          }
-        },
-        "ur": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "کوئی اور لائبریری منتخب کریں"
-          }
-        },
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Chọn thư viện khác"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "选取其他资料库"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "選擇其他資料庫"
-          }
-        },
-        "zh-HK": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "選擇另一個資料庫"
-          }
-        }
-      }
-    },
     "Looking for Macs on this network…": {
       "localizations": {
         "am": {
@@ -116461,275 +115923,6 @@
         }
       }
     },
-    "Choose what your library is made of. Everything with a checkmark is shown together as one library.": {
-      "comment": "At the top of the iPhone's list of libraries (paired Macs, network shares, folders) while the user chooses which of them make up the library; each row has a checkmark.",
-      "localizations": {
-        "am": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ቤተ-መጻሕፍትዎ ከምን እንደሚሠራ ይምረጡ። ምልክት የተደረገበት ሁሉ እንደ አንድ ቤተ-መጻሕፍት በአንድ ላይ ይታያል።"
-          }
-        },
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "اختر ممَّ تتكوّن مكتبتك. كل ما عليه علامة اختيار يُعرض معًا كمكتبة واحدة."
-          }
-        },
-        "bn": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "আপনার লাইব্রেরি কী কী নিয়ে গঠিত তা বেছে নিন। টিকচিহ্ন দেওয়া সবকিছু একসাথে একটি লাইব্রেরি হিসেবে দেখানো হয়।"
-          }
-        },
-        "cs": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Vyberte, z čeho se skládá vaše knihovna. Vše zaškrtnuté se zobrazuje společně jako jedna knihovna."
-          }
-        },
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Vælg, hvad dit bibliotek består af. Alt med et flueben vises samlet som ét bibliotek."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wähle, woraus deine Mediathek besteht. Alles mit einem Häkchen wird zusammen als eine Mediathek angezeigt."
-          }
-        },
-        "el": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Επιλέξτε από τι αποτελείται η βιβλιοθήκη σας. Ό,τι έχει σημάδι επιλογής εμφανίζεται μαζί ως μία βιβλιοθήκη."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Elige de qué se compone tu biblioteca. Todo lo que tiene una marca de verificación se muestra junto como una sola biblioteca."
-          }
-        },
-        "fa": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "انتخاب کنید کتابخانهٔ شما از چه چیزهایی تشکیل شود. هرچه علامت تیک دارد با هم به‌صورت یک کتابخانه نشان داده می‌شود."
-          }
-        },
-        "fi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Valitse, mistä kirjastosi koostuu. Kaikki valintamerkillä merkityt näytetään yhdessä yhtenä kirjastona."
-          }
-        },
-        "fil": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Piliin kung saan binubuo ang library mo. Ang lahat ng may checkmark ay ipinapakita nang magkakasama bilang iisang library."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Choisissez de quoi se compose votre bibliothèque. Tout ce qui est coché s’affiche ensemble, comme une seule bibliothèque."
-          }
-        },
-        "gu": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "તમારી લાઇબ્રેરી શેની બનેલી છે તે પસંદ કરો. ચેકમાર્ક ધરાવતું બધું એક લાઇબ્રેરી તરીકે સાથે બતાવાય છે."
-          }
-        },
-        "ha": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Zaɓi abin da laburarenka ya ƙunsa. Duk abin da ke da alamar zaɓi ana nuna shi tare a matsayin laburare ɗaya."
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "יש לבחור ממה מורכבת הספריה שלך. כל מה שמסומן בסימן וי מוצג יחד כספריה אחת."
-          }
-        },
-        "hi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "चुनें कि आपकी लाइब्रेरी किन चीज़ों से बनी है। चेकमार्क वाली हर चीज़ एक लाइब्रेरी के रूप में एक साथ दिखाई जाती है।"
-          }
-        },
-        "hu": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Válaszd ki, miből álljon a könyvtárad. Minden, ami mellett pipa van, együtt, egyetlen könyvtárként jelenik meg."
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pilih isi perpustakaan Anda. Semua yang bertanda centang ditampilkan bersama sebagai satu perpustakaan."
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Scegli da cosa è composta la tua libreria. Tutto ciò che ha un segno di spunta viene mostrato insieme, come un’unica libreria."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ライブラリを構成するものを選択してください。チェックマークの付いたものすべてが、1つのライブラリとしてまとめて表示されます。"
-          }
-        },
-        "kn": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ನಿಮ್ಮ ಲೈಬ್ರರಿ ಯಾವುದರಿಂದ ಕೂಡಿದೆ ಎಂಬುದನ್ನು ಆರಿಸಿ. ಚೆಕ್‌ಮಾರ್ಕ್ ಇರುವ ಎಲ್ಲವನ್ನೂ ಒಂದೇ ಲೈಬ್ರರಿಯಾಗಿ ಒಟ್ಟಿಗೆ ತೋರಿಸಲಾಗುತ್ತದೆ."
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "보관함을 구성할 항목을 선택하십시오. 체크 표시가 있는 모든 항목이 하나의 보관함으로 함께 표시됩니다."
-          }
-        },
-        "ml": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "നിങ്ങളുടെ ലൈബ്രറിയിൽ എന്തെല്ലാം ഉൾപ്പെടണമെന്ന് തിരഞ്ഞെടുക്കുക. ചെക്ക്മാർക്കുള്ളതെല്ലാം ഒറ്റ ലൈബ്രറിയായി ഒരുമിച്ച് കാണിക്കും."
-          }
-        },
-        "mr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "तुमची लायब्ररी कशापासून बनलेली आहे ते निवडा. चेकमार्क असलेले सर्व काही एक लायब्ररी म्हणून एकत्र दाखवले जाते."
-          }
-        },
-        "ms": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pilih kandungan pustaka anda. Semua yang bertanda semak ditunjukkan bersama-sama sebagai satu pustaka."
-          }
-        },
-        "nb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Velg hva biblioteket ditt består av. Alt med en hake vises samlet som ett bibliotek."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kies waaruit je bibliotheek bestaat. Alles met een vinkje wordt samen als één bibliotheek getoond."
-          }
-        },
-        "pa": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ਚੁਣੋ ਕਿ ਤੁਹਾਡੀ ਲਾਇਬ੍ਰੇਰੀ ਕਿਸ ਚੀਜ਼ ਤੋਂ ਬਣੀ ਹੈ। ਚੈੱਕਮਾਰਕ ਵਾਲੀ ਹਰ ਚੀਜ਼ ਇੱਕ ਲਾਇਬ੍ਰੇਰੀ ਵਜੋਂ ਇਕੱਠੀ ਦਿਖਾਈ ਜਾਂਦੀ ਹੈ।"
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wybierz, z czego składa się Twoja biblioteka. Wszystko, co jest zaznaczone, jest pokazywane razem jako jedna biblioteka."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Escolha do que sua biblioteca é composta. Tudo o que tem uma marca de seleção é mostrado junto, como uma só biblioteca."
-          }
-        },
-        "pt-PT": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Escolha de que é composta a sua biblioteca. Tudo o que tem um visto é mostrado em conjunto, como uma só biblioteca."
-          }
-        },
-        "ro": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Alegeți din ce este alcătuită biblioteca. Tot ce este bifat se afișează împreună, ca o singură bibliotecă."
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Välj vad ditt bibliotek består av. Allt med en bock visas tillsammans som ett bibliotek."
-          }
-        },
-        "sw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Chagua maktaba yako inaundwa na nini. Kila kitu chenye alama ya tiki huonyeshwa pamoja kama maktaba moja."
-          }
-        },
-        "ta": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "உங்கள் நூலகம் எவற்றால் ஆனது என்பதைத் தேர்வுசெய்யவும். சரிக்குறி உள்ள அனைத்தும் ஒரே நூலகமாக ஒன்றாகக் காட்டப்படும்."
-          }
-        },
-        "te": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "మీ లైబ్రరీ వేటితో రూపొందిందో ఎంచుకోండి. చెక్‌మార్క్ ఉన్నవన్నీ ఒకే లైబ్రరీగా కలిపి చూపబడతాయి."
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "เลือกว่าคลังของคุณประกอบด้วยอะไรบ้าง ทุกรายการที่มีเครื่องหมายถูกจะแสดงรวมกันเป็นคลังเดียว"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Arşivinizin nelerden oluşacağını seçin. Onay işareti olan her şey tek bir arşiv olarak birlikte gösterilir."
-          }
-        },
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Виберіть, із чого складається ваша медіатека. Усе, що позначено галочкою, показується разом як одна медіатека."
-          }
-        },
-        "ur": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "منتخب کریں کہ آپ کی لائبریری کن چیزوں سے بنی ہے۔ چیک مارک والی ہر چیز ایک لائبریری کے طور پر ایک ساتھ دکھائی جاتی ہے۔"
-          }
-        },
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Chọn những gì tạo nên thư viện của bạn. Mọi mục có dấu kiểm được hiển thị cùng nhau như một thư viện."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "选择资料库的组成部分。所有带勾号的项目会合并显示为一个资料库。"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "選擇資料庫的組成部分。所有帶有勾號的項目會合併顯示為一個資料庫。"
-          }
-        },
-        "zh-HK": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "選擇資料庫的組成部分。所有帶有剔號的項目會合併顯示為一個資料庫。"
-          }
-        }
-      }
-    },
     "That isn’t in your library any more.": {
       "comment": "Shown on the iPhone when a song is asked for whose Mac, network share or folder has been taken out of the library since.",
       "localizations": {
@@ -123983,6 +123176,1450 @@
           "stringUnit": {
             "state": "translated",
             "value": "此播放列表沒有歌曲。"
+          }
+        }
+      }
+    },
+    "Connected": {
+      "localizations": {
+        "am": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ተገናኝቷል"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "متصل"
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "সংযুক্ত"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Připojeno"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forbundet"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verbunden"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Συνδεδεμένο"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conectado"
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "وصل"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yhdistetty"
+          }
+        },
+        "fil": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nakakonekta"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connecté"
+          }
+        },
+        "gu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "કનેક્ટ થયેલ"
+          }
+        },
+        "ha": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "An haɗa"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "מחובר"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "कनेक्ट है"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Csatlakoztatva"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terhubung"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connessa"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "接続済み"
+          }
+        },
+        "kn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ಸಂಪರ್ಕಗೊಂಡಿದೆ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "연결됨"
+          }
+        },
+        "ml": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "കണക്റ്റ് ചെയ്തു"
+          }
+        },
+        "mr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "कनेक्ट केलेले"
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bersambung"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tilkoblet"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verbonden"
+          }
+        },
+        "pa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ਕਨੈਕਟ ਹੈ"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Połączono"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conectado"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ligado"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conectat"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ansluten"
+          }
+        },
+        "sw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Imeunganishwa"
+          }
+        },
+        "ta": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "இணைக்கப்பட்டது"
+          }
+        },
+        "te": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "కనెక్ట్ అయింది"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "เชื่อมต่อแล้ว"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bağlı"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Під’єднано"
+          }
+        },
+        "ur": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "منسلک"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã kết nối"
+          }
+        },
+        "zh-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已連接"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已连接"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已連線"
+          }
+        }
+      }
+    },
+    "Connecting…": {
+      "localizations": {
+        "am": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "በመገናኘት ላይ…"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "جارٍ الاتصال…"
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "সংযোগ করা হচ্ছে…"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Připojování…"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opretter forbindelse…"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verbinden …"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Σύνδεση…"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conectando…"
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "در حال اتصال…"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yhdistetään…"
+          }
+        },
+        "fil": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kumokonekta…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connexion…"
+          }
+        },
+        "gu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "કનેક્ટ કરી રહ્યાં છીએ…"
+          }
+        },
+        "ha": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ana haɗawa…"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "מתחבר…"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "कनेक्ट हो रहा है…"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kapcsolódás…"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Menghubungkan…"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connessione…"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "接続中…"
+          }
+        },
+        "kn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ಸಂಪರ್ಕಿಸಲಾಗುತ್ತಿದೆ…"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "연결하는 중…"
+          }
+        },
+        "ml": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "കണക്റ്റ് ചെയ്യുന്നു…"
+          }
+        },
+        "mr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "कनेक्ट करत आहे…"
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Menyambung…"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kobler til …"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verbinden…"
+          }
+        },
+        "pa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ਕਨੈਕਟ ਹੋ ਰਿਹਾ ਹੈ…"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Łączenie…"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conectando…"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A ligar…"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se conectează…"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ansluter …"
+          }
+        },
+        "sw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inaunganisha…"
+          }
+        },
+        "ta": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "இணைக்கிறது…"
+          }
+        },
+        "te": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "కనెక్ట్ చేస్తోంది…"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "กำลังเชื่อมต่อ…"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bağlanılıyor…"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Під’єднання…"
+          }
+        },
+        "ur": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "منسلک ہو رہا ہے…"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đang kết nối…"
+          }
+        },
+        "zh-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在連接…"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在连接…"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在連線…"
+          }
+        }
+      }
+    },
+    "Reading tags": {
+      "localizations": {
+        "am": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "መለያዎችን በማንበብ ላይ"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "جارٍ قراءة العلامات"
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ট্যাগ পড়া হচ্ছে"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Čtení tagů"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Læser mærker"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tags werden gelesen"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ανάγνωση ετικετών"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leyendo etiquetas"
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "در حال خواندن برچسب‌ها"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luetaan tageja"
+          }
+        },
+        "fil": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Binabasa ang mga tag"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lecture des tags"
+          }
+        },
+        "gu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ટૅગ વાંચી રહ્યાં છીએ"
+          }
+        },
+        "ha": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ana karanta alamomi"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "קורא תגיות"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "टैग पढ़े जा रहे हैं"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Címkék olvasása"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Membaca tag"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lettura dei tag"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "タグを読み込み中"
+          }
+        },
+        "kn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ಟ್ಯಾಗ್‌ಗಳನ್ನು ಓದಲಾಗುತ್ತಿದೆ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "태그 읽는 중"
+          }
+        },
+        "ml": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ടാഗുകൾ വായിക്കുന്നു"
+          }
+        },
+        "mr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "टॅग वाचत आहे"
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Membaca tag"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leser tagger"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tags lezen"
+          }
+        },
+        "pa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ਟੈਗ ਪੜ੍ਹੇ ਜਾ ਰਹੇ ਹਨ"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Odczytywanie tagów"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lendo etiquetas"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A ler etiquetas"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se citesc etichetele"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Läser taggar"
+          }
+        },
+        "sw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inasoma tagi"
+          }
+        },
+        "ta": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "டேக்குகளைப் படிக்கிறது"
+          }
+        },
+        "te": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ట్యాగ్‌లను చదువుతోంది"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "กำลังอ่านแท็ก"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Etiketler okunuyor"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Читання тегів"
+          }
+        },
+        "ur": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ٹیگز پڑھے جا رہے ہیں"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đang đọc thẻ"
+          }
+        },
+        "zh-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在讀取標籤"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在读取标签"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在讀取標籤"
+          }
+        }
+      }
+    },
+    "%lld found": {
+      "comment": "Files found so far while scanning",
+      "localizations": {
+        "am": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld ተገኝተዋል"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تم العثور على %lld"
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld-টি পাওয়া গেছে"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nalezeno: %lld"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld fundet"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld gefunden"
+          }
+        },
+        "el": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Βρέθηκε %lld"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "Βρέθηκαν %lld"
+                }
+              }
+            }
+          }
+        },
+        "es": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld encontrado"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld encontrados"
+                }
+              }
+            }
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld مورد پیدا شد"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld löydetty"
+          }
+        },
+        "fil": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld ang nahanap"
+          }
+        },
+        "fr": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld trouvé"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld trouvés"
+                }
+              }
+            }
+          }
+        },
+        "gu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld મળ્યાં"
+          }
+        },
+        "ha": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "An samu %lld"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "נמצאו %lld"
+          }
+        },
+        "hi": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld मिली"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld मिलीं"
+                }
+              }
+            }
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld találat"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld ditemukan"
+          }
+        },
+        "it": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld trovato"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld trovati"
+                }
+              }
+            }
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld個見つかりました"
+          }
+        },
+        "kn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld ಕಂಡುಬಂದಿವೆ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld개 찾음"
+          }
+        },
+        "ml": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld എണ്ണം കണ്ടെത്തി"
+          }
+        },
+        "mr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld सापडले"
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld ditemui"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld funnet"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld gevonden"
+          }
+        },
+        "pa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld ਮਿਲੇ"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Znaleziono: %lld"
+          }
+        },
+        "pt-BR": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld encontrado"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld encontrados"
+                }
+              }
+            }
+          }
+        },
+        "pt-PT": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld encontrado"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld encontrados"
+                }
+              }
+            }
+          }
+        },
+        "ro": {
+          "variations": {
+            "plural": {
+              "one": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld găsit"
+                }
+              },
+              "few": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld găsite"
+                }
+              },
+              "other": {
+                "stringUnit": {
+                  "state": "translated",
+                  "value": "%lld găsite"
+                }
+              }
+            }
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld hittade"
+          }
+        },
+        "sw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld zimepatikana"
+          }
+        },
+        "ta": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld கண்டறியப்பட்டன"
+          }
+        },
+        "te": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld కనుగొనబడ్డాయి"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "พบ %lld รายการ"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld bulundu"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Знайдено: %lld"
+          }
+        },
+        "ur": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld ملے"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Đã tìm thấy %lld"
+          }
+        },
+        "zh-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已找到 %lld 個"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已找到 %lld 个"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已找到 %lld 個"
+          }
+        }
+      }
+    },
+    "Everything turned on here is in your Library. Turn one off to take its music out of the Library without forgetting it.": {
+      "comment": "Footer under the list of Macs, SMB shares and folders on the iPhone's Sources screen; each has an on/off switch.",
+      "localizations": {
+        "am": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "እዚህ የበሩት ሁሉ በቤተ-መጻሕፍትዎ ውስጥ ናቸው። ሳይረሱት ሙዚቃውን ከቤተ-መጻሕፍቱ ለማውጣት አንዱን ያጥፉት።"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "كل ما هو مُفعّل هنا موجود في المكتبة. أوقف أحدها لإخراج موسيقاه من المكتبة دون نسيانه."
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "এখানে যা চালু আছে তার সবই আপনার লাইব্রেরিতে আছে। কোনোটিকে না ভুলে তার মিউজিক লাইব্রেরি থেকে সরাতে সেটি বন্ধ করুন।"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vše, co je zde zapnuté, je ve vaší knihovně. Vypnutím zdroje odeberete jeho hudbu z knihovny, aniž by byl zapomenut."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alt, der er slået til her, er i dit bibliotek. Slå en fra for at fjerne dens musik fra biblioteket uden at glemme den."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alles, was hier eingeschaltet ist, ist in deiner Mediathek. Schalte eine Quelle aus, um ihre Musik aus der Mediathek zu nehmen, ohne sie zu entfernen."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ό,τι είναι ενεργό εδώ βρίσκεται στη βιβλιοθήκη σας. Απενεργοποιήστε μια πηγή για να βγάλετε τη μουσική της από τη βιβλιοθήκη χωρίς να την ξεχάσετε."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Todo lo que está activado aquí está en tu biblioteca. Desactiva una fuente para quitar su música de la biblioteca sin olvidarla."
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "هر چه اینجا روشن است در کتابخانهٔ شماست. یکی را خاموش کنید تا موسیقی‌اش بدون فراموش شدن از کتابخانه بیرون برود."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kaikki tässä päälle kytketty on kirjastossasi. Kytke lähde pois, niin sen musiikki poistuu kirjastosta unohtamatta lähdettä."
+          }
+        },
+        "fil": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ang lahat ng naka-on dito ay nasa iyong Library. I-off ang isa para alisin ang musika nito sa Library nang hindi ito kinakalimutan."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tout ce qui est activé ici est dans votre bibliothèque. Désactivez une source pour retirer sa musique de la bibliothèque sans l’oublier."
+          }
+        },
+        "gu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "અહીં જે ચાલુ છે તે બધું તમારી લાઇબ્રેરીમાં છે. કોઈને ભૂલ્યા વિના તેનું સંગીત લાઇબ્રેરીમાંથી કાઢવા તેને બંધ કરો."
+          }
+        },
+        "ha": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Duk abin da aka kunna a nan yana cikin Laburarenka. Kashe ɗaya don cire waƙoƙinsa daga Laburare ba tare da mantawa da shi ba."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "כל מה שמופעל כאן נמצא בספריה שלך. כבה מקור כדי להוציא את המוזיקה שלו מהספריה בלי לשכוח אותו."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "यहाँ जो कुछ चालू है, वह सब आपकी लाइब्रेरी में है। किसी को भूले बिना उसका संगीत लाइब्रेरी से हटाने के लिए उसे बंद करें।"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Minden, ami itt be van kapcsolva, a könyvtáradban van. Kapcsolj ki egyet, hogy a zenéje kikerüljön a könyvtárból, de ne felejtődjön el."
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Semua yang dinyalakan di sini ada di Perpustakaan Anda. Matikan salah satunya untuk mengeluarkan musiknya dari Perpustakaan tanpa melupakannya."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tutto ciò che è attivo qui è nella tua libreria. Disattiva una sorgente per togliere la sua musica dalla libreria senza dimenticarla."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ここでオンになっているものはすべてライブラリに入っています。オフにすると、登録を解除せずにその音楽をライブラリから外せます。"
+          }
+        },
+        "kn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ಇಲ್ಲಿ ಆನ್ ಆಗಿರುವುದೆಲ್ಲವೂ ನಿಮ್ಮ ಲೈಬ್ರರಿಯಲ್ಲಿದೆ. ಅದನ್ನು ಮರೆಯದೆ ಅದರ ಸಂಗೀತವನ್ನು ಲೈಬ್ರರಿಯಿಂದ ತೆಗೆಯಲು ಒಂದನ್ನು ಆಫ್ ಮಾಡಿ."
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "여기에서 켜져 있는 모든 항목이 보관함에 있습니다. 항목을 끄면 지우지 않고 해당 음악을 보관함에서 뺍니다."
+          }
+        },
+        "ml": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ഇവിടെ ഓണായ എല്ലാം നിങ്ങളുടെ ലൈബ്രറിയിലുണ്ട്. ഒന്നിനെ മറക്കാതെ അതിന്റെ സംഗീതം ലൈബ്രറിയിൽ നിന്ന് മാറ്റാൻ അത് ഓഫ് ചെയ്യുക."
+          }
+        },
+        "mr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "येथे चालू असलेले सर्व तुमच्या लायब्ररीत आहे. एखादे न विसरता त्याचे संगीत लायब्ररीतून काढण्यासाठी ते बंद करा."
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Semua yang dihidupkan di sini ada dalam Pustaka anda. Matikan satu untuk mengeluarkan muziknya daripada Pustaka tanpa melupakannya."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alt som er slått på her, er i biblioteket ditt. Slå av en kilde for å ta musikken ut av biblioteket uten å glemme den."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alles wat hier aan staat, staat in je bibliotheek. Zet er een uit om de muziek ervan uit de bibliotheek te halen zonder hem te vergeten."
+          }
+        },
+        "pa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ਇੱਥੇ ਜੋ ਵੀ ਚਾਲੂ ਹੈ, ਉਹ ਸਭ ਤੁਹਾਡੀ ਲਾਇਬ੍ਰੇਰੀ ਵਿੱਚ ਹੈ। ਕਿਸੇ ਨੂੰ ਭੁੱਲੇ ਬਿਨਾਂ ਉਸਦਾ ਸੰਗੀਤ ਲਾਇਬ੍ਰੇਰੀ ਵਿੱਚੋਂ ਕੱਢਣ ਲਈ ਉਸਨੂੰ ਬੰਦ ਕਰੋ।"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wszystko, co jest tu włączone, jest w Twojej bibliotece. Wyłącz źródło, aby usunąć jego muzykę z biblioteki bez zapominania go."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tudo o que está ativado aqui está na sua biblioteca. Desative uma fonte para tirar a música dela da biblioteca sem esquecê-la."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tudo o que está ativado aqui está na sua biblioteca. Desative uma fonte para retirar a música dela da biblioteca sem a esquecer."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tot ce este activat aici se află în biblioteca ta. Dezactivează o sursă pentru a-i scoate muzica din bibliotecă fără a o uita."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allt som är påslaget här finns i ditt bibliotek. Slå av en källa för att ta bort dess musik från biblioteket utan att glömma den."
+          }
+        },
+        "sw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kila kilichowashwa hapa kiko kwenye Maktaba yako. Zima kimoja ili kuondoa muziki wake kwenye Maktaba bila kukisahau."
+          }
+        },
+        "ta": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "இங்கே இயக்கப்பட்டவை அனைத்தும் உங்கள் லைப்ரரியில் உள்ளன. ஒன்றை மறக்காமல் அதன் இசையை லைப்ரரியிலிருந்து நீக்க அதை முடக்கவும்."
+          }
+        },
+        "te": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ఇక్కడ ఆన్‌లో ఉన్నవన్నీ మీ లైబ్రరీలో ఉన్నాయి. ఒకదాన్ని మరచిపోకుండా దాని సంగీతాన్ని లైబ్రరీ నుండి తీసివేయడానికి దాన్ని ఆఫ్ చేయండి."
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ทุกอย่างที่เปิดอยู่ที่นี่อยู่ในคลังของคุณ ปิดแหล่งใดแหล่งหนึ่งเพื่อนำเพลงของแหล่งนั้นออกจากคลังโดยไม่เลิกจำ"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Burada açık olan her şey Arşivinizde. Birini unutmadan müziğini Arşivden çıkarmak için kapatın."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Усе, що тут увімкнено, є у вашій медіатеці. Вимкніть джерело, щоб прибрати його музику з медіатеки, не забуваючи його."
+          }
+        },
+        "ur": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "یہاں جو کچھ آن ہے وہ سب آپ کی لائبریری میں ہے۔ کسی کو بھولے بغیر اس کی موسیقی لائبریری سے نکالنے کے لیے اسے آف کریں۔"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mọi thứ được bật ở đây đều có trong Thư viện của bạn. Tắt một nguồn để đưa nhạc của nó ra khỏi Thư viện mà không quên nguồn đó."
+          }
+        },
+        "zh-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這裡開啟的所有項目都在你的資料庫中。關閉其中一個即可將其音樂移出資料庫，而不會忘記它。"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此处开启的所有项目都在你的资料库中。关闭其中一个即可将其音乐移出资料库，而不会忽略它。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "這裡開啟的所有項目都在你的資料庫中。關閉其中一個即可將其音樂移出資料庫，而不會忘記它。"
           }
         }
       }
