@@ -114,8 +114,11 @@ struct NetworkTests {
             try? await Task.sleep(for: .seconds(3600))
             return 1
         }
+        // The work sleeps an hour, so -1 can only have come from the deadline. The clock is a hang detector only: on a
+        // 3-core CI Mac the rest of the package's tests can hold Swift's shared threads for over a minute before this
+        // test gets a turn back after the deadline has fired (68 s was seen), so the bound sits far below the work's hour.
         #expect(value == -1)
-        #expect(Date().timeIntervalSince(started) < 60, "a hang detector, not a latency bound")
+        #expect(Date().timeIntervalSince(started) < 900, "a hang detector, not a latency bound")
         // Work that finishes gives its own answer. What ends this wait is the work, not the clock: the work needs a turn
         // on Swift's shared threads, which the rest of the package's tests can hold for minutes on a loaded CI machine
         // (30 s ran out there), so the deadline is one only work that never ran at all could reach.
