@@ -93,14 +93,17 @@ func recordedConversation(_ connection: SMBConnection, credentials: SMBCredentia
         var dialect: UInt16
         var encrypted = false
         var guest = false
+        /// The cipher the server chose, when the session is encrypted.
+        var cipher: ShareCiphers.Kind?
         var testDescription: String { name }
     }
 
     static let cases = [
         Case(name: "smb202", dialect: 0x0202), Case(name: "smb210", dialect: 0x0210), Case(name: "smb302", dialect: 0x0302),
         Case(name: "smb311", dialect: 0x0311),
-        Case(name: "smb311gcm", dialect: 0x0311, encrypted: true), Case(name: "smb311ccm", dialect: 0x0311, encrypted: true),
-        Case(name: "smb302ccm", dialect: 0x0302, encrypted: true),
+        Case(name: "smb311gcm", dialect: 0x0311, encrypted: true, cipher: .gcm), Case(name: "smb311ccm", dialect: 0x0311, encrypted: true, cipher: .ccm),
+        Case(name: "smb302ccm", dialect: 0x0302, encrypted: true, cipher: .ccm),
+        Case(name: "smb311gcm256", dialect: 0x0311, encrypted: true, cipher: .gcm256), Case(name: "smb311ccm256", dialect: 0x0311, encrypted: true, cipher: .ccm256),
         Case(name: "smb311guest", dialect: 0x0311, guest: true), Case(name: "smb311nobody", dialect: 0x0311, guest: true),
     ]
 
@@ -117,12 +120,20 @@ func recordedConversation(_ connection: SMBConnection, credentials: SMBCredentia
         #expect(connection.dialect == recorded.dialect)
         #expect(connection.encrypted == recorded.encrypted)
         #expect(connection.guest == recorded.guest)
+        if recorded.encrypted { #expect(connection.cipher == recorded.cipher) }
         #expect(transport.mismatch == nil)
         #expect(transport.finished)
     }
 
     @Test func everyRecordingIsPlayed() {
-        #expect(Set(Self.cases.map(\.name)) == Set(SMBRecordings.all.keys))
+        #expect(Set(Self.cases.map(\.name)) == Set(SMBRecordings.all.keys.filter { !$0.hasSuffix("shares") }))
+    }
+
+    @Test func theClientOffersEveryCipherWithAES128First() throws {
+        // SMB 3.1.1's cipher list in the first request: AES-128-GCM, AES-128-CCM, AES-256-GCM, AES-256-CCM (Windows' own
+        // order). A server that takes only AES-256 gets it; any other keeps choosing as it did.
+        let first = try #require(SMBRecordings.all["smb311"]?.sent.first)
+        #expect(first.contains("02000a00000000000400" + "0200" + "0100" + "0400" + "0300"))
     }
 
     @Test func encryptedConversationsShowNothingOfTheShare() throws {
@@ -132,7 +143,7 @@ func recordedConversation(_ connection: SMBConnection, credentials: SMBCredentia
         let open = try #require(SMBRecordings.all["smb311"])
         let openText = (open.sent + open.received).joined()
         #expect(openText.contains(share) && openText.contains(folder) && openText.contains(contents))
-        for name in ["smb311gcm", "smb302ccm"] {
+        for name in ["smb311gcm", "smb302ccm", "smb311gcm256", "smb311ccm256"] {
             let recording = try #require(SMBRecordings.all[name])
             let text = (recording.sent + recording.received).joined()
             #expect(!text.contains(share) && !text.contains(folder) && !text.contains(contents))
@@ -152,7 +163,7 @@ func recordedConversation(_ connection: SMBConnection, credentials: SMBCredentia
         #expect(throws: SMBError.badSignature) { try recordedConversation(connection) }
     }
 
-    @Test(arguments: ["smb311gcm", "smb311ccm", "smb302ccm"]) func anEncryptedAnswerChangedOnTheWayIsRefused(name: String) throws {
+    @Test(arguments: ["smb311gcm", "smb311ccm", "smb302ccm", "smb311gcm256", "smb311ccm256"]) func anEncryptedAnswerChangedOnTheWayIsRefused(name: String) throws {
         let recording = try #require(SMBRecordings.all[name])
         let sealed = recording.received.indices.filter { recording.received[$0].hasPrefix("fd534d42") }
         #expect(sealed.count >= 8)

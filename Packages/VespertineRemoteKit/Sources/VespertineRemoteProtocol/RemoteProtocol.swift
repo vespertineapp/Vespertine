@@ -208,7 +208,10 @@ public enum RemoteCommand: Codable, Sendable, Equatable {
     /// frames at (176400 carries DSD64). A two-channel DSD song whose carrier rate is within it then arrives as its own
     /// DSD bits in DoP frames (`StreamDescriptor.dsdRate` says so); anything else arrives as it would without `dop`. A Mac
     /// that doesn't know `dop` ignores it and converts DSD to PCM.
-    case streamOpen(id: Int64, maxSampleRate: Double?, smaller: Bool? = nil, dop: Double? = nil)
+    /// `original`: to keep on the phone as the file is. A DSD song then arrives as its own DSF or DSDIFF file (the phone
+    /// makes PCM or DoP of it each time it plays); other songs arrive as they would anyway. A Mac or share that doesn't
+    /// know `original` ignores it.
+    case streamOpen(id: Int64, maxSampleRate: Double?, smaller: Bool? = nil, dop: Double? = nil, original: Bool? = nil)
     /// Reads up to `length` bytes (at most `RemoteProtocol.maximumChunk`) from `offset` of an open stream. Answered with a
     /// `StreamFrame` (binary) carrying this command's `id`, or `.failed`.
     case streamRead(stream: Int, offset: Int64, length: Int)

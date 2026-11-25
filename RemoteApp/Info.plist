@@ -5,6 +5,8 @@
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
 		<string>org.szeremeta.VespertineRemote.share-scan</string>
+		<string>org.szeremeta.VespertineRemote.keep.overnight</string>
+		<string>org.szeremeta.VespertineRemote.keep.continued.*</string>
 	</array>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>

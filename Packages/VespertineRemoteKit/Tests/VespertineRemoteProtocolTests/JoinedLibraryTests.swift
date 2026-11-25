@@ -89,7 +89,7 @@ private final class FakeLibrary: LibraryMember {
             return .tracks(items: Array(all.filter { $0.title.contains(text) }.prefix(limit)))
         case .artwork(let key, let size):
             return .artwork(key: key, size: size, mimeType: "image/png", data: Data(key.utf8))
-        case .streamOpen(let id, _, _, _):
+        case .streamOpen(let id, _, _, _, _):
             nextStream += 1
             return .streamOpened(StreamDescriptor(stream: nextStream, kind: .original, byteSize: 10, format: StreamFormat(codec: "FLAC", container: "flac", sampleRate: 44_100, bitDepth: 16, channels: 2, channelLabels: nil, lossless: true),
                                                   frames: nil, tag: "tag-\(id)", chunkSize: 4))

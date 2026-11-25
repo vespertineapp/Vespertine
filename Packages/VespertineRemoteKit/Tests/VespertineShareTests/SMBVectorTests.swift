@@ -29,6 +29,15 @@ import Testing
         }
     }
 
+    @Test func aes256KeysAreTwiceAsLong() {
+        // MS-SMB2 3.1.4.2: with AES-256 the cipher keys come out of the same derivation with L = 256, all 32 bytes of
+        // HMAC-SHA-256 kept. The numbers were worked out apart from this code, with Python's hmac module.
+        let key = [UInt8](0..<16), digest = [UInt8](0..<64)
+        #expect(hex(SMBConnection.derive(key, label: "SMBC2SCipherKey", context: digest, bits: 256)) == "d09c44a545f554240ddf8ac2777570de0f590e402196d1006261f7448076384d")
+        #expect(hex(SMBConnection.derive(key, label: "SMBS2CCipherKey", context: digest, bits: 256)) == "7a55e2deed408102591fdea4192f54895bd7e4c879d11927493898b42c8a9ccd")
+        #expect(hex(SMBConnection.derive(key, label: "SMBC2SCipherKey", context: digest)) == "f1b6250ca4d9f8877e41071f59228ce4")
+    }
+
     @Test func smb30KeysComeFromTheSessionKeyAlone() {
         let session = SMBVectors.ccm300, key = unhex(session.sessionKey)
         #expect(hex(SMBConnection.derive(key, label: "SMB2AESCMAC", context: "SmbSign")) == session.signingKey)

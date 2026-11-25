@@ -231,7 +231,7 @@ enum ShareDigests {
         return hmac(sha256, key: key, message)
     }
 
-    // MARK: AES-128 and CMAC (FIPS 197, RFC 4493)
+    // MARK: AES-128 and AES-256, and CMAC (FIPS 197, RFC 4493)
 
     private static let sbox: [UInt8] = {
         // Built from its definition (the inverse in GF(2^8), then the affine map) rather than typed out.
@@ -248,40 +248,45 @@ enum ShareDigests {
         return box
     }()
 
-    /// The key schedule for a 16-byte key: 11 round keys of 16 bytes.
+    /// The key schedule for a 16-byte key (11 round keys of 16 bytes) or a 32-byte one (15 round keys).
     struct AESKey {
         fileprivate var rounds: [UInt8]
+        /// How many rounds the cipher runs: 10 for AES-128, 14 for AES-256.
+        fileprivate var count: Int { rounds.count / 16 - 1 }
 
         init(_ key: [UInt8]) {
-            precondition(key.count == 16)
+            precondition(key.count == 16 || key.count == 32)
+            let words = key.count / 4
             var w = key
             var rcon: UInt8 = 1
-            for i in stride(from: 16, to: 176, by: 4) {
+            for i in stride(from: key.count, to: (words + 7) * 16, by: 4) {
                 var t = Array(w[(i - 4)..<i])
-                if i % 16 == 0 {
+                if (i / 4) % words == 0 {
                     t = [sbox[Int(t[1])] ^ rcon, sbox[Int(t[2])], sbox[Int(t[3])], sbox[Int(t[0])]]
                     rcon = rcon << 1 ^ (rcon & 0x80 != 0 ? 0x1b : 0)
+                } else if words == 8, (i / 4) % words == 4 {
+                    t = t.map { sbox[Int($0)] }
                 }
-                for j in 0..<4 { w.append(w[i - 16 + j] ^ t[j]) }
+                for j in 0..<4 { w.append(w[i - key.count + j] ^ t[j]) }
             }
             rounds = w
         }
     }
 
     /// Encrypts the 16 bytes at `state` in place.
-    private static func encrypt(_ state: UnsafeMutablePointer<UInt8>, _ key: UnsafePointer<UInt8>, _ box: UnsafePointer<UInt8>) {
+    private static func encrypt(_ state: UnsafeMutablePointer<UInt8>, _ key: UnsafePointer<UInt8>, _ box: UnsafePointer<UInt8>, rounds last: Int) {
         for i in 0..<16 { state[i] ^= key[i] }
         var t = (UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0),
                  UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0), UInt8(0))
         withUnsafeMutableBytes(of: &t) { raw in
             let s = raw.bindMemory(to: UInt8.self).baseAddress!
-            for round in 1...10 {
+            for round in 1...last {
                 // SubBytes and ShiftRows together: column c, row r comes from column (c + r) mod 4.
                 for c in 0..<4 {
                     for r in 0..<4 { s[c * 4 + r] = box[Int(state[((c + r) & 3) * 4 + r])] }
                 }
                 let k = key + round * 16
-                if round < 10 {
+                if round < last {
                     for c in 0..<4 {
                         let a0 = s[c * 4], a1 = s[c * 4 + 1], a2 = s[c * 4 + 2], a3 = s[c * 4 + 3]
                         let all = a0 ^ a1 ^ a2 ^ a3
@@ -304,7 +309,7 @@ enum ShareDigests {
     static func withAES<T>(_ key: AESKey, _ body: ((UnsafeMutablePointer<UInt8>) -> Void) throws -> T) rethrows -> T {
         try key.rounds.withUnsafeBufferPointer { k in
             try sbox.withUnsafeBufferPointer { box in
-                try body { state in encrypt(state, k.baseAddress!, box.baseAddress!) }
+                try body { state in encrypt(state, k.baseAddress!, box.baseAddress!, rounds: key.count) }
             }
         }
     }
@@ -314,7 +319,7 @@ enum ShareDigests {
         var out = block
         out.withUnsafeMutableBufferPointer { state in
             key.rounds.withUnsafeBufferPointer { k in
-                sbox.withUnsafeBufferPointer { box in encrypt(state.baseAddress!, k.baseAddress!, box.baseAddress!) }
+                sbox.withUnsafeBufferPointer { box in encrypt(state.baseAddress!, k.baseAddress!, box.baseAddress!, rounds: key.count) }
             }
         }
         return out
@@ -358,10 +363,10 @@ enum ShareDigests {
                     sbox.withUnsafeBufferPointer { box in
                         for block in 0..<(blocks - 1) {
                             for i in 0..<16 { state[i] ^= m[block * 16 + i] }
-                            encrypt(state.baseAddress!, k.baseAddress!, box.baseAddress!)
+                            encrypt(state.baseAddress!, k.baseAddress!, box.baseAddress!, rounds: schedule.count)
                         }
                         for i in 0..<16 { state[i] ^= last[i] }
-                        encrypt(state.baseAddress!, k.baseAddress!, box.baseAddress!)
+                        encrypt(state.baseAddress!, k.baseAddress!, box.baseAddress!, rounds: schedule.count)
                     }
                 }
             }

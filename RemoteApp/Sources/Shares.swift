@@ -163,3 +163,21 @@ enum LibraryWording {
                       noPlaylists: ShareWording.sayings.noPlaylists)
     }
 }
+
+extension ShareAddress {
+    /// The shares this server offers to `user` with `password` (the address has no share yet).
+    nonisolated func shares(password: String) async -> Result<[SMBShareInfo], SMBError> {
+        let address = self
+        return await withCheckedContinuation { continuation in
+            DispatchQueue.global(qos: .userInitiated).async {
+                do {
+                    let shares = try SMBShareList.fetch(host: address.host, port: address.port,
+                                                        credentials: SMBCredentials(name: address.user, password: password), timeout: 10)
+                    continuation.resume(returning: .success(shares))
+                } catch {
+                    continuation.resume(returning: .failure(error as? SMBError ?? .closed))
+                }
+            }
+        }
+    }
+}

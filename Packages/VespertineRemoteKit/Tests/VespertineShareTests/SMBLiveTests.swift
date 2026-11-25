@@ -105,6 +105,50 @@ private let live: (host: String, port: Int, share: String, user: String, passwor
         connection.disconnect()
     }
 
+    /// How fast a large file comes from the server: read as the player reads a song (256 KB at a time, each after the
+    /// last arrived) and as a download does (a megabyte at a time), one request at a time as the client used to and with
+    /// several on the line and reading ahead as it does now. VESPERTINE_SMB_BENCH names a file the results are added to;
+    /// VESPERTINE_SMB_BIG is the file; VESPERTINE_SMB_BENCH_LABEL says what the line was (e.g. "50 ms").
+    @Test(.enabled(if: ProcessInfo.processInfo.environment["VESPERTINE_SMB_BENCH"] != nil)) func measuresThroughput() throws {
+        let live = try #require(live)
+        let environment = ProcessInfo.processInfo.environment
+        let path = try #require(environment["VESPERTINE_SMB_BIG"])
+        let limit = Int64(environment["VESPERTINE_SMB_BENCH_BYTES"].flatMap { Int($0) } ?? 32 << 20)
+        var lines: [String] = []
+        for (name, depth, ahead) in [("one at a time", 1, 0), ("pipelined", 16, 8 << 20)] {
+            for (pattern, piece) in [("player 256 KB", 256 << 10), ("download 1 MB", 1 << 20)] {
+                let connection = SMBConnection(transport: try SocketTransport(host: live.host, port: live.port, timeout: 60))
+                try connection.connect(server: live.host, share: live.share, credentials: SMBCredentials(name: live.user, password: live.password))
+                connection.readDepth = depth
+                connection.readAheadLimit = ahead
+                let file = try connection.open(path, folder: false)
+                let total = min(file.size, limit)
+                let start = Date()
+                var offset: Int64 = 0
+                while offset < total {
+                    let got = try connection.read(file, offset: offset, length: min(piece, Int(total - offset)))
+                    if got.isEmpty { break }
+                    offset += Int64(got.count)
+                }
+                let seconds = Date().timeIntervalSince(start)
+                #expect(offset == total)
+                let line = String(format: "%@\t%@\t%@\t%@\t%.1f MB/s\t%.1f Mbit/s", environment["VESPERTINE_SMB_BENCH_LABEL"] ?? "",
+                                  connection.encrypted ? "encrypted" : "signed", name, pattern,
+                                  Double(offset) / seconds / 1e6, Double(offset) * 8 / seconds / 1e6)
+                print("BENCH", line)
+                lines.append(line)
+                try connection.close(file)
+                connection.disconnect()
+            }
+        }
+        if let out = environment["VESPERTINE_SMB_BENCH"], !out.isEmpty {
+            let handle = FileHandle(forWritingAtPath: out) ?? { FileManager.default.createFile(atPath: out, contents: nil); return FileHandle(forWritingAtPath: out)! }()
+            handle.seekToEndOfFile()
+            handle.write(Data((lines.joined(separator: "\n") + "\n").utf8))
+            try handle.close()
+        }
+    }
+
     /// Writes the conversation SMBReplayTests plays back, for the server VESPERTINE_SMB names. VESPERTINE_SMB_RECORD is
     /// the folder to write to; VESPERTINE_SMB_RECORD_NAME names the recording when the version alone doesn't say it.
     @Test(.enabled(if: !(ProcessInfo.processInfo.environment["VESPERTINE_SMB_RECORD"] ?? "").isEmpty)) func record() throws {
@@ -113,6 +157,29 @@ private let live: (host: String, port: Int, share: String, user: String, passwor
         let connection = SMBConnection(transport: transport, options: recordedOptions)
         try recordedConversation(connection, credentials: SMBCredentials(name: live.user, password: live.password))
         let name = ProcessInfo.processInfo.environment["VESPERTINE_SMB_RECORD_NAME"] ?? "smb" + String(connection.dialect, radix: 16)
+        try transport.source(named: name).write(toFile: ProcessInfo.processInfo.environment["VESPERTINE_SMB_RECORD"]! + "/\(name).txt", atomically: true, encoding: .utf8)
+    }
+
+    /// The shares the server offers, as "Add a Share" lists them after signing in. VESPERTINE_SMB_SHARES is the names
+    /// expected, with commas between (the Samba setup in docs/PHONE-SHARES.md has "archive,music").
+    @Test func listsTheServersShares() throws {
+        let live = try #require(live)
+        let shares = try SMBShareList.fetch(host: live.host, port: live.port, credentials: SMBCredentials(name: live.user, password: live.password))
+        print("shares", shares)
+        #expect(shares.contains { $0.name == live.share })
+        #expect(!shares.contains { $0.name.hasSuffix("$") })
+        if let expected = ProcessInfo.processInfo.environment["VESPERTINE_SMB_SHARES"] {
+            #expect(shares.map(\.name) == expected.split(separator: ",").map(String.init))
+        }
+    }
+
+    /// Writes the share listing SMBShareListTests plays back (VESPERTINE_SMB_RECORD as for `record`).
+    @Test(.enabled(if: !(ProcessInfo.processInfo.environment["VESPERTINE_SMB_RECORD"] ?? "").isEmpty)) func recordShareList() throws {
+        let live = try #require(live)
+        let transport = RecordingTransport(try SocketTransport(host: live.host, port: live.port))
+        let connection = SMBConnection(transport: transport, options: recordedOptions)
+        _ = try SMBShareList.fetch(on: connection, server: live.host, credentials: SMBCredentials(name: live.user, password: live.password))
+        let name = (ProcessInfo.processInfo.environment["VESPERTINE_SMB_RECORD_NAME"] ?? "smb" + String(connection.dialect, radix: 16)) + "shares"
         try transport.source(named: name).write(toFile: ProcessInfo.processInfo.environment["VESPERTINE_SMB_RECORD"]! + "/\(name).txt", atomically: true, encoding: .utf8)
     }
 

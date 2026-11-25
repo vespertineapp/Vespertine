@@ -172,6 +172,15 @@ final class FakeSession: SMBSession, @unchecked Sendable {
         #expect(ShareAddress(typed: "smb://nas/My%20Music/New%20Folder") == ShareAddress(host: "nas", share: "My Music", folder: "New Folder", user: ""))
         #expect(ShareAddress(typed: "smb://[fd7a:115c:a1e0::1]/music") == ShareAddress(host: "fd7a:115c:a1e0::1", share: "music", user: ""))
         #expect(ShareAddress(typed: "smb://[fd7a:115c:a1e0::1]:4450/music")?.port == 4450)
+        // Only a server: no share, so it is a server whose shares are listed to choose from.
+        #expect(ShareAddress(typed: "smb://nas.local") == nil)
+        #expect(ShareAddress(server: "smb://nas.local") == ShareAddress(host: "nas.local", share: "", user: ""))
+        #expect(ShareAddress(server: "  nas.tail1a2b3.ts.net/ ", user: "listener") == ShareAddress(host: "nas.tail1a2b3.ts.net", share: "", user: "listener"))
+        #expect(ShareAddress(server: "\\\\listener@192.168.1.20:4450") == ShareAddress(host: "192.168.1.20", port: 4450, share: "", user: "listener"))
+        #expect(ShareAddress(server: "smb://[fd7a:115c:a1e0::1]") == ShareAddress(host: "fd7a:115c:a1e0::1", share: "", user: ""))
+        #expect(ShareAddress(server: "smb://nas/music") == nil)
+        #expect(ShareAddress(server: "  ") == nil)
+        #expect(ShareAddress(server: "smb://nas.local", user: "")?.choosing("Hi-Res Music") == ShareAddress(host: "nas.local", share: "Hi-Res Music", user: ""))
         // A typed account wins over one in the address.
         #expect(ShareAddress(typed: "smb://guest@nas/music", user: "listener")?.user == "listener")
     }

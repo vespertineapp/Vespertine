@@ -29,6 +29,9 @@ public final class Keeper {
     public private(set) var fetching: (song: Int64, fraction: Double)?
     /// Songs the Mac wouldn't send (they play on the Mac only, or left its library). Asked again the next time the app opens.
     public private(set) var unavailable: Set<Int64> = []
+    /// Songs that arrived damaged twice running (the check in `KeptCheck` failed): not kept, and not tried again until the
+    /// app next opens.
+    public private(set) var damaged: Set<Int64> = []
     /// There is more to fetch than room for it.
     public private(set) var isFull = false
     /// Why fetching stopped, in words, when it wasn't finished.
@@ -66,6 +69,15 @@ public final class Keeper {
         resume()
     }
 
+    /// Songs still to fetch (not counting ones that can't be: refused, or damaged twice).
+    public var remaining: Int { next().count }
+
+    /// Stops fetching now (iOS is ending the app's time in the background). What arrived of the song being fetched stays,
+    /// to carry on from with `resume`.
+    public func pause() {
+        worker?.cancel()
+    }
+
     /// Carries on with whatever is missing. Does nothing while already fetching.
     public func resume() {
         guard worker == nil, client != nil, !next().isEmpty else { return }
@@ -77,7 +89,7 @@ public final class Keeper {
     }
 
     private func next() -> [(track: TrackSummary, smaller: Bool)] {
-        store.missing.filter { !unavailable.contains($0.track.id ?? -1) }
+        store.missing.filter { !unavailable.contains($0.track.id ?? -1) && !damaged.contains($0.track.id ?? -1) }
     }
 
     private func work() async {
@@ -95,26 +107,39 @@ public final class Keeper {
             } catch {
                 return
             }
-            let carriesOn = await fetch(song, descriptor, from: client)
+            let outcome = await fetch(song, descriptor, from: client)
             await client.close(descriptor.stream)
-            if !carriesOn { return }
+            switch outcome {
+            case .kept: retried.remove(song)
+            case .stop: return
+            case .damaged:
+                // Fetched again once from the start; a second damaged copy is left out and said.
+                if retried.remove(song) != nil { damaged.insert(song) } else { retried.insert(song) }
+            }
         }
     }
 
-    /// Fetches one open stream into the store. False: stop here (no room, the Mac went away, the file couldn't be written).
-    private func fetch(_ song: Int64, _ descriptor: StreamDescriptor, from client: PhoneStreamClient) async -> Bool {
+    /// Songs fetched again because the first copy arrived damaged.
+    @ObservationIgnored private var retried: Set<Int64> = []
+
+    private enum Outcome { case kept, stop, damaged }
+
+    /// Fetches one open stream into the store. `.stop`: stop here (no room, the Mac went away, the file couldn't be written).
+    private func fetch(_ song: Int64, _ descriptor: StreamDescriptor, from client: PhoneStreamClient) async -> Outcome {
         if let limitBytes, store.bytes + descriptor.byteSize > limitBytes {
             isFull = true
-            return false
+            return .stop
         }
+        // What an earlier try left of this song is kept when it is the same bytes (the downloader checks); only the rest is fetched.
         let part = store.partFile(for: song)
-        try? FileManager.default.removeItem(at: part)
         let number = descriptor.stream
         let size = max(1, descriptor.byteSize)
         fetching = (song, 0)
         let downloader = StreamDownloader(descriptor: descriptor, destination: part, read: { offset, length in
             try await client.read(number, offset, length)
         })
+        // Bytes an earlier try left: not fetched this time, so not counted again.
+        let resumedFrom = await downloader.alreadyHere
         do {
             try await downloader.run { [weak self] done in
                 Task { @MainActor in
@@ -122,14 +147,21 @@ public final class Keeper {
                     self.fetching = (song, min(1, Double(done) / Double(size)))
                 }
             }
-            bytesReceived += descriptor.byteSize
+            bytesReceived += descriptor.byteSize - resumedFrom
+            // Whole before it counts: the size, and a FLAC's samples against its own MD5 (off the main thread: it decodes).
+            let check = await Task.detached(priority: .utility) { KeptCheck.verify(part, descriptor: descriptor) }.value
+            if case .damaged = check {
+                try? FileManager.default.removeItem(at: part)
+                try? FileManager.default.removeItem(at: StreamDownloader.progressFile(for: part))
+                return .damaged
+            }
             // Its ReplayGain values are kept beside it, so they are here with the Mac off (whether or not they are used now).
             let values = await client.info?(song)?.replayGain
             try store.arrived(song, descriptor: descriptor, replayGain: values)
-            return true
+            return .kept
         } catch {
             if !(error is CancellationError), client.isConnected() { notice = error.localizedDescription }
-            return false
+            return .stop
         }
     }
 
@@ -139,7 +171,15 @@ public final class Keeper {
         let deadline = ContinuousClock.now + preparingTimeout
         while true {
             try Task.checkCancellation()
-            let reply = if let rate, let smaller = client.openSmaller { await smaller(song, rate) } else { await client.open(song, rate) }
+            // The original file unless smaller copies were asked for: a DSD song then stays DSD (the player makes PCM or DoP
+            // of it each time it plays, for whatever it is plugged into).
+            let reply = if let rate, let smaller = client.openSmaller {
+                await smaller(song, rate)
+            } else if rate == nil, let original = client.openOriginal {
+                await original(song)
+            } else {
+                await client.open(song, rate)
+            }
             switch reply {
             case .streamOpened(let descriptor): return descriptor
             case .streamPreparing:

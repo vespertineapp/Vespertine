@@ -9,6 +9,7 @@ import SwiftUI
 import VespertinePhonePlayer
 import VespertineRemoteClient
 import VespertineRemoteProtocol
+import VespertineShare
 
 @Observable
 final class KeptShelf {
@@ -105,6 +106,16 @@ final class KeptShelf {
         try? FileManager.default.removeItem(at: Self.folder(serverID))
     }
 
+    /// Songs left to keep, from every library.
+    var remaining: Int { keepers.values.reduce(0) { $0 + $1.remaining } }
+    /// How far into the song arriving now (when one is).
+    var fraction: Double? { keepers.values.lazy.compactMap(\.fetching?.fraction).first }
+    /// Nothing is being fetched right now.
+    var isIdle: Bool { keepers.values.allSatisfy(\.isIdle) }
+    /// iOS ended the time in the background: everything stops, half songs kept to carry on from.
+    func pauseAll() { for keeper in keepers.values { keeper.pause() } }
+    func resumeAll() { for keeper in keepers.values { keeper.resume() } }
+
     /// Bytes fetched to keep since the app opened (part of the data counter).
     var bytesReceived: Int64 { keepers.values.reduce(0) { $0 + $1.bytesReceived } }
 }
@@ -152,7 +163,13 @@ struct KeepButton: View {
                 }
                 .accessibilityLabel(progress.isComplete ? Text("Kept on This Device") : Text("Fetching to Keep on This Device"))
             } else {
-                Button { if let list = make() { keeper.keep(list) } } label: { Image(systemName: "arrow.down.circle") }
+                Button {
+                    if let list = make() {
+                        keeper.keep(list)
+                        // On iOS 26 and later, fetching may go on after the app is left (iOS shows its progress).
+                        KeepInBackground.shared.userChoseToKeep()
+                    }
+                } label: { Image(systemName: "arrow.down.circle") }
                     .accessibilityLabel(Text("Keep on This Device"))
                     .disabled(!session.isConnected)
             }
@@ -215,6 +232,8 @@ private struct KeptStatus: View {
             Text("The rest is fetched when the Mac is connected.")
         } else if !keeper.unavailable.isEmpty {
             Text("Some songs can’t be kept: they play on the Mac only, or aren’t in its library any more.")
+        } else if !keeper.damaged.isEmpty {
+            Text("Some songs didn’t arrive whole twice in a row, so they weren’t kept. They’re fetched again the next time Vespertine opens.", comment: "Shown on the iPhone or iPad under the list of albums kept on the device for listening offline. Each kept song is checked after it arrives (its size, and for FLAC its own checksum); these failed the check twice and were left out.")
         }
     }
 }
@@ -295,4 +314,20 @@ struct KeptListPage: View {
             }
         }
     }
+}
+
+/// A kept DSD file as the player reads it: DoP frames or PCM made from the file as each range is asked for.
+final class KeptDSDSource: ByteSource, @unchecked Sendable {
+    private let kept: KeptDSD
+    var byteSize: Int64 { kept.descriptor.byteSize }
+    var isComplete: Bool { true }
+
+    init(_ kept: KeptDSD) { self.kept = kept }
+
+    func read(at offset: Int64, length: Int) throws -> Data {
+        guard offset >= 0, offset < byteSize, length > 0 else { return Data() }
+        return try kept.read(offset: offset, length: length)
+    }
+
+    func interruptReads() {}
 }

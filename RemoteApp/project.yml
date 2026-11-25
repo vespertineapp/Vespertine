@@ -51,10 +51,14 @@ targets:
         LSRequiresIPhoneOS: true
         UIRequiresFullScreen: false
         ITSAppUsesNonExemptEncryption: false
-        # "This iPhone" in Output: music keeps playing with the screen locked or another app in front. Processing: a
-        # share's first scan carries on in time iOS gives it later (ShareBackgroundScan.swift).
+        # "This iPhone" in Output: music keeps playing with the screen locked or another app in front. "processing": a
+        # share's first scan carries on in time iOS gives it later (ShareBackgroundScan.swift), and music chosen to keep
+        # is fetched by iOS's background tasks (KeepInBackground.swift); the audio mode is never used for either.
         UIBackgroundModes: [audio, processing]
-        BGTaskSchedulerPermittedIdentifiers: [org.szeremeta.VespertineRemote.share-scan]
+        BGTaskSchedulerPermittedIdentifiers:
+          - org.szeremeta.VespertineRemote.share-scan
+          - org.szeremeta.VespertineRemote.keep.overnight
+          - org.szeremeta.VespertineRemote.keep.continued.*
         UILaunchScreen:
           UIColorName: LaunchBackground
         UIApplicationSceneManifest:

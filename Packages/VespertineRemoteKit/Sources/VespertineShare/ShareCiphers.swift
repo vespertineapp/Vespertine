@@ -1,6 +1,6 @@
 //
-// Vespertine: the two ways SMB 3 encrypts its messages, AES-128-GCM (SP 800-38D) and AES-128-CCM (RFC 3610,
-// SP 800-38C). Each turns a message into as many unreadable bytes plus a tag that proves nothing was changed on the way,
+// Vespertine: the ways SMB 3 encrypts its messages, AES-GCM (SP 800-38D) and AES-CCM (RFC 3610, SP 800-38C), each
+// with a 128-bit key or (SMB 3.1.1 only) a 256-bit one. Each turns a message into as many unreadable bytes plus a tag that proves nothing was changed on the way,
 // and back. Written out in plain Swift, like the digests, so the client is the same code on the phone and on Linux; on
 // Apple's systems the system's own (much faster) AES does the work, since a song is read through this a megabyte at a time.
 // SPDX-License-Identifier: GPL-3.0-or-later WITH LicenseRef-Vespertine-App-Store-Exception
@@ -17,9 +17,14 @@ enum ShareCiphers {
     enum Kind: UInt16, Sendable {
         case ccm = 1
         case gcm = 2
+        case ccm256 = 3
+        case gcm256 = 4
 
         /// How much of the 16-byte nonce field of an encrypted message this cipher uses.
-        var nonceLength: Int { self == .gcm ? 12 : 11 }
+        var nonceLength: Int { isGCM ? 12 : 11 }
+        var isGCM: Bool { self == .gcm || self == .gcm256 }
+        /// The key's size in bytes.
+        var keyLength: Int { self == .gcm256 || self == .ccm256 ? 32 : 16 }
     }
 
     struct Sealed: Equatable {
@@ -27,20 +32,19 @@ enum ShareCiphers {
         var tag: [UInt8]
     }
 
-    /// Encrypts `message` with a 16-byte key. `aad` is covered by the tag but sent as it is. `plain`: as for the digests.
+    /// Encrypts `message` with a key of the cipher's size. `aad` is covered by the tag but sent as it is. `plain`: as for the digests.
     static func seal(_ kind: Kind, key: [UInt8], nonce: [UInt8], _ message: [UInt8], aad: [UInt8], plain: Bool = false) -> Sealed {
-        switch kind {
-        case .gcm: gcmSeal(key: key, nonce: nonce, message, aad: aad, plain: plain)
-        case .ccm: ccm(key: key, nonce: nonce, message, aad: aad, tagLength: 16, opening: false, plain: plain)
-        }
+        precondition(key.count == kind.keyLength)
+        return kind.isGCM ? gcmSeal(key: key, nonce: nonce, message, aad: aad, plain: plain)
+            : ccm(key: key, nonce: nonce, message, aad: aad, tagLength: 16, opening: false, plain: plain)
     }
 
     /// The message back, or nil when the tag doesn't fit: something was changed on the way, or it was made with another key.
     static func open(_ kind: Kind, key: [UInt8], nonce: [UInt8], _ sealed: Sealed, aad: [UInt8], plain: Bool = false) -> [UInt8]? {
-        switch kind {
-        case .gcm:
+        guard key.count == kind.keyLength else { return nil }
+        if kind.isGCM {
             return gcmOpen(key: key, nonce: nonce, sealed, aad: aad, plain: plain)
-        case .ccm:
+        } else {
             let opened = ccm(key: key, nonce: nonce, sealed.ciphertext, aad: aad, tagLength: sealed.tag.count, opening: true, plain: plain)
             return same(opened.tag, sealed.tag) ? opened.ciphertext : nil
         }

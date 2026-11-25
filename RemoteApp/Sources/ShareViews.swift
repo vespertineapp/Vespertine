@@ -36,6 +36,8 @@ struct ShareEditView: View {
     @State private var name = ""
     @State private var checking = false
     @State private var error: String?
+    /// The server's shares, once only a server was typed and it listed them.
+    @State private var offered: [SMBShareInfo]?
     @FocusState private var typing: Bool
 
     init(editing: SavedShare? = nil) {
@@ -70,7 +72,33 @@ struct ShareEditView: View {
                 } header: {
                     Text("SMB Share")
                 } footer: {
-                    Text("The server’s name or address, the share, and the folder the music is in if that isn’t the whole share. For example: smb://nas.local/music/Albums. To play away from home, use the server’s Tailscale name or address.")
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("The server’s name or address, the share, and the folder the music is in if that isn’t the whole share. For example: smb://nas.local/music/Albums. To play away from home, use the server’s Tailscale name or address.")
+                        Text("Or type only the server, like smb://nas.local, to choose from its shares.", comment: "Shown on the iPhone or iPad under the address field of the form that adds a network (SMB) share. Typing just the server’s name and pressing Add lists the shared folders the server offers. Keep “smb://nas.local” as an example in Latin letters.")
+                    }
+                }
+                if let offered {
+                    Section {
+                        ForEach(offered, id: \.name) { share in
+                            Button {
+                                guard let server = ShareAddress(server: address, user: user.trimmingCharacters(in: .whitespaces)) else { return }
+                                address = server.choosing(share.name).display
+                                self.offered = nil
+                                Task { await confirm() }
+                            } label: {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(verbatim: share.name)
+                                    if !share.comment.isEmpty {
+                                        Text(verbatim: share.comment).font(.footnote).foregroundStyle(.secondary)
+                                    }
+                                }
+                            }
+                            .accessibilityIdentifier("share-offered-\(share.name)")
+                        }
+                    } header: {
+                        Text("Choose a Share", comment: "Shown on the iPhone or iPad above the list of shared folders a network (SMB) server offers, after only the server’s name was typed in the form that adds a share. Tapping one adds it.")
+                    }
+                    .id("share-offered")
                 }
                 Section {
                     TextField("Account", text: $user)
@@ -135,6 +163,24 @@ struct ShareEditView: View {
 
     /// Signs in to the share once before keeping it, so a wrong address or password is said here.
     private func confirm() async {
+        if typed == nil, let server = ShareAddress(server: address, user: user.trimmingCharacters(in: .whitespaces)) {
+            // Only a server: sign in and list its shares to choose from.
+            checking = true
+            error = nil
+            let listed = await server.shares(password: password)
+            checking = false
+            switch listed {
+            case .success(let shares) where !shares.isEmpty:
+                offered = shares
+                typing = false
+            case .success, .failure(.accessDenied), .failure(.status), .failure(.unsupported), .failure(.malformed):
+                error = String(localized: "This server didn’t list its shares. Type the share’s name as well, like smb://server/share.", comment: "Shown on the iPhone or iPad at the top of the form that adds a network (SMB) share, when only a server was typed and the server would not say which shared folders it has (or has none this account can see). Keep “smb://server/share” as an example in Latin letters.")
+            case .failure(let trouble):
+                error = ShareWording.trouble(trouble)
+            }
+            return
+        }
+        offered = nil
         guard let typed else {
             error = String(localized: "Type the server and the share, like smb://server/share.", comment: "Shown on the iPhone under the Add a Share form when the address typed has no server or no share name in it. Keep “smb://server/share” as an example in Latin letters.")
             typing = false

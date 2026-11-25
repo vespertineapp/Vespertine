@@ -22,6 +22,8 @@ public struct PhoneStreamClient: Sendable {
     public var openSmaller: (@Sendable (_ song: Int64, _ maxSampleRate: Double) async -> RemoteReply)?
     /// Opens a song for a DAC that takes DoP up to the carrier rate `dop` (a DSD song may then arrive as DoP frames). nil: as `open`.
     public var openDoP: (@Sendable (_ song: Int64, _ maxSampleRate: Double?, _ dop: Double) async -> RemoteReply)?
+    /// Opens a song to keep as its own file (a DSD song as its DSF or DSDIFF, not PCM or DoP made of it). nil: as `open`.
+    public var openOriginal: (@Sendable (_ song: Int64) async -> RemoteReply)?
     /// What the Mac (or the share) says about a song without opening it: asked for its ReplayGain values, and only while
     /// ReplayGain is on. nil: can't be asked.
     public var info: (@Sendable (_ song: Int64) async -> StreamInfo?)?
@@ -53,6 +55,7 @@ public struct PhoneStreamClient: Sendable {
                   isConnected: { [weak session] in session?.isConnected ?? false })
         openSmaller = { [weak session] song, rate in await session?.send(.streamOpen(id: song, maxSampleRate: rate, smaller: true)) ?? .failed(reason: "") }
         openDoP = { [weak session] song, rate, dop in await session?.send(.streamOpen(id: song, maxSampleRate: rate, dop: dop)) ?? .failed(reason: "") }
+        openOriginal = { [weak session] song in await session?.send(.streamOpen(id: song, maxSampleRate: nil, original: true)) ?? .failed(reason: "") }
         info = { [weak session] song in
             guard case .streamInfo(let items)? = await session?.send(.streamInfo(ids: [song], maxSampleRate: nil)) else { return nil }
             return items.first { $0.id == song }
@@ -166,6 +169,10 @@ public final class PhonePlayback {
     /// ReplayGain is on and the song being heard has nothing done to it: its file has no values (or they come to no
     /// change), or it is DSD sent as DoP.
     public var replayGainHasNothing: Bool { replayGain != .off && nowPlaying != nil && stream != nil && appliedGain == nil }
+    /// A song kept as its own DSD file, made into what the output takes now: PCM no higher than `maxSampleRate`, or DoP
+    /// frames for a DAC that takes them up to the carrier rate `dop` (the app does it with `KeptDSD`). nil: it can't be.
+    @ObservationIgnored public var keptRendering: @MainActor (_ file: URL, _ descriptor: StreamDescriptor, _ maxSampleRate: Double?, _ dop: Double?)
+        -> (descriptor: StreamDescriptor, source: any ByteSource)? = { _, _, _, _ in nil }
     /// The ReplayGain values of a song kept on this device, as they were when it was kept: used when the Mac can't be asked.
     @ObservationIgnored public var keptGain: @MainActor (Int64) -> ReplayGain? = { _ in nil }
     /// Told the values of each song they were asked for (the app keeps them beside a kept song's file).
@@ -381,7 +388,18 @@ public final class PhonePlayback {
         // One being opened that was let go of meanwhile is no use: it is closed when it gets here.
         if let running = opening[entry.id], !running.isCancelled { return try await running.value }
         guard let song = entry.track.id else { throw Failure.notInLibrary }
-        if let kept = kept(song), let file = try? FileByteSource(url: kept.file) {
+        if let kept = kept(song), kept.descriptor.format.codec == "DSD" {
+            // Kept as the original DSD file: made into DoP or PCM for the output as it is now, as a share's song is.
+            let ceiling = plain ? nil : (ahead ? DoPGate.aheadCeiling(ceiling: dop.ceiling(), outputRate: dop.rate()) : dop.ceiling())
+            if let rendered = keptRendering(kept.file, kept.descriptor, maxSampleRate(), ceiling) {
+                let carrier = DoPGate.carrier(format: entry.track.format)
+                pcmReasons[entry.id] = carrier != nil && rendered.descriptor.dsdRate == nil
+                    ? why ?? dop.reason(carrier) ?? (ahead && !plain ? .ahead : .rate) : nil
+                let result = Open(song: song, descriptor: rendered.descriptor, source: rendered.source)
+                open[entry.id] = result
+                return result
+            }
+        } else if let kept = kept(song), let file = try? FileByteSource(url: kept.file) {
             let result = Open(song: song, descriptor: kept.descriptor, source: file)
             open[entry.id] = result
             return result

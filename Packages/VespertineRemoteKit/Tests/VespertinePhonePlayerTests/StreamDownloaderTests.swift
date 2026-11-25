@@ -9,11 +9,11 @@ import VespertineRemoteClient
 import VespertineRemoteProtocol
 @testable import VespertinePhonePlayer
 
-private func descriptor(size: Int) -> StreamDescriptor {
+private func descriptor(size: Int, tag: String = "t") -> StreamDescriptor {
     StreamDescriptor(stream: 1, kind: .original,
                      byteSize: Int64(size),
                      format: StreamFormat(codec: "FLAC", container: "flac", sampleRate: 44_100, bitDepth: 16, channels: 2, channelLabels: nil, lossless: true),
-                     frames: nil, tag: "t", chunkSize: 1000)
+                     frames: nil, tag: tag, chunkSize: 1000)
 }
 
 private func tmp() -> URL { FileManager.default.temporaryDirectory.appendingPathComponent("downloader-\(UUID()).flac") }
@@ -26,6 +26,8 @@ private final class FakeReader: @unchecked Sendable {
     private var failures: Set<Int64>
     var delays: (Int64) -> Duration = { _ in .zero }
     var shortReads = false
+    /// Every read from here on fails (the line went for good).
+    var failFrom: Int64?
 
     init(data: Data, failOnce: Set<Int64> = []) { self.data = data; failures = failOnce }
 
@@ -38,6 +40,7 @@ private final class FakeReader: @unchecked Sendable {
         }
         try await Task.sleep(for: delays(offset))
         if shouldFail { throw RemoteLinkError.timedOut }
+        if let failFrom, offset >= failFrom { throw RemoteLinkError.timedOut }
         let n = shortReads ? min(length, 300) : length
         let end = min(Int(offset) + n, data.count)
         let slice = offset >= Int64(data.count) ? Data() : data[Int(offset)..<end]
@@ -46,6 +49,67 @@ private final class FakeReader: @unchecked Sendable {
 }
 
 @Suite struct Downloader {
+    @Test func aDownloadCutShortCarriesOnFromWhereItStopped() async throws {
+        let data = Data((0..<10_500).map { UInt8(truncatingIfNeeded: $0 &* 31) })
+        let url = tmp(); defer { try? FileManager.default.removeItem(at: url); try? FileManager.default.removeItem(at: StreamDownloader.progressFile(for: url)) }
+        // The line goes at 6000 bytes, for good: the run fails, and what arrived stays, with a note of what it is.
+        let first = FakeReader(data: data)
+        first.failFrom = 6000
+        await #expect(throws: (any Error).self) {
+            try await StreamDownloader(descriptor: descriptor(size: data.count), destination: url, read: first.read, window: 1, attempts: 1).run()
+        }
+        #expect(FileManager.default.fileExists(atPath: url.path))
+        #expect(FileManager.default.fileExists(atPath: StreamDownloader.progressFile(for: url).path))
+        // The app was closed and opened again: the next run asks only for what isn't here.
+        let second = FakeReader(data: data)
+        let downloader = StreamDownloader(descriptor: descriptor(size: data.count), destination: url, read: second.read)
+        #expect(await downloader.alreadyHere == 6000)
+        try await downloader.run()
+        #expect(second.requests.allSatisfy { $0.0 >= 6000 })
+        #expect(second.requests.count == 5)
+        #expect(try Data(contentsOf: url) == data)
+        // Whole: the note goes.
+        #expect(!FileManager.default.fileExists(atPath: StreamDownloader.progressFile(for: url).path))
+    }
+
+    @Test func piecesThatArrivedOutOfOrderAreKeptAndOnlyTheGapsFetched() async throws {
+        let data = Data((0..<8_000).map { UInt8(truncatingIfNeeded: $0 &* 7) })
+        let url = tmp(); defer { try? FileManager.default.removeItem(at: url); try? FileManager.default.removeItem(at: StreamDownloader.progressFile(for: url)) }
+        let first = FakeReader(data: data, failOnce: [])
+        first.failFrom = 100_000
+        // Chunk 2 (bytes 2000…2999) never comes; the others do.
+        let gaps = FakeReader(data: data)
+        let reader: StreamDownloader.Reader = { offset, length in
+            if offset == 2000 { throw RemoteLinkError.timedOut }
+            return try await gaps.read(offset, length)
+        }
+        await #expect(throws: (any Error).self) {
+            try await StreamDownloader(descriptor: descriptor(size: data.count), destination: url, read: reader, window: 4, attempts: 1).run()
+        }
+        let second = FakeReader(data: data)
+        try await StreamDownloader(descriptor: descriptor(size: data.count), destination: url, read: second.read).run()
+        #expect(try Data(contentsOf: url) == data)
+        #expect(second.requests.contains { $0.0 == 2000 })
+        #expect(!second.requests.contains { $0.0 == 0 })
+    }
+
+    @Test func aSongThatChangedMeanwhileStartsAgain() async throws {
+        let old = Data(repeating: 1, count: 5000), new = Data((0..<5200).map { UInt8(truncatingIfNeeded: $0 &* 3) })
+        let url = tmp(); defer { try? FileManager.default.removeItem(at: url); try? FileManager.default.removeItem(at: StreamDownloader.progressFile(for: url)) }
+        let first = FakeReader(data: old)
+        first.failFrom = 3000
+        await #expect(throws: (any Error).self) {
+            try await StreamDownloader(descriptor: descriptor(size: old.count, tag: "old"), destination: url, read: first.read, window: 1, attempts: 1).run()
+        }
+        // The file on the server is another now (its tag differs): nothing of the old one is used.
+        let second = FakeReader(data: new)
+        let downloader = StreamDownloader(descriptor: descriptor(size: new.count, tag: "new"), destination: url, read: second.read)
+        #expect(await downloader.alreadyHere == 0)
+        try await downloader.run()
+        #expect(second.requests.contains { $0.0 == 0 })
+        #expect(try Data(contentsOf: url) == new)
+    }
+
     @Test func theWholeStreamLandsInTheFileByteForByte() async throws {
         let data = Data((0..<10_500).map { UInt8(truncatingIfNeeded: $0 &* 17) })
         let reader = FakeReader(data: data)
@@ -85,12 +149,14 @@ private final class FakeReader: @unchecked Sendable {
         #expect(reader.requests.filter { $0.0 == 2000 }.count == 2)
     }
 
-    @Test func aReadThatKeepsFailingEndsTheDownloadAndLeavesNoFile() async throws {
+    @Test func aReadThatKeepsFailingEndsTheDownloadAndKeepsWhatCameForNextTime() async throws {
         struct Always: Error {}
-        let url = tmp()
+        let url = tmp(); defer { try? FileManager.default.removeItem(at: url); try? FileManager.default.removeItem(at: StreamDownloader.progressFile(for: url)) }
         let downloader = StreamDownloader(descriptor: descriptor(size: 5_000), destination: url, read: { _, _ in throw Always() })
         await #expect(throws: Always.self) { try await downloader.run() }
-        #expect(!FileManager.default.fileExists(atPath: url.path))
+        // Nothing arrived, so the next run starts from the beginning; the part file and its note are there for it.
+        #expect(FileManager.default.fileExists(atPath: StreamDownloader.progressFile(for: url).path))
+        #expect(await StreamDownloader(descriptor: descriptor(size: 5_000), destination: url, read: { _, _ in throw Always() }).alreadyHere == 0)
     }
 
     @Test func aMacThatAnswersWithLessKeepsBeingAskedForTheRest() async throws {
@@ -107,7 +173,9 @@ private final class FakeReader: @unchecked Sendable {
         let url = tmp()
         let downloader = StreamDownloader(descriptor: descriptor(size: 5_000), destination: url, read: reader.read)
         await #expect(throws: StreamDownloader.Failure.self) { try await downloader.run() }
+        // The song is shorter than it said: the bytes can't be trusted, so nothing is kept to carry on from.
         #expect(!FileManager.default.fileExists(atPath: url.path))
+        #expect(!FileManager.default.fileExists(atPath: StreamDownloader.progressFile(for: url).path))
     }
 
     @Test func aFrameForAnotherRangeIsRefused() async throws {
@@ -127,16 +195,27 @@ private final class FakeReader: @unchecked Sendable {
         #expect(seen.values == seen.values.sorted() && seen.values.last == 6_000)
     }
 
-    @Test func cancellingRemovesTheHalfFile() async throws {
-        let reader = FakeReader(data: Data(count: 50_000))
-        reader.delays = { _ in .milliseconds(200) }
-        let url = tmp()
+    @Test func cancellingKeepsWhatArrivedForNextTime() async throws {
+        // iOS ends the app's time in the background, or the person removes the album while it arrives: what came stays
+        // until the song is asked for again (or the list is removed, which clears it: see KeptTests).
+        let data = Data((0..<50_000).map { UInt8(truncatingIfNeeded: $0 &* 11) })
+        let reader = FakeReader(data: data)
+        // The rest takes far longer than the test waits: it is cancelled once the first 4000 bytes are in, however busy
+        // the machine is (a fixed 100 ms wait failed on a loaded one).
+        reader.delays = { offset in offset < 4000 ? .zero : .seconds(60) }
+        let url = tmp(); defer { try? FileManager.default.removeItem(at: url); try? FileManager.default.removeItem(at: StreamDownloader.progressFile(for: url)) }
         let downloader = StreamDownloader(descriptor: descriptor(size: 50_000), destination: url, read: reader.read)
-        let task = Task { try await downloader.run() }
-        try await Task.sleep(for: .milliseconds(100))
+        let seen = Seen()
+        let task = Task { try await downloader.run { seen.add($0) } }
+        let deadline = ContinuousClock.now + .seconds(30)
+        while (seen.values.last ?? 0) < 4000, ContinuousClock.now < deadline { try await Task.sleep(for: .milliseconds(5)) }
+        #expect(seen.values.last == 4000)
         task.cancel()
         _ = try? await task.value
-        #expect(!FileManager.default.fileExists(atPath: url.path))
+        let again = StreamDownloader(descriptor: descriptor(size: 50_000), destination: url, read: FakeReader(data: data).read)
+        #expect(await again.alreadyHere == 4000)
+        try await again.run()
+        #expect(try Data(contentsOf: url) == data)
     }
 }
 
