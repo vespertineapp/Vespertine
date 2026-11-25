@@ -60,6 +60,8 @@ final class AppSettings {
     var store: UserDefaults { defaults }
 
     var exclusiveMode: Bool { didSet { defaults.set(exclusiveMode, forKey: "exclusiveMode") } }
+    /// While music plays to an HDMI or DisplayPort output, the display is kept from sleeping (its sleep drops the link).
+    var keepDisplayAwake: Bool { didSet { defaults.set(keepDisplayAwake, forKey: "keepDisplayAwake") } }
     /// Integer mode (exclusive access only): PCM needing no processing goes to the DAC as 32-bit integers.
     var integerMode: Bool { didSet { defaults.set(integerMode, forKey: "integerMode") } }
     /// "Match 16-bit sources" (exclusive access only): 16-bit files go to a DAC's own 16-bit mode where it has one.
@@ -250,7 +252,7 @@ final class AppSettings {
         }
         roomStore = RoomProfileStore(directory: resolvedDataDirectory)
         defaults.register(defaults: [
-            "exclusiveMode": false, "atmosBySystem": true, "integerMode": true, "matchSixteenBit": false, "releaseAfterPause": 30.0, "replayGain": "off", "replayGainPreamp": 0.0,
+            "exclusiveMode": false, "keepDisplayAwake": true, "atmosBySystem": true, "integerMode": true, "matchSixteenBit": false, "releaseAfterPause": 30.0, "replayGain": "off", "replayGainPreamp": 0.0,
             "allowDigitalVolume": false, "digitalVolume": 1.0, "importMode": ImportMode.reference.rawValue,
             "watchFolders": false, LocalLibrarySwitch.key: true, "fetchArtworkOnline": true, "scrobble": false, "discordPresence": false, "dopListUpdates": true, "discordArtwork": true, "miniPlayerFloats": true, "skipNonMusic": true,
             "networkCache": true, "networkCacheLimitGB": 20.0, "networkPrefetch": 3,
@@ -262,6 +264,7 @@ final class AppSettings {
         StreamingCore.registerDefaults(defaults, providers: StreamingModel.ids)
         Self.migrateAutomaticWorkToOff(defaults)
         exclusiveMode = defaults.bool(forKey: "exclusiveMode")
+        keepDisplayAwake = defaults.bool(forKey: "keepDisplayAwake")
         atmosBySystem = defaults.bool(forKey: "atmosBySystem")
         versionPreference = TrackVersions.Preference(rawValue: defaults.string(forKey: "versionPreference") ?? "") ?? .matchOutput
         bundleCopies = defaults.bool(forKey: "bundleCopies")

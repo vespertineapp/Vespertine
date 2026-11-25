@@ -131,6 +131,10 @@ final class PlayerController {
     @ObservationIgnored private var requestedState: (state: PlaybackState, from: PlaybackState, at: Date)?
     @ObservationIgnored private var pollTask: Task<Void, Never>?
     @ObservationIgnored private var adoptedSource: UUID?
+    /// Keeps the Mac awake while music plays, and the display too for HDMI and DisplayPort outputs (see `KeepAwake`).
+    @ObservationIgnored private let keepAwake = PlaybackKeepAwake()
+    /// When playback started waiting for its output to come back (nil: it isn't waiting).
+    @ObservationIgnored private var waitingSince: Date?
     /// The Discord status, while Settings › Online turns it on.
     let discord = DiscordPresence()
 
@@ -1255,6 +1259,18 @@ final class PlayerController {
         return URL(fileURLWithPath: track.filePath).deletingLastPathComponent().lastPathComponent
     }
 
+    /// Holds or lets go of what keeps the Mac (and an HDMI or DisplayPort output's display) awake, from what the player is doing:
+    /// playing, wherever it was started (here, the remote, Shortcuts), or waiting for its output to come back. Paused or
+    /// stopped, macOS sleeps as it is set to.
+    private func updateKeepAwake(_ snap: EngineSnapshot) {
+        if snap.waitingForDevice == nil { waitingSince = nil } else if waitingSince == nil { waitingSince = Date() }
+        // While the output is gone the engine has none: the chosen one's, as it was last seen connected.
+        let chosen = settings.selectedDevice.flatMap { $0.uid == settings.selectedDeviceUID ? $0.transport : nil }
+        let transport = snap.outputDevice?.transport ?? (snap.waitingForDevice != nil ? chosen : nil)
+        keepAwake.set(.needed(playing: state == .playing, waited: waitingSince.map { Date().timeIntervalSince($0) }, transport: transport,
+                              keepDisplay: settings.keepDisplayAwake))
+    }
+
     func poll(_ snapshot: EngineSnapshot? = nil) {
         if receiverDemo { return }
         let snap = snapshot ?? renderer?.snapshot ?? engine.snapshot
@@ -1305,6 +1321,7 @@ final class PlayerController {
             outputDevice = snap.outputDevice
         }
         if state == .playing, let device = snap.outputDevice { followSystemOutput(to: device) } else if state != .playing { lastFollowed = nil }
+        updateKeepAwake(snap)
         syncVolumeRelay()
         if underruns != snap.underruns { underruns = snap.underruns }
         if buffering != snap.isBuffering { buffering = snap.isBuffering }

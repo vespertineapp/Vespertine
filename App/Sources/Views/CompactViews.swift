@@ -234,6 +234,9 @@ struct PlaybackSettings: View {
                 }
                 Text("\u{201C}Put it back as it was\u{201D} restores each device Vespertine switched to the sample rate and bit depth it had before, so other apps (and tools like LosslessSwitcher) take over from where they left off.")
                     .font(.caption).foregroundStyle(.secondary)
+                Toggle("Keep the display on for HDMI and DisplayPort", isOn: $s.keepDisplayAwake)
+                Text("When the display sleeps, an HDMI or DisplayPort output loses its link and a receiver or TV goes silent. On: the display stays on while music plays to one. The Mac itself stays awake while any output plays.")
+                    .font(.caption).foregroundStyle(.secondary)
                 LabeledContent("Software path") {
                     Button("Loopback Test…") { openWindow(id: "main"); model.showLoopbackTest = true }
                 }

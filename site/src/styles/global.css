@@ -497,7 +497,7 @@ html:not(.js) .features::before {
 .release__tag { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 14px; margin-bottom: 14px; }
 .release__v { font: 300 clamp(40px, 4vw, 56px)/1 var(--serif); letter-spacing: -.02em; margin: 0 0 14px; }
 .release__summary { font: 400 clamp(18px, 1.5vw, 21px)/1.45 var(--serif); color: var(--ink); }
-.notes { color: var(--muted); font-size: 15px; }
+.notes { color: var(--muted); font-size: 15px; overflow-wrap: anywhere; }
 .notes h4 { font: 500 12px/1.4 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--brass); margin: 24px 0 8px; }
 .notes ul { border-bottom: 1px solid var(--line); }
 .notes li { padding: 10px 0; border-top: 1px solid var(--line); }
@@ -510,7 +510,7 @@ html:not(.js) .features::before {
 .history .v a:hover { color: var(--brass-hi); }
 .history time { display: block; font: 400 12px/1.6 var(--mono); color: var(--dim); margin-top: 2px; }
 .history p { margin: 0; color: var(--muted); font-size: 15px; }
-@media (max-width: 900px) { .releases { grid-template-columns: 1fr; } }
+@media (max-width: 900px) { .releases { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 520px) { .history li { grid-template-columns: 1fr; gap: 6px; } }
 
 /* ---------- FAQ ---------- */

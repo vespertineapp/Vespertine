@@ -147,6 +147,10 @@ Two or more USB DACs play as one multichannel system, such as a quad from two st
 
 With **Mac Sound Output (beta)**, also off by default, a group becomes an output of the Mac under the name you gave it, so a browser, the TV app or a video player can play stereo, 5.1 or 7.1 to it, with the volume keys working and Vespertine closed. Stereo from other apps can play as the group plays music, as extended stereo, or upmixed to surround. It needs Vespertine's audio driver, installed from Settings with an administrator's password. Not bit-perfect: it is for films, video and the web. [Details and limits](MAC-SOUND-OUTPUT.md).
 
+## Sleep while playing
+
+While a song plays (started on the Mac, from the remote, Shortcuts or a control app), Vespertine keeps the Mac from idle sleep, whatever the output, and lets go when playback pauses or stops. For an HDMI or DisplayPort output it also keeps the display on, because a sleeping display drops the link and the receiver or TV goes silent; a song started while the display is asleep wakes it. "Keep the display on for HDMI and DisplayPort" (Settings › Playback › Output, on by default) turns that part off. If the output drops out mid-song, the Mac stays awake for up to ten minutes while playback waits for it. macOS still sleeps a MacBook whose lid is closed on battery; on power, with a display or receiver connected, it stays awake.
+
 ## iPhone and iPad: what the signal badge says
 
 When the iPhone or iPad app plays a song itself, its badge says only what can be shown. **ORIGINAL FILE** means the device plays the song's own file. **ORIGINAL FILE · NO PROCESSING** appears only for a lossless file on a DAC that iOS reports running at the song's own rate and channel count, with the volume at 100% and nothing in Vespertine changing the sound. **ORIGINAL FILE · VERIFIED ON THIS DAC** appears only when, on top of that, the DAC passed the app's DoP listening test at exactly the song's rate (176.4, 192, 352.8 or 384 kHz): a DAC can only play that test as music if every frame reached it as sent.

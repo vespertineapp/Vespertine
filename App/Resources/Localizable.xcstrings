@@ -134843,6 +134843,275 @@
         }
       }
     },
+    "Keep the display on for HDMI and DisplayPort": {
+      "comment": "Settings › Playback › Output: a switch. While music plays to an HDMI or DisplayPort output, the Mac's display is kept from sleeping.",
+      "localizations": {
+        "am": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ለHDMI እና DisplayPort ማሳያውን አብራ ይቆይ"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "إبقاء الشاشة قيد التشغيل لـ HDMI وDisplayPort"
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HDMI ও DisplayPort-এর জন্য ডিসপ্লে চালু রাখুন"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nechat displej zapnutý pro HDMI a DisplayPort"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hold skærmen tændt ved HDMI og DisplayPort"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bildschirm bei HDMI und DisplayPort eingeschaltet lassen"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Η οθόνη μένει αναμμένη για HDMI και DisplayPort"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mantener la pantalla encendida con HDMI y DisplayPort"
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "روشن نگه داشتن نمایشگر برای HDMI و DisplayPort"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pidä näyttö päällä HDMI- ja DisplayPort-lähdöillä"
+          }
+        },
+        "fil": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Panatilihing bukas ang display para sa HDMI at DisplayPort"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Garder l’écran allumé pour HDMI et DisplayPort"
+          }
+        },
+        "gu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HDMI અને DisplayPort માટે ડિસ્પ્લે ચાલુ રાખો"
+          }
+        },
+        "ha": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ci gaba da kunna allo don HDMI da DisplayPort"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "להשאיר את המסך דולק עבור HDMI ו־DisplayPort"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HDMI और DisplayPort के लिए डिस्प्ले चालू रखें"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kijelző bekapcsolva tartása HDMI és DisplayPort esetén"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Biarkan layar menyala untuk HDMI dan DisplayPort"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tieni acceso lo schermo con HDMI e DisplayPort"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HDMIとDisplayPortではディスプレイをオンのままにする"
+          }
+        },
+        "kn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HDMI ಮತ್ತು DisplayPort ಗಾಗಿ ಡಿಸ್‌ಪ್ಲೇ ಆನ್ ಇರಿಸಿ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HDMI 및 DisplayPort 사용 시 디스플레이 켜두기"
+          }
+        },
+        "ml": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HDMI-നും DisplayPort-നും ഡിസ്‌പ്ലേ ഓണാക്കി വയ്ക്കുക"
+          }
+        },
+        "mr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HDMI आणि DisplayPort साठी डिस्प्ले चालू ठेवा"
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Biarkan paparan hidup untuk HDMI dan DisplayPort"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hold skjermen på for HDMI og DisplayPort"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beeldscherm aan houden bij HDMI en DisplayPort"
+          }
+        },
+        "pa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HDMI ਅਤੇ DisplayPort ਲਈ ਡਿਸਪਲੇ ਚਾਲੂ ਰੱਖੋ"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie wyłączaj ekranu przy HDMI i DisplayPort"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manter a tela ligada com HDMI e DisplayPort"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manter o ecrã ligado com HDMI e DisplayPort"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Menține ecranul pornit pentru HDMI și DisplayPort"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Håll skärmen på för HDMI och DisplayPort"
+          }
+        },
+        "sw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weka skrini ikiwaka kwa HDMI na DisplayPort"
+          }
+        },
+        "ta": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HDMI மற்றும் DisplayPort-க்கு டிஸ்ப்ளேவை இயக்கத்தில் வைத்திரு"
+          }
+        },
+        "te": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HDMI మరియు DisplayPort కోసం డిస్‌ప్లేను ఆన్‌లో ఉంచండి"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "เปิดจอค้างไว้สำหรับ HDMI และ DisplayPort"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HDMI ve DisplayPort için ekranı açık tut"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не вимикати екран для HDMI і DisplayPort"
+          }
+        },
+        "ur": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HDMI اور DisplayPort کے لیے ڈسپلے آن رکھیں"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Giữ màn hình bật khi dùng HDMI và DisplayPort"
+          }
+        },
+        "zh-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用 HDMI 及 DisplayPort 時保持顯示器開啟"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用 HDMI 和 DisplayPort 时保持显示器开启"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用 HDMI 和 DisplayPort 時保持顯示器開啟"
+          }
+        }
+      }
+    },
     "Last Played": {
       "localizations": {
         "am": {
@@ -533170,6 +533439,275 @@
           "stringUnit": {
             "state": "translated",
             "value": "波浪"
+          }
+        }
+      }
+    },
+    "When the display sleeps, an HDMI or DisplayPort output loses its link and a receiver or TV goes silent. On: the display stays on while music plays to one. The Mac itself stays awake while any output plays.": {
+      "comment": "Settings › Playback › Output: the note under the switch that keeps the display on for HDMI and DisplayPort outputs.",
+      "localizations": {
+        "am": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ማሳያው ሲተኛ HDMI ወይም DisplayPort ውጤት ግንኙነቱን ያጣል፣ ሪሲቨር ወይም ቲቪም ዝም ይላል። በርቶ፦ ሙዚቃ ወደ አንዱ ሲጫወት ማሳያው በርቶ ይቆያል። ማንኛውም ውጤት ሲጫወት Mac ራሱ ነቅቶ ይቆያል።"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "عندما تدخل الشاشة في وضع السكون، يفقد مخرج HDMI أو DisplayPort اتصاله ويصمت جهاز الاستقبال أو التلفاز. عند التشغيل: تبقى الشاشة قيد التشغيل أثناء تشغيل الموسيقى عبر أحدهما. ويبقى جهاز Mac نفسه مستيقظًا أثناء التشغيل عبر أي مخرج."
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ডিসপ্লে ঘুমিয়ে পড়লে HDMI বা DisplayPort আউটপুটের সংযোগ বিচ্ছিন্ন হয় এবং রিসিভার বা টিভি নীরব হয়ে যায়। চালু: এগুলোর কোনোটিতে মিউজিক বাজার সময় ডিসপ্লে চালু থাকে। যেকোনো আউটপুটে বাজার সময় Mac নিজে জেগে থাকে।"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Když displej přejde do spánku, výstup HDMI nebo DisplayPort ztratí spojení a receiver nebo televize ztichne. Zapnuto: displej zůstane zapnutý, dokud do takového výstupu hraje hudba. Samotný Mac zůstává vzhůru, dokud hraje jakýkoli výstup."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Når skærmen går i dvale, mister en HDMI- eller DisplayPort-udgang forbindelsen, og en receiver eller et tv bliver stille. Til: Skærmen forbliver tændt, mens der spilles musik til en af dem. Selve Mac'en forbliver vågen, mens der spilles til enhver udgang."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wenn der Bildschirm in den Ruhezustand wechselt, verliert ein HDMI- oder DisplayPort-Ausgang seine Verbindung und ein Receiver oder Fernseher verstummt. Ein: Der Bildschirm bleibt an, solange Musik über einen solchen Ausgang spielt. Der Mac selbst bleibt wach, solange irgendein Ausgang spielt."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Όταν η οθόνη μπαίνει σε ύπνο, μια έξοδος HDMI ή DisplayPort χάνει τη σύνδεσή της και ο ενισχυτής ή η τηλεόραση σωπαίνει. Ενεργό: η οθόνη μένει αναμμένη όσο παίζει μουσική σε μία από αυτές. Το ίδιο το Mac μένει ξύπνιο όσο παίζει οποιαδήποτε έξοδος."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cuando la pantalla entra en reposo, una salida HDMI o DisplayPort pierde la conexión y el receptor o el televisor se queda en silencio. Activado: la pantalla sigue encendida mientras suena música por una de ellas. El propio Mac se mantiene activo mientras suene cualquier salida."
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "وقتی نمایشگر به خواب می‌رود، خروجی HDMI یا DisplayPort اتصالش را از دست می‌دهد و گیرنده یا تلویزیون بی‌صدا می‌شود. روشن: تا وقتی موسیقی از یکی از آن‌ها پخش می‌شود، نمایشگر روشن می‌ماند. خود Mac هم تا وقتی هر خروجی‌ای پخش می‌کند بیدار می‌ماند."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kun näyttö menee lepoon, HDMI- tai DisplayPort-lähtö menettää yhteytensä ja vahvistin tai televisio hiljenee. Päällä: näyttö pysyy päällä, kun musiikki soi tällaiseen lähtöön. Mac itse pysyy hereillä, kun mikä tahansa lähtö soi."
+          }
+        },
+        "fil": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kapag natulog ang display, nawawalan ng koneksyon ang HDMI o DisplayPort output at tumatahimik ang receiver o TV. Naka-on: nananatiling bukas ang display habang tumutugtog ang musika sa isa sa mga ito. Nananatiling gising ang Mac mismo habang tumutugtog ang anumang output."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quand l’écran se met en veille, une sortie HDMI ou DisplayPort perd sa liaison et l’ampli ou le téléviseur se tait. Activé : l’écran reste allumé tant que la musique joue sur l’une d’elles. Le Mac lui-même reste éveillé tant qu’une sortie joue."
+          }
+        },
+        "gu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ડિસ્પ્લે સ્લીપમાં જાય ત્યારે HDMI અથવા DisplayPort આઉટપુટનું જોડાણ તૂટી જાય છે અને રિસીવર કે ટીવી શાંત થઈ જાય છે. ચાલુ: તેમાંથી કોઈ પર સંગીત વાગે ત્યાં સુધી ડિસ્પ્લે ચાલુ રહે છે. કોઈપણ આઉટપુટ વાગે ત્યાં સુધી Mac પોતે જાગતું રહે છે."
+          }
+        },
+        "ha": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Idan allo ya yi barci, fitar HDMI ko DisplayPort tana rasa haɗinta kuma rasiba ko TV ta yi shiru. A kunne: allo yana ci gaba da kunne yayin da kiɗa ke kunnawa zuwa ɗayansu. Mac ɗin kansa yana farke yayin da kowace fita ke kunnawa."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "כשהמסך נכנס למצב שינה, יציאת HDMI או DisplayPort מאבדת את החיבור והרסיבר או הטלוויזיה משתתקים. מופעל: המסך נשאר דולק כל עוד מוזיקה מתנגנת לאחת מהן. ה־Mac עצמו נשאר ער כל עוד יציאה כלשהי מנגנת."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "डिस्प्ले के स्लीप में जाने पर HDMI या DisplayPort आउटपुट का कनेक्शन टूट जाता है और रिसीवर या टीवी चुप हो जाता है। चालू: इनमें से किसी पर संगीत बजते समय डिस्प्ले चालू रहता है। किसी भी आउटपुट पर बजते समय Mac खुद जागा रहता है।"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Amikor a kijelző alvó módba lép, a HDMI- vagy DisplayPort-kimenet elveszti a kapcsolatot, és az erősítő vagy a tévé elnémul. Bekapcsolva: a kijelző bekapcsolva marad, amíg ilyen kimenetre szól a zene. Maga a Mac ébren marad, amíg bármelyik kimenet szól."
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saat layar tidur, output HDMI atau DisplayPort kehilangan sambungannya dan receiver atau TV menjadi senyap. Aktif: layar tetap menyala selama musik diputar ke salah satunya. Mac sendiri tetap terjaga selama output apa pun diputar."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quando lo schermo va in stop, un’uscita HDMI o DisplayPort perde il collegamento e il ricevitore o il televisore tace. Attivo: lo schermo resta acceso finché la musica suona su una di queste. Il Mac stesso resta attivo finché suona qualsiasi uscita."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ディスプレイがスリープすると、HDMIやDisplayPortの出力はリンクを失い、AVレシーバーやテレビは無音になります。オン：これらの出力で音楽を再生している間、ディスプレイはオンのままです。どの出力で再生していても、Mac本体はスリープしません。"
+          }
+        },
+        "kn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ಡಿಸ್‌ಪ್ಲೇ ನಿದ್ರಿಸಿದಾಗ HDMI ಅಥವಾ DisplayPort ಔಟ್‌ಪುಟ್ ತನ್ನ ಸಂಪರ್ಕ ಕಳೆದುಕೊಳ್ಳುತ್ತದೆ ಮತ್ತು ರಿಸೀವರ್ ಅಥವಾ ಟಿವಿ ಮೌನವಾಗುತ್ತದೆ. ಆನ್: ಅವುಗಳಲ್ಲಿ ಒಂದಕ್ಕೆ ಸಂಗೀತ ಪ್ಲೇ ಆಗುತ್ತಿರುವಾಗ ಡಿಸ್‌ಪ್ಲೇ ಆನ್ ಇರುತ್ತದೆ. ಯಾವುದೇ ಔಟ್‌ಪುಟ್ ಪ್ಲೇ ಆಗುತ್ತಿರುವಾಗ Mac ಸ್ವತಃ ಎಚ್ಚರವಾಗಿರುತ್ತದೆ."
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "디스플레이가 잠자기 상태가 되면 HDMI 또는 DisplayPort 출력의 연결이 끊기고 리시버나 TV의 소리가 멈춥니다. 켬: 이 출력으로 음악이 재생되는 동안 디스플레이가 켜진 상태로 유지됩니다. 어떤 출력으로 재생하든 Mac 자체는 깨어 있습니다."
+          }
+        },
+        "ml": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ഡിസ്‌പ്ലേ ഉറങ്ങുമ്പോൾ HDMI അല്ലെങ്കിൽ DisplayPort ഔട്ട്‌പുട്ടിന് കണക്ഷൻ നഷ്ടമാകുകയും റിസീവറോ ടിവിയോ നിശ്ശബ്ദമാകുകയും ചെയ്യും. ഓൺ: അവയിലൊന്നിലേക്ക് സംഗീതം പ്ലേ ചെയ്യുമ്പോൾ ഡിസ്‌പ്ലേ ഓണായിരിക്കും. ഏത് ഔട്ട്‌പുട്ട് പ്ലേ ചെയ്യുമ്പോഴും Mac തന്നെ ഉണർന്നിരിക്കും."
+          }
+        },
+        "mr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "डिस्प्ले स्लीपमध्ये गेल्यावर HDMI किंवा DisplayPort आउटपुटचे कनेक्शन तुटते आणि रिसीव्हर किंवा टीव्ही शांत होतो. चालू: यापैकी एकावर संगीत वाजत असताना डिस्प्ले चालू राहतो. कोणतेही आउटपुट वाजत असताना Mac स्वतः जागा राहतो."
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apabila paparan tidur, output HDMI atau DisplayPort kehilangan sambungannya dan penerima atau TV menjadi senyap. Hidup: paparan kekal hidup semasa muzik dimainkan ke salah satunya. Mac itu sendiri kekal berjaga semasa mana-mana output dimainkan."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Når skjermen går i dvale, mister en HDMI- eller DisplayPort-utgang forbindelsen, og en receiver eller TV blir stille. På: Skjermen holdes på mens musikk spilles til en av dem. Selve Mac-en holder seg våken mens en hvilken som helst utgang spiller."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Als het beeldscherm in slaap gaat, verliest een HDMI- of DisplayPort-uitgang de verbinding en valt een receiver of tv stil. Aan: het beeldscherm blijft aan zolang er muziek naar zo’n uitgang speelt. De Mac zelf blijft wakker zolang er een uitgang speelt."
+          }
+        },
+        "pa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ਡਿਸਪਲੇ ਦੇ ਸਲੀਪ ਹੋਣ ’ਤੇ HDMI ਜਾਂ DisplayPort ਆਊਟਪੁੱਟ ਦਾ ਕਨੈਕਸ਼ਨ ਟੁੱਟ ਜਾਂਦਾ ਹੈ ਅਤੇ ਰਿਸੀਵਰ ਜਾਂ ਟੀਵੀ ਚੁੱਪ ਹੋ ਜਾਂਦਾ ਹੈ। ਚਾਲੂ: ਇਹਨਾਂ ਵਿੱਚੋਂ ਕਿਸੇ ’ਤੇ ਸੰਗੀਤ ਵੱਜਣ ਦੌਰਾਨ ਡਿਸਪਲੇ ਚਾਲੂ ਰਹਿੰਦਾ ਹੈ। ਕਿਸੇ ਵੀ ਆਊਟਪੁੱਟ ’ਤੇ ਵੱਜਣ ਦੌਰਾਨ Mac ਖੁਦ ਜਾਗਦਾ ਰਹਿੰਦਾ ਹੈ।"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gdy ekran przechodzi w uśpienie, wyjście HDMI lub DisplayPort traci połączenie, a amplituner lub telewizor milknie. Włączone: ekran pozostaje włączony, dopóki muzyka gra przez jedno z nich. Sam Mac nie usypia, dopóki gra jakiekolwiek wyjście."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quando a tela entra em repouso, uma saída HDMI ou DisplayPort perde a conexão e o receiver ou a TV fica em silêncio. Ativado: a tela fica ligada enquanto a música toca em uma delas. O próprio Mac fica ativo enquanto qualquer saída estiver tocando."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quando o ecrã entra em repouso, uma saída HDMI ou DisplayPort perde a ligação e o recetor ou a televisão fica em silêncio. Ativado: o ecrã mantém-se ligado enquanto a música toca numa delas. O próprio Mac mantém-se ativo enquanto qualquer saída estiver a tocar."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Când ecranul intră în repaus, o ieșire HDMI sau DisplayPort își pierde legătura, iar receiverul sau televizorul amuțește. Activat: ecranul rămâne pornit cât timp muzica se aude printr-una dintre ele. Mac-ul însuși rămâne activ cât timp se aude orice ieșire."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "När skärmen går i vila tappar en HDMI- eller DisplayPort-utgång anslutningen och en receiver eller tv tystnar. På: skärmen förblir på medan musik spelas till en av dem. Själva Macen förblir vaken medan någon utgång spelar."
+          }
+        },
+        "sw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skrini inapolala, toleo la HDMI au DisplayPort hupoteza muunganisho wake na risiva au TV hunyamaza. Imewashwa: skrini hubaki ikiwaka muziki unapocheza kupitia mojawapo. Mac yenyewe hubaki macho toleo lolote linapocheza."
+          }
+        },
+        "ta": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "டிஸ்ப்ளே உறங்கும்போது HDMI அல்லது DisplayPort வெளியீடு அதன் இணைப்பை இழக்கிறது, ரிசீவர் அல்லது டிவி அமைதியாகிறது. இயக்கத்தில்: அவற்றில் ஒன்றுக்கு இசை இயங்கும்போது டிஸ்ப்ளே இயக்கத்தில் இருக்கும். எந்த வெளியீடு இயங்கினாலும் Mac தானே விழித்திருக்கும்."
+          }
+        },
+        "te": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "డిస్‌ప్లే నిద్రపోయినప్పుడు HDMI లేదా DisplayPort అవుట్‌పుట్ తన కనెక్షన్‌ను కోల్పోతుంది, రిసీవర్ లేదా టీవీ నిశ్శబ్దమవుతుంది. ఆన్: వాటిలో ఒకదానికి సంగీతం ప్లే అవుతున్నప్పుడు డిస్‌ప్లే ఆన్‌లో ఉంటుంది. ఏ అవుట్‌పుట్ ప్లే అవుతున్నా Mac స్వయంగా మేల్కొని ఉంటుంది."
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "เมื่อจอเข้าสู่โหมดพัก เอาต์พุต HDMI หรือ DisplayPort จะขาดการเชื่อมต่อ และรีซีฟเวอร์หรือทีวีจะเงียบ เปิด: จอจะเปิดค้างไว้ขณะเล่นเพลงผ่านเอาต์พุตเหล่านี้ ตัว Mac เองจะไม่เข้าสู่โหมดพักขณะเล่นผ่านเอาต์พุตใดก็ตาม"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ekran uyku moduna geçtiğinde HDMI veya DisplayPort çıkışı bağlantısını kaybeder ve alıcı ya da televizyon susar. Açık: bunlardan birine müzik çalarken ekran açık kalır. Herhangi bir çıkış çalarken Mac'in kendisi uyanık kalır."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Коли екран переходить у режим сну, вихід HDMI або DisplayPort втрачає зʼєднання, і ресивер чи телевізор замовкає. Увімкнено: екран лишається увімкненим, доки музика грає через один із них. Сам Mac не засинає, доки грає будь-який вихід."
+          }
+        },
+        "ur": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "جب ڈسپلے سلیپ میں جاتا ہے تو HDMI یا DisplayPort آؤٹ پٹ کا رابطہ ٹوٹ جاتا ہے اور ریسیور یا ٹی وی خاموش ہو جاتا ہے۔ آن: جب تک ان میں سے کسی پر موسیقی چلتی ہے، ڈسپلے آن رہتا ہے۔ کسی بھی آؤٹ پٹ پر چلنے کے دوران Mac خود جاگتا رہتا ہے۔"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Khi màn hình ngủ, đầu ra HDMI hoặc DisplayPort mất kết nối và receiver hoặc TV im lặng. Bật: màn hình luôn bật khi nhạc phát qua một trong các đầu ra đó. Bản thân máy Mac luôn thức khi bất kỳ đầu ra nào đang phát."
+          }
+        },
+        "zh-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "顯示器進入睡眠時，HDMI 或 DisplayPort 輸出會失去連接，擴音機或電視會變得無聲。開啟：音樂經這類輸出播放時，顯示器會保持開啟。無論使用哪個輸出播放，Mac 本身都會保持喚醒。"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示器进入睡眠时，HDMI 或 DisplayPort 输出会断开连接，功放或电视会变得无声。开启：音乐通过这类输出播放时，显示器保持开启。无论通过哪个输出播放，Mac 本身都保持唤醒。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "顯示器進入睡眠時，HDMI 或 DisplayPort 輸出會中斷連線，擴大機或電視會變得無聲。開啟：音樂透過這類輸出播放時，顯示器會保持開啟。無論透過哪個輸出播放，Mac 本身都會保持喚醒。"
           }
         }
       }
