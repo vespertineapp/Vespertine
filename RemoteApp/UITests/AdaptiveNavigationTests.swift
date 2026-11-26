@@ -42,7 +42,7 @@ final class AdaptiveNavigationTests: XCTestCase {
             let firstAlbum = app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS 'Low Tide Lanterns'")).firstMatch
             XCTAssertTrue(firstAlbum.waitForExistence(timeout: 10))
             sidebar("output").tap()
-            XCTAssertTrue(app.navigationBars["Output"].waitForExistence(timeout: 5))
+            XCTAssertTrue(app.navigationBars["Play On"].waitForExistence(timeout: 5))
             sidebar("sources").tap()
             XCTAssertTrue(app.navigationBars["Sources"].waitForExistence(timeout: 5))
         } else {
@@ -114,7 +114,7 @@ final class AdaptiveNavigationTests: XCTestCase {
 
     /// At the largest text size the demo bar is one line and a button, not half the screen; a tap on the line opens it.
     func testDemoNoticeStaysSmallAtTheLargestTextSize() {
-        launch(screen: "output", largeText: true)
+        launch(screen: "queue", largeText: true)
         let notice = app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Demo: a made-up library")).firstMatch
         XCTAssertTrue(notice.waitForExistence(timeout: 15))
         let leave = app.buttons["Leave Demo"]
@@ -146,11 +146,11 @@ final class AdaptiveNavigationTests: XCTestCase {
         XCTAssertTrue(app.buttons["Pause"].exists)
     }
 
-    /// The last row of a list stops above the mini player, not under it, and Settings is one tap from the top of Output.
-    func testOutputsLastRowClearsTheMiniPlayerAndSettingsIsAtTheTop() throws {
+    /// The last row of a list stops above the mini player, not under it, and Settings is one tap from the top of Sources.
+    func testSourcesLastRowClearsTheMiniPlayerAndSettingsIsAtTheTop() throws {
         try XCTSkipIf(UIDevice.current.userInterfaceIdiom == .pad, "The phone's tab layout.")
-        launch(screen: "output")
-        XCTAssertTrue(app.navigationBars["Output"].waitForExistence(timeout: 15))
+        launch(screen: "sources")
+        XCTAssertTrue(app.navigationBars["Sources"].waitForExistence(timeout: 15))
         let mini = element("mini-player")
         XCTAssertTrue(mini.waitForExistence(timeout: 10))
         for _ in 0..<4 { app.swipeUp() }
@@ -158,7 +158,7 @@ final class AdaptiveNavigationTests: XCTestCase {
         let row = try XCTUnwrap(last)
         XCTAssertLessThanOrEqual(row.frame.maxY, mini.frame.minY + 1, "the last row is under the mini player")
         for _ in 0..<4 { app.swipeDown() }
-        element("output-gear").tap()
+        element("sources-gear").tap()
         XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 5))
     }
 

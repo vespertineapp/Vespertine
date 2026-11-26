@@ -3080,6 +3080,275 @@
     "123 456": {
       "shouldTranslate": false
     },
+    "A DAC plugged into this device is asked for each song’s own sample rate. In Play On, this device’s ⓘ shows what reaches it and has the test for playing DSD natively.": {
+      "comment": "First-run setup on the iPhone and iPad. A note at the foot of the Sound step. DSD and DAC keep their names.",
+      "localizations": {
+        "am": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ከዚህ መሣሪያ ጋር የተሰካ DAC ለእያንዳንዱ ዘፈን የራሱ የናሙና መጠን ይጠየቃል። በ«ማጫወቻ ቦታ» ውስጥ የዚህ መሣሪያ ⓘ ወደሱ የሚደርሰውን ያሳያል፣ እና DSDን በቀጥታ ለማጫወት ሙከራውን ይዟል።"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "يُطلب من محوّل DAC الموصول بهذا الجهاز معدل العيّنات الخاص بكل أغنية. في «التشغيل على»، يعرض ⓘ الخاص بهذا الجهاز ما يصل إليه، ويضم اختبار تشغيل DSD أصليًا."
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "এই ডিভাইসে লাগানো একটি DAC-কে প্রতিটি গানের নিজস্ব স্যাম্পল রেট চাওয়া হয়। «যেখানে চালাবেন»-এ এই ডিভাইসের ⓘ দেখায় তাতে কী পৌঁছায়, এবং সেখানে DSD নেটিভভাবে বাজানোর পরীক্ষাও আছে।"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DAC připojený k tomuto zařízení je požádán o vlastní vzorkovací frekvenci každé skladby. V „Přehrávat na“ ukazuje ⓘ tohoto zařízení, co do něj dorazí, a je tam i test nativního přehrávání DSD."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En DAC, der er sluttet til denne enhed, bliver bedt om hver sangs egen samplingfrekvens. I “Afspil på” viser denne enheds ⓘ, hvad der når den, og har testen for at afspille DSD direkte."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein an dieses Gerät angeschlossener DAC wird nach der eigenen Abtastrate jedes Songs gefragt. Unter „Wiedergabe auf“ zeigt das ⓘ dieses Geräts, was bei ihm ankommt, und hat den Test für natives DSD."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Σε ένα DAC συνδεδεμένο σε αυτήν τη συσκευή ζητείται ο ρυθμός δειγματοληψίας κάθε τραγουδιού. Στην «Αναπαραγωγή σε», το ⓘ αυτής της συσκευής δείχνει τι φτάνει σε αυτό και έχει τη δοκιμή για εγγενή αναπαραγωγή DSD."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A un DAC conectado a este dispositivo se le pide la frecuencia de muestreo propia de cada canción. En «Reproducir en», el ⓘ de este dispositivo muestra lo que le llega y tiene la prueba para reproducir DSD de forma nativa."
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "از DAC وصل‌شده به این دستگاه، نرخ نمونه‌برداری خود هر آهنگ خواسته می‌شود. در «پخش روی»، ⓘ این دستگاه نشان می‌دهد چه چیزی به آن می‌رسد و آزمون پخش بومی DSD را دارد."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tähän laitteeseen liitetyltä DAC:lta pyydetään jokaisen kappaleen omaa näytetaajuutta. Kohdassa ”Toista laitteessa” tämän laitteen ⓘ näyttää, mitä siihen päätyy, ja siellä on DSD:n natiivitoiston testi."
+          }
+        },
+        "fil": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hinihingi sa DAC na nakasaksak sa device na ito ang sariling sample rate ng bawat kanta. Sa “I-play sa”, ipinapakita ng ⓘ ng device na ito kung ano ang umaabot dito, at nandoon ang test para sa native na pag-play ng DSD."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un DAC branché sur cet appareil reçoit la demande de la fréquence d’échantillonnage propre à chaque morceau. Dans « Lire sur », le ⓘ de cet appareil montre ce qui lui parvient et propose le test pour lire le DSD nativement."
+          }
+        },
+        "gu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "આ ડિવાઇસમાં પ્લગ કરેલા DACને દરેક ગીતનો પોતાનો સેમ્પલ રેટ પૂછવામાં આવે છે. «અહીં વગાડો»માં આ ડિવાઇસનું ⓘ તેના સુધી શું પહોંચે છે તે બતાવે છે, અને તેમાં DSD નેટિવ રીતે વગાડવાની ચકાસણી છે."
+          }
+        },
+        "ha": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ana tambayar DAC da aka toshe a wannan na’ura ainihin ƙimar samfurin kowace waƙa. A “Kunna a Kan”, ⓘ na wannan na’ura yana nuna abin da ke kai masa, kuma yana da gwajin kunna DSD kai tsaye."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DAC שמחובר למכשיר הזה מתבקש לקצב הדגימה של כל שיר. ב״ניגון ב־״, ה־ⓘ של המכשיר הזה מציג מה מגיע אליו, ויש בו את הבדיקה לניגון DSD מקורי."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "इस डिवाइस में लगे DAC से हर गाने का अपना सैंपल रेट माँगा जाता है। «यहाँ चलाएँ» में इस डिवाइस का ⓘ दिखाता है कि उस तक क्या पहुँचता है, और उसमें DSD को नेटिव रूप से चलाने का परीक्षण है।"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Az eszközhöz csatlakoztatott DAC minden dalnál a dal saját mintavételi frekvenciáját kapja. A „Lejátszás itt” listában az eszköz ⓘ-ja mutatja, mi jut el hozzá, és ott van a natív DSD-lejátszás tesztje is."
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DAC yang dicolokkan ke perangkat ini diminta sample rate milik setiap lagu. Di “Putar di”, ⓘ perangkat ini menampilkan apa yang mencapainya dan berisi tes untuk memutar DSD secara native."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A un DAC collegato a questo dispositivo viene chiesta la frequenza di campionamento propria di ogni brano. In “Riproduci su”, la ⓘ di questo dispositivo mostra cosa gli arriva e contiene il test per riprodurre il DSD in modo nativo."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このデバイスにつないだDACには、各曲固有のサンプルレートが要求されます。「再生先」のこのデバイスのⓘで、DACに届く内容を確認でき、DSDのネイティブ再生テストも行えます。"
+          }
+        },
+        "kn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ಈ ಸಾಧನಕ್ಕೆ ಪ್ಲಗ್ ಮಾಡಿದ DAC ಗೆ ಪ್ರತಿ ಹಾಡಿನ ಸ್ವಂತ ಸ್ಯಾಂಪಲ್ ರೇಟ್ ಕೇಳಲಾಗುತ್ತದೆ. «ಇಲ್ಲಿ ಪ್ಲೇ ಮಾಡಿ» ನಲ್ಲಿ ಈ ಸಾಧನದ ⓘ ಅದಕ್ಕೆ ಏನು ತಲುಪುತ್ತದೆ ಎಂದು ತೋರಿಸುತ್ತದೆ ಮತ್ತು DSD ಅನ್ನು ನೇಟಿವ್ ಆಗಿ ಪ್ಲೇ ಮಾಡುವ ಪರೀಕ್ಷೆಯನ್ನು ಹೊಂದಿದೆ."
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 기기에 연결된 DAC에는 각 곡 고유의 샘플링 레이트가 요청됩니다. ‘재생 위치’에서 이 기기의 ⓘ는 DAC에 도달하는 신호를 보여 주며, DSD 네이티브 재생 테스트도 있습니다."
+          }
+        },
+        "ml": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ഈ ഉപകരണത്തിൽ കണക്റ്റ് ചെയ്ത DAC-നോട് ഓരോ പാട്ടിന്റെയും സ്വന്തം സാമ്പിൾ റേറ്റ് ആവശ്യപ്പെടുന്നു. «ഇവിടെ പ്ലേ ചെയ്യുക» എന്നതിൽ ഈ ഉപകരണത്തിന്റെ ⓘ അതിൽ എന്താണ് എത്തുന്നതെന്ന് കാണിക്കുന്നു, DSD നേറ്റീവായി പ്ലേ ചെയ്യാനുള്ള പരിശോധനയും അതിലുണ്ട്."
+          }
+        },
+        "mr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "या डिव्हाइसला जोडलेल्या DAC ला प्रत्येक गाण्याचा स्वतःचा सॅम्पल रेट मागितला जातो. «येथे वाजवा» मध्ये या डिव्हाइसचे ⓘ त्याच्यापर्यंत काय पोहोचते ते दाखवते, आणि त्यात DSD नेटिव्हपणे वाजवण्याची चाचणी आहे."
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DAC yang dipasang pada peranti ini diminta kadar sampel lagu itu sendiri. Dalam “Main pada”, ⓘ peranti ini menunjukkan apa yang sampai kepadanya dan mempunyai ujian untuk memainkan DSD secara asli."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En DAC som er koblet til denne enheten, blir bedt om hver sangs egen samplingsfrekvens. I «Spill på» viser denne enhetens ⓘ hva som når den, og har testen for å spille DSD direkte."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Een DAC die op dit apparaat is aangesloten, krijgt de eigen samplefrequentie van elk nummer gevraagd. In ‘Speel af op’ toont de ⓘ van dit apparaat wat hem bereikt, en staat de test om DSD native af te spelen."
+          }
+        },
+        "pa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ਇਸ ਡਿਵਾਈਸ ਨਾਲ ਲੱਗੇ DAC ਤੋਂ ਹਰ ਗੀਤ ਦਾ ਆਪਣਾ ਸੈਂਪਲ ਰੇਟ ਮੰਗਿਆ ਜਾਂਦਾ ਹੈ। «ਇੱਥੇ ਚਲਾਓ» ਵਿੱਚ ਇਸ ਡਿਵਾਈਸ ਦਾ ⓘ ਦਿਖਾਉਂਦਾ ਹੈ ਕਿ ਉਸ ਤੱਕ ਕੀ ਪਹੁੰਚਦਾ ਹੈ, ਅਤੇ ਉਸ ਵਿੱਚ DSD ਨੂੰ ਨੇਟਿਵ ਤੌਰ ’ਤੇ ਚਲਾਉਣ ਦਾ ਟੈਸਟ ਹੈ।"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DAC podłączony do tego urządzenia jest proszony o własną częstotliwość próbkowania każdego utworu. W „Odtwarzaj na” ⓘ tego urządzenia pokazuje, co do niego dociera, i zawiera test natywnego odtwarzania DSD."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Um DAC conectado a este dispositivo recebe o pedido da taxa de amostragem própria de cada música. Em “Tocar em”, o ⓘ deste dispositivo mostra o que chega a ele e tem o teste para tocar DSD nativamente."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A um DAC ligado a este dispositivo é pedida a taxa de amostragem própria de cada música. Em “Reproduzir em”, o ⓘ deste dispositivo mostra o que lhe chega e tem o teste para reproduzir DSD nativamente."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unui DAC conectat la acest dispozitiv i se cere rata de eșantionare proprie fiecărei melodii. În „Redă pe”, ⓘ al acestui dispozitiv arată ce ajunge la el și conține testul pentru redarea nativă DSD."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En DAC som är ansluten till den här enheten ombeds använda varje låts egen samplingsfrekvens. I ”Spela på” visar den här enhetens ⓘ vad som når den och har testet för att spela DSD direkt."
+          }
+        },
+        "sw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DAC iliyochomekwa kwenye kifaa hiki huombwa kiwango cha sampuli cha kila wimbo chenyewe. Kwenye “Cheza kwenye”, ⓘ ya kifaa hiki huonyesha kinachoifikia, na ina jaribio la kucheza DSD moja kwa moja."
+          }
+        },
+        "ta": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "இந்தச் சாதனத்தில் இணைக்கப்பட்ட DAC-இடம் ஒவ்வொரு பாடலின் சொந்த மாதிரி வீதம் கேட்கப்படுகிறது. «இதில் இயக்கு» என்பதில் இந்தச் சாதனத்தின் ⓘ அதை எது அடைகிறது என்பதைக் காட்டுகிறது, மேலும் DSD-ஐ நேட்டிவாக இயக்கும் சோதனையும் அதில் உள்ளது."
+          }
+        },
+        "te": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ఈ పరికరానికి కనెక్ట్ చేసిన DACని ప్రతి పాట సొంత శాంపిల్ రేట్ అడుగుతారు. «ఇక్కడ ప్లే చేయి»లో ఈ పరికరం ⓘ దానికి ఏం చేరుతుందో చూపుతుంది, మరియు DSDని నేటివ్‌గా ప్లే చేసే పరీక్ష అందులో ఉంది."
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DAC ที่เสียบกับอุปกรณ์เครื่องนี้จะได้รับการขอใช้อัตราสุ่มตัวอย่างของแต่ละเพลงเอง ใน “เล่นบน” ⓘ ของอุปกรณ์เครื่องนี้จะแสดงสิ่งที่ไปถึง DAC และมีการทดสอบการเล่น DSD แบบเนทีฟ"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu aygıta takılı bir DAC’ten her şarkının kendi örnekleme hızı istenir. “Çalma Yeri”nde bu aygıtın ⓘ simgesi ona neyin ulaştığını gösterir ve DSD’yi doğal olarak çalma testini içerir."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "У DAC, підключеного до цього пристрою, запитується власна частота дискретизації кожної пісні. У «Відтворювати на» ⓘ цього пристрою показує, що до нього доходить, і містить тест для відтворення DSD напряму."
+          }
+        },
+        "ur": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اس ڈیوائس سے جڑے DAC سے ہر گانے کا اپنا سیمپل ریٹ مانگا جاتا ہے۔ «یہاں چلائیں» میں اس ڈیوائس کا ⓘ دکھاتا ہے کہ اس تک کیا پہنچتا ہے، اور اس میں DSD کو براہِ راست چلانے کا ٹیسٹ ہے۔"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "DAC cắm vào thiết bị này được yêu cầu dùng tần số lấy mẫu riêng của từng bài. Trong “Phát trên”, ⓘ của thiết bị này cho biết những gì đến được DAC và có bài kiểm tra phát DSD gốc."
+          }
+        },
+        "zh-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "接入此裝置的 DAC 會被要求使用每首歌曲本身的取樣率。在「播放位置」中，此裝置的 ⓘ 會顯示到達 DAC 的內容，並提供原生播放 DSD 的測試。"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "接入此设备的 DAC 会被要求使用每首歌曲自身的采样率。在“播放位置”中，此设备的 ⓘ 会显示到达 DAC 的内容，并提供原生播放 DSD 的测试。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "接入此裝置的 DAC 會被要求使用每首歌曲本身的取樣率。在「播放位置」中，此裝置的 ⓘ 會顯示到達 DAC 的內容，並提供原生播放 DSD 的測試。"
+          }
+        }
+      }
+    },
     "A channel to each output": {
       "comment": "Shown on the iPhone or iPad. Output screen, in a small table titled “What Reaches the Output” that lists facts read back from iOS while a song plays on an external DAC or audio interface. Value for the row “Surround”: each channel of a surround song goes to its own output of the audio interface, unmixed. Short.",
       "localizations": {
@@ -19408,270 +19677,270 @@
         }
       }
     },
-    "Demo: a made-up library. To hear it, choose this device in Output.": {
+    "Demo: a made-up library. To hear it, choose this device in Play On.": {
       "localizations": {
         "am": {
           "stringUnit": {
             "state": "translated",
-            "value": "ማሳያ፦ የፈጠራ ቤተ-መጻሕፍት። ለመስማት በውፅዓት ውስጥ ይህን መሣሪያ ይምረጡ።"
+            "value": "ማሳያ፦ የተፈጠረ ቤተ-መጻሕፍት። ለመስማት በ«ማጫወቻ ቦታ» ውስጥ ይህን መሣሪያ ይምረጡ።"
           }
         },
         "ar": {
           "stringUnit": {
             "state": "translated",
-            "value": "عرض تجريبي: مكتبة وهمية. لسماعها، اختر هذا الجهاز في “المخرج”."
+            "value": "عرض تجريبي: مكتبة مختلَقة. لسماعها، اختر هذا الجهاز في «التشغيل على»."
           }
         },
         "bn": {
           "stringUnit": {
             "state": "translated",
-            "value": "ডেমো: একটি বানানো লাইব্রেরি। এটি শুনতে আউটপুটে এই ডিভাইসটি বেছে নিন।"
+            "value": "ডেমো: একটি বানানো লাইব্রেরি। শুনতে «যেখানে চালাবেন»-এ এই ডিভাইসটি বেছে নিন।"
           }
         },
         "cs": {
           "stringUnit": {
             "state": "translated",
-            "value": "Demo: smyšlená knihovna. Chcete-li ji slyšet, vyberte ve Výstupu toto zařízení."
+            "value": "Ukázka: vymyšlená knihovna. Chcete-li ji slyšet, vyberte v „Přehrávat na“ toto zařízení."
           }
         },
         "da": {
           "stringUnit": {
             "state": "translated",
-            "value": "Demo: et opdigtet bibliotek. Vælg denne enhed i Output for at høre det."
+            "value": "Demo: et opdigtet bibliotek. Vælg denne enhed i “Afspil på” for at høre det."
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Demo: eine erfundene Mediathek. Wähle dieses Gerät unter „Ausgabe“, um sie zu hören."
+            "value": "Demo: eine erfundene Mediathek. Um sie zu hören, wähle dieses Gerät unter „Wiedergabe auf“."
           }
         },
         "el": {
           "stringUnit": {
             "state": "translated",
-            "value": "Επίδειξη: μια φανταστική βιβλιοθήκη. Για να την ακούσετε, επιλέξτε αυτήν τη συσκευή στην «Έξοδο»."
+            "value": "Επίδειξη: μια φανταστική βιβλιοθήκη. Για να την ακούσετε, επιλέξτε αυτήν τη συσκευή στην «Αναπαραγωγή σε»."
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Demo: una biblioteca inventada. Para oírla, elige este dispositivo en Salida."
+            "value": "Demo: una biblioteca inventada. Para oírla, elige este dispositivo en «Reproducir en»."
           }
         },
         "fa": {
           "stringUnit": {
             "state": "translated",
-            "value": "نسخهٔ نمایشی: یک کتابخانهٔ ساختگی. برای شنیدن آن، این دستگاه را در «خروجی» انتخاب کنید."
+            "value": "نمایشی: یک کتابخانهٔ ساختگی. برای شنیدن آن، این دستگاه را در «پخش روی» انتخاب کنید."
           }
         },
         "fi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Demo: keksitty kirjasto. Jos haluat kuulla sen, valitse Ulostulosta tämä laite."
+            "value": "Esittely: keksitty kirjasto. Jos haluat kuulla sen, valitse tämä laite kohdassa ”Toista laitteessa”."
           }
         },
         "fil": {
           "stringUnit": {
             "state": "translated",
-            "value": "Demo: gawa-gawang library. Para marinig ito, piliin ang device na ito sa Output."
+            "value": "Demo: isang gawa-gawang library. Para marinig ito, piliin ang device na ito sa “I-play sa”."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Démo : une bibliothèque fictive. Pour l’entendre, choisissez cet appareil dans Sortie."
+            "value": "Démo : une bibliothèque imaginaire. Pour l’écouter, choisissez cet appareil dans « Lire sur »."
           }
         },
         "gu": {
           "stringUnit": {
             "state": "translated",
-            "value": "ડેમો: એક કાલ્પનિક લાઇબ્રેરી. તેને સાંભળવા માટે આઉટપુટમાં આ ડિવાઇસ પસંદ કરો."
+            "value": "ડેમો: એક બનાવટી લાઇબ્રેરી. સાંભળવા માટે «અહીં વગાડો»માં આ ડિવાઇસ પસંદ કરો."
           }
         },
         "ha": {
           "stringUnit": {
             "state": "translated",
-            "value": "Gwaji: ƙirƙirarren laburare. Don jin sa, zaɓi wannan na'ura a cikin Fitarwa."
+            "value": "Demo: laburare da aka ƙirƙira. Don ji, zaɓi wannan na’ura a “Kunna a Kan”."
           }
         },
         "he": {
           "stringUnit": {
             "state": "translated",
-            "value": "הדגמה: ספריה בדויה. כדי לשמוע אותה, בחר במכשיר זה תחת ״פלט״."
+            "value": "הדגמה: ספריה מומצאת. כדי לשמוע אותה, יש לבחור את המכשיר הזה ב״ניגון ב־״."
           }
         },
         "hi": {
           "stringUnit": {
             "state": "translated",
-            "value": "डेमो: एक काल्पनिक लाइब्रेरी। इसे सुनने के लिए आउटपुट में यह डिवाइस चुनें।"
+            "value": "डेमो: एक बनावटी लाइब्रेरी। सुनने के लिए «यहाँ चलाएँ» में यह डिवाइस चुनें।"
           }
         },
         "hu": {
           "stringUnit": {
             "state": "translated",
-            "value": "Demó: kitalált könyvtár. Ha hallani szeretné, válassza ezt az eszközt a Kimenet alatt."
+            "value": "Bemutató: kitalált könyvtár. A meghallgatásához válaszd ezt az eszközt a „Lejátszás itt” listában."
           }
         },
         "id": {
           "stringUnit": {
             "state": "translated",
-            "value": "Demo: perpustakaan rekaan. Untuk mendengarnya, pilih perangkat ini di Output."
+            "value": "Demo: perpustakaan rekaan. Untuk mendengarnya, pilih perangkat ini di “Putar di”."
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Demo: una libreria inventata. Per ascoltarla, scegli questo dispositivo in Uscita."
+            "value": "Demo: una libreria inventata. Per ascoltarla, scegli questo dispositivo in “Riproduci su”."
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "デモ: 架空のライブラリです。音を聴くには、「出力」でこのデバイスを選択してください。"
+            "value": "デモ：架空のライブラリです。聴くには、「再生先」でこのデバイスを選択してください。"
           }
         },
         "kn": {
           "stringUnit": {
             "state": "translated",
-            "value": "ಡೆಮೊ: ಕಾಲ್ಪನಿಕ ಲೈಬ್ರರಿ. ಅದನ್ನು ಕೇಳಲು, ಔಟ್‌ಪುಟ್‌ನಲ್ಲಿ ಈ ಸಾಧನವನ್ನು ಆರಿಸಿ."
+            "value": "ಡೆಮೊ: ಕಲ್ಪಿತ ಲೈಬ್ರರಿ. ಕೇಳಲು «ಇಲ್ಲಿ ಪ್ಲೇ ಮಾಡಿ» ನಲ್ಲಿ ಈ ಸಾಧನವನ್ನು ಆಯ್ಕೆಮಾಡಿ."
           }
         },
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "데모: 가상의 보관함입니다. 소리를 들으려면 출력에서 이 기기를 선택하십시오."
+            "value": "데모: 가상의 보관함입니다. 들으려면 ‘재생 위치’에서 이 기기를 선택하십시오."
           }
         },
         "ml": {
           "stringUnit": {
             "state": "translated",
-            "value": "ഡെമോ: ഒരു സാങ്കൽപ്പിക ലൈബ്രറി. അത് കേൾക്കാൻ, ഔട്ട്‌പുട്ടിൽ ഈ ഉപകരണം തിരഞ്ഞെടുക്കുക."
+            "value": "ഡെമോ: ഒരു സാങ്കൽപ്പിക ലൈബ്രറി. കേൾക്കാൻ «ഇവിടെ പ്ലേ ചെയ്യുക» എന്നതിൽ ഈ ഉപകരണം തിരഞ്ഞെടുക്കുക."
           }
         },
         "mr": {
           "stringUnit": {
             "state": "translated",
-            "value": "डेमो: एक काल्पनिक लायब्ररी. ती ऐकण्यासाठी आउटपुटमध्ये हे डिव्हाइस निवडा."
+            "value": "डेमो: एक काल्पनिक लायब्ररी. ऐकण्यासाठी «येथे वाजवा» मध्ये हे डिव्हाइस निवडा."
           }
         },
         "ms": {
           "stringUnit": {
             "state": "translated",
-            "value": "Demo: pustaka rekaan. Untuk mendengarnya, pilih peranti ini dalam Output."
+            "value": "Demo: pustaka rekaan. Untuk mendengarnya, pilih peranti ini dalam “Main pada”."
           }
         },
         "nb": {
           "stringUnit": {
             "state": "translated",
-            "value": "Demo: et oppdiktet bibliotek. Velg denne enheten i Utgang for å høre det."
+            "value": "Demo: et oppdiktet bibliotek. Velg denne enheten i «Spill på» for å høre det."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Demo: een verzonnen bibliotheek. Kies dit apparaat in ‘Uitvoer’ om het te horen."
+            "value": "Demo: een verzonnen bibliotheek. Kies dit apparaat in ‘Speel af op’ om hem te horen."
           }
         },
         "pa": {
           "stringUnit": {
             "state": "translated",
-            "value": "ਡੈਮੋ: ਇੱਕ ਬਣਾਉਟੀ ਲਾਇਬ੍ਰੇਰੀ। ਇਸਨੂੰ ਸੁਣਨ ਲਈ ਆਉਟਪੁੱਟ ਵਿੱਚ ਇਹ ਡਿਵਾਈਸ ਚੁਣੋ।"
+            "value": "ਡੈਮੋ: ਇੱਕ ਬਣਾਈ ਹੋਈ ਲਾਇਬ੍ਰੇਰੀ। ਸੁਣਨ ਲਈ «ਇੱਥੇ ਚਲਾਓ» ਵਿੱਚ ਇਹ ਡਿਵਾਈਸ ਚੁਣੋ।"
           }
         },
         "pl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Demo: zmyślona biblioteka. Aby ją usłyszeć, wybierz to urządzenie w Wyjściu."
+            "value": "Demo: zmyślona biblioteka. Aby ją usłyszeć, wybierz to urządzenie w „Odtwarzaj na”."
           }
         },
         "pt-BR": {
           "stringUnit": {
             "state": "translated",
-            "value": "Demonstração: uma biblioteca fictícia. Para ouvi-la, escolha este dispositivo em Saída."
+            "value": "Demo: uma biblioteca inventada. Para ouvi-la, escolha este dispositivo em “Tocar em”."
           }
         },
         "pt-PT": {
           "stringUnit": {
             "state": "translated",
-            "value": "Demonstração: uma biblioteca fictícia. Para a ouvir, escolha este dispositivo em Saída."
+            "value": "Demo: uma biblioteca inventada. Para a ouvir, escolha este dispositivo em “Reproduzir em”."
           }
         },
         "ro": {
           "stringUnit": {
             "state": "translated",
-            "value": "Demonstrație: o bibliotecă inventată. Pentru a o auzi, alegeți acest dispozitiv în Ieșire."
+            "value": "Demo: o bibliotecă inventată. Pentru a o asculta, alegeți acest dispozitiv în „Redă pe”."
           }
         },
         "sv": {
           "stringUnit": {
             "state": "translated",
-            "value": "Demo: ett påhittat bibliotek. Välj den här enheten i Utgång för att höra det."
+            "value": "Demo: ett påhittat bibliotek. Välj den här enheten i ”Spela på” för att höra det."
           }
         },
         "sw": {
           "stringUnit": {
             "state": "translated",
-            "value": "Onyesho: maktaba ya kubuni. Ili kuisikia, chagua kifaa hiki kwenye Kutoa sauti."
+            "value": "Onyesho: maktaba ya kubuni. Ili kuisikia, chagua kifaa hiki kwenye “Cheza kwenye”."
           }
         },
         "ta": {
           "stringUnit": {
             "state": "translated",
-            "value": "டெமோ: ஒரு கற்பனை லைப்ரரி. அதைக் கேட்க, வெளியீட்டில் இந்தச் சாதனத்தைத் தேர்வுசெய்யவும்."
+            "value": "டெமோ: ஒரு கற்பனை நூலகம். கேட்க, «இதில் இயக்கு» என்பதில் இந்தச் சாதனத்தைத் தேர்ந்தெடுக்கவும்."
           }
         },
         "te": {
           "stringUnit": {
             "state": "translated",
-            "value": "డెమో: ఒక కల్పిత లైబ్రరీ. దాన్ని వినడానికి, అవుట్‌పుట్‌లో ఈ పరికరాన్ని ఎంచుకోండి."
+            "value": "డెమో: ఒక కల్పిత లైబ్రరీ. వినడానికి «ఇక్కడ ప్లే చేయి»లో ఈ పరికరాన్ని ఎంచుకోండి."
           }
         },
         "th": {
           "stringUnit": {
             "state": "translated",
-            "value": "สาธิต: คลังสมมติ หากต้องการฟัง ให้เลือกอุปกรณ์เครื่องนี้ในขาออก"
+            "value": "เดโม: คลังที่สมมติขึ้น หากต้องการฟัง ให้เลือกอุปกรณ์เครื่องนี้ใน “เล่นบน”"
           }
         },
         "tr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Demo: uydurma bir arşiv. Duymak için Çıkış’ta bu aygıtı seçin."
+            "value": "Demo: uydurma bir arşiv. Dinlemek için “Çalma Yeri”nde bu aygıtı seçin."
           }
         },
         "uk": {
           "stringUnit": {
             "state": "translated",
-            "value": "Демо: вигадана медіатека. Щоб почути її, виберіть цей пристрій у розділі «Вихід»."
+            "value": "Демо: вигадана медіатека. Щоб почути її, виберіть цей пристрій у «Відтворювати на»."
           }
         },
         "ur": {
           "stringUnit": {
             "state": "translated",
-            "value": "ڈیمو: ایک فرضی لائبریری۔ اسے سننے کے لیے آؤٹ پٹ میں یہ ڈیوائس منتخب کریں۔"
+            "value": "ڈیمو: ایک فرضی لائبریری۔ اسے سننے کے لیے «یہاں چلائیں» میں یہ ڈیوائس منتخب کریں۔"
           }
         },
         "vi": {
           "stringUnit": {
             "state": "translated",
-            "value": "Demo: một thư viện giả lập. Để nghe, hãy chọn thiết bị này trong Đầu ra."
+            "value": "Bản demo: một thư viện giả lập. Để nghe, hãy chọn thiết bị này trong “Phát trên”."
           }
         },
         "zh-HK": {
           "stringUnit": {
             "state": "translated",
-            "value": "示範：虛構的資料庫。如要聽到聲音，請在「輸出」中選擇此裝置。"
+            "value": "示範：一個虛構的資料庫。如要聆聽，請在「播放位置」中選擇此裝置。"
           }
         },
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "演示：虚构的资料库。若要听到声音，请在“输出”中选取此设备。"
+            "value": "演示：一个虚构的资料库。要收听，请在“播放位置”中选择此设备。"
           }
         },
         "zh-Hant": {
           "stringUnit": {
             "state": "translated",
-            "value": "示範：虛構的資料庫。若要聽到聲音，請在「輸出」中選擇此裝置。"
+            "value": "示範：一個虛構的資料庫。若要聆聽，請在「播放位置」中選擇此裝置。"
           }
         }
       }
@@ -20483,6 +20752,275 @@
         }
       }
     },
+    "For music played on this device. Each of these is also in Play On, under ⓘ.": {
+      "comment": "First-run setup on the iPhone and iPad. Under the heading “How it should sound”. Output is the app's screen of that name.",
+      "localizations": {
+        "am": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "በዚህ መሣሪያ ለሚጫወት ሙዚቃ። እያንዳንዳቸው በ«ማጫወቻ ቦታ» ውስጥ ከⓘ ስር ይገኛሉ።"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "للموسيقى التي تُشغَّل على هذا الجهاز. كل واحد من هذه موجود أيضًا في «التشغيل على»، تحت ⓘ."
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "এই ডিভাইসে বাজানো সংগীতের জন্য। এগুলোর প্রতিটি «যেখানে চালাবেন»-এ ⓘ-এর নিচেও আছে।"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pro hudbu přehrávanou na tomto zařízení. Každé z nich je také v „Přehrávat na“ pod ⓘ."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Til musik, der afspilles på denne enhed. Hver af disse findes også i “Afspil på” under ⓘ."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Für Musik, die auf diesem Gerät spielt. Jede dieser Einstellungen findest du auch unter „Wiedergabe auf“, hinter ⓘ."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Για μουσική που παίζει σε αυτήν τη συσκευή. Καθένα από αυτά υπάρχει και στην «Αναπαραγωγή σε», κάτω από το ⓘ."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Para la música que suena en este dispositivo. Cada una de estas opciones también está en «Reproducir en», bajo ⓘ."
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "برای موسیقی‌ای که روی این دستگاه پخش می‌شود. هر کدام از این‌ها در «پخش روی»، زیر ⓘ نیز هست."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tässä laitteessa soivalle musiikille. Jokainen näistä on myös kohdassa ”Toista laitteessa” ⓘ:n takana."
+          }
+        },
+        "fil": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Para sa musikang pinapatugtog sa device na ito. Nasa “I-play sa” din ang bawat isa, sa ilalim ng ⓘ."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pour la musique lue sur cet appareil. Chacun de ces réglages se trouve aussi dans « Lire sur », sous ⓘ."
+          }
+        },
+        "gu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "આ ડિવાઇસ પર વગાડાતા સંગીત માટે. આમાંનું દરેક «અહીં વગાડો»માં ⓘ હેઠળ પણ છે."
+          }
+        },
+        "ha": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Don kiɗan da ake kunnawa a wannan na’ura. Kowanne daga cikin waɗannan yana kuma a “Kunna a Kan”, ƙarƙashin ⓘ."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "למוזיקה שמתנגנת במכשיר הזה. כל אחת מאלה נמצאת גם ב״ניגון ב־״, תחת ⓘ."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "इस डिवाइस पर चलने वाले संगीत के लिए। इनमें से हर एक «यहाँ चलाएँ» में ⓘ के नीचे भी है।"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Az ezen az eszközön szóló zenéhez. Mindegyik megtalálható a „Lejátszás itt” listában is, az ⓘ alatt."
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Untuk musik yang diputar di perangkat ini. Masing-masing juga ada di “Putar di”, di bawah ⓘ."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Per la musica riprodotta su questo dispositivo. Ognuna di queste si trova anche in “Riproduci su”, sotto ⓘ."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このデバイスで再生する音楽用です。どれも「再生先」のⓘからも設定できます。"
+          }
+        },
+        "kn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ಈ ಸಾಧನದಲ್ಲಿ ಪ್ಲೇ ಆಗುವ ಸಂಗೀತಕ್ಕಾಗಿ. ಇವುಗಳಲ್ಲಿ ಪ್ರತಿಯೊಂದೂ «ಇಲ್ಲಿ ಪ್ಲೇ ಮಾಡಿ» ನಲ್ಲಿ ⓘ ಅಡಿಯಲ್ಲಿಯೂ ಇದೆ."
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 기기에서 재생되는 음악용입니다. 각 항목은 ‘재생 위치’의 ⓘ에도 있습니다."
+          }
+        },
+        "ml": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ഈ ഉപകരണത്തിൽ പ്ലേ ചെയ്യുന്ന സംഗീതത്തിന്. ഇവ ഓരോന്നും «ഇവിടെ പ്ലേ ചെയ്യുക» എന്നതിൽ ⓘ-ന് കീഴിലും ഉണ്ട്."
+          }
+        },
+        "mr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "या डिव्हाइसवर वाजणाऱ्या संगीतासाठी. यातील प्रत्येक «येथे वाजवा» मध्ये ⓘ खालीही आहे."
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Untuk muzik yang dimainkan pada peranti ini. Setiap satu daripadanya juga ada dalam “Main pada”, di bawah ⓘ."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For musikk som spilles på denne enheten. Hver av disse finnes også i «Spill på», under ⓘ."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voor muziek die op dit apparaat speelt. Elk hiervan staat ook in ‘Speel af op’, onder ⓘ."
+          }
+        },
+        "pa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ਇਸ ਡਿਵਾਈਸ ’ਤੇ ਚੱਲਦੇ ਸੰਗੀਤ ਲਈ। ਇਹਨਾਂ ਵਿੱਚੋਂ ਹਰ ਇੱਕ «ਇੱਥੇ ਚਲਾਓ» ਵਿੱਚ ⓘ ਹੇਠਾਂ ਵੀ ਹੈ।"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dla muzyki odtwarzanej na tym urządzeniu. Każde z tych ustawień jest też w „Odtwarzaj na”, pod ⓘ."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Para músicas tocadas neste dispositivo. Cada um destes também está em “Tocar em”, sob ⓘ."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Para música reproduzida neste dispositivo. Cada um destes também está em “Reproduzir em”, sob ⓘ."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pentru muzica redată pe acest dispozitiv. Fiecare dintre acestea se află și în „Redă pe”, sub ⓘ."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "För musik som spelas på den här enheten. Var och en av dessa finns också i ”Spela på”, under ⓘ."
+          }
+        },
+        "sw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kwa muziki unaochezwa kwenye kifaa hiki. Kila kimoja kati ya hivi kipo pia kwenye “Cheza kwenye”, chini ya ⓘ."
+          }
+        },
+        "ta": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "இந்தச் சாதனத்தில் இயங்கும் இசைக்காக. இவை ஒவ்வொன்றும் «இதில் இயக்கு» என்பதில் ⓘ-இன் கீழும் உள்ளன."
+          }
+        },
+        "te": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ఈ పరికరంలో ప్లే అయ్యే సంగీతం కోసం. వీటిలో ప్రతిదీ «ఇక్కడ ప్లే చేయి»లో ⓘ కింద కూడా ఉంది."
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "สำหรับเพลงที่เล่นบนอุปกรณ์เครื่องนี้ ทุกรายการนี้อยู่ใน “เล่นบน” ใต้ ⓘ ด้วย"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu aygıtta çalan müzik için. Bunların her biri “Çalma Yeri”nde, ⓘ altında da bulunur."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Для музики, що відтворюється на цьому пристрої. Кожне з цього також є у «Відтворювати на», під ⓘ."
+          }
+        },
+        "ur": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اس ڈیوائس پر چلنے والی موسیقی کے لیے۔ ان میں سے ہر ایک «یہاں چلائیں» میں ⓘ کے نیچے بھی ہے۔"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dành cho nhạc phát trên thiết bị này. Mỗi mục này cũng có trong “Phát trên”, dưới ⓘ."
+          }
+        },
+        "zh-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用於在此裝置上播放的音樂。這些設定也都在「播放位置」的 ⓘ 中。"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用于在此设备上播放的音乐。这些设置也都在“播放位置”的 ⓘ 中。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用於在此裝置上播放的音樂。這些設定也都在「播放位置」的 ⓘ 中。"
+          }
+        }
+      }
+    },
     "Most Played": {
       "localizations": {
         "am": {
@@ -20747,6 +21285,274 @@
           "stringUnit": {
             "state": "translated",
             "value": "最常播放"
+          }
+        }
+      }
+    },
+    "No Mac nearby? Try Vespertine with a made-up library. Choose this device in Play On to hear it play.": {
+      "localizations": {
+        "am": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "በአቅራቢያ Mac የለም? Vespertineን በተፈጠረ ቤተ-መጻሕፍት ይሞክሩ። ሲጫወት ለመስማት በ«ማጫወቻ ቦታ» ውስጥ ይህን መሣሪያ ይምረጡ።"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لا يوجد Mac قريب؟ جرّب Vespertine مع مكتبة مختلَقة. اختر هذا الجهاز في «التشغيل على» لتسمعها تُشغَّل."
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "কাছে কোনো Mac নেই? একটি বানানো লাইব্রেরি দিয়ে Vespertine চেষ্টা করুন। বাজতে শুনতে «যেখানে চালাবেন»-এ এই ডিভাইসটি বেছে নিন।"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Žádný Mac poblíž? Vyzkoušejte Vespertine s vymyšlenou knihovnou. Chcete-li ji slyšet hrát, vyberte v „Přehrávat na“ toto zařízení."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingen Mac i nærheden? Prøv Vespertine med et opdigtet bibliotek. Vælg denne enhed i “Afspil på” for at høre det spille."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kein Mac in der Nähe? Probiere Vespertine mit einer erfundenen Mediathek aus. Wähle dieses Gerät unter „Wiedergabe auf“, um sie zu hören."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Κανένα Mac κοντά; Δοκιμάστε το Vespertine με μια φανταστική βιβλιοθήκη. Επιλέξτε αυτήν τη συσκευή στην «Αναπαραγωγή σε» για να την ακούσετε."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿No hay un Mac cerca? Prueba Vespertine con una biblioteca inventada. Elige este dispositivo en «Reproducir en» para oírla."
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac نزدیک نیست؟ Vespertine را با یک کتابخانهٔ ساختگی امتحان کنید. برای شنیدن پخش، این دستگاه را در «پخش روی» انتخاب کنید."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eikö Macia ole lähellä? Kokeile Vespertinea keksityllä kirjastolla. Valitse tämä laite kohdassa ”Toista laitteessa”, niin kuulet sen soivan."
+          }
+        },
+        "fil": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Walang Mac sa malapit? Subukan ang Vespertine gamit ang isang gawa-gawang library. Piliin ang device na ito sa “I-play sa” para marinig itong tumugtog."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pas de Mac à proximité ? Essayez Vespertine avec une bibliothèque imaginaire. Choisissez cet appareil dans « Lire sur » pour l’entendre."
+          }
+        },
+        "gu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "નજીકમાં કોઈ Mac નથી? બનાવટી લાઇબ્રેરી સાથે Vespertine અજમાવો. તેને વાગતું સાંભળવા માટે «અહીં વગાડો»માં આ ડિવાઇસ પસંદ કરો."
+          }
+        },
+        "ha": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Babu Mac a kusa? Gwada Vespertine da laburare da aka ƙirƙira. Zaɓi wannan na’ura a “Kunna a Kan” don jin ta tana kunnawa."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "אין Mac בקרבת מקום? אפשר לנסות את Vespertine עם ספריה מומצאת. כדי לשמוע אותה מתנגנת, יש לבחור את המכשיר הזה ב״ניגון ב־״."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "पास में कोई Mac नहीं? एक बनावटी लाइब्रेरी के साथ Vespertine आज़माएँ। उसे बजते सुनने के लिए «यहाँ चलाएँ» में यह डिवाइस चुनें।"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nincs Mac a közelben? Próbáld ki a Vespertine-t egy kitalált könyvtárral. Hogy halld is, válaszd ezt az eszközt a „Lejátszás itt” listában."
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tidak ada Mac di dekat Anda? Coba Vespertine dengan perpustakaan rekaan. Pilih perangkat ini di “Putar di” untuk mendengarnya diputar."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nessun Mac nelle vicinanze? Prova Vespertine con una libreria inventata. Scegli questo dispositivo in “Riproduci su” per sentirla suonare."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "近くにMacがありませんか？架空のライブラリでVespertineを試せます。再生を聴くには、「再生先」でこのデバイスを選択してください。"
+          }
+        },
+        "kn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ಹತ್ತಿರ Mac ಇಲ್ಲವೇ? ಕಲ್ಪಿತ ಲೈಬ್ರರಿಯೊಂದಿಗೆ Vespertine ಪ್ರಯತ್ನಿಸಿ. ಅದು ಪ್ಲೇ ಆಗುವುದನ್ನು ಕೇಳಲು «ಇಲ್ಲಿ ಪ್ಲೇ ಮಾಡಿ» ನಲ್ಲಿ ಈ ಸಾಧನವನ್ನು ಆಯ್ಕೆಮಾಡಿ."
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "근처에 Mac이 없습니까? 가상의 보관함으로 Vespertine을 사용해 보십시오. 재생되는 소리를 들으려면 ‘재생 위치’에서 이 기기를 선택하십시오."
+          }
+        },
+        "ml": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "അടുത്ത് Mac ഇല്ലേ? ഒരു സാങ്കൽപ്പിക ലൈബ്രറിയുമായി Vespertine പരീക്ഷിക്കുക. അത് പ്ലേ ചെയ്യുന്നത് കേൾക്കാൻ «ഇവിടെ പ്ലേ ചെയ്യുക» എന്നതിൽ ഈ ഉപകരണം തിരഞ്ഞെടുക്കുക."
+          }
+        },
+        "mr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "जवळ Mac नाही? काल्पनिक लायब्ररीसह Vespertine वापरून पहा. ते वाजताना ऐकण्यासाठी «येथे वाजवा» मध्ये हे डिव्हाइस निवडा."
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiada Mac berdekatan? Cuba Vespertine dengan pustaka rekaan. Pilih peranti ini dalam “Main pada” untuk mendengarnya dimainkan."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingen Mac i nærheten? Prøv Vespertine med et oppdiktet bibliotek. Velg denne enheten i «Spill på» for å høre det spille."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geen Mac in de buurt? Probeer Vespertine met een verzonnen bibliotheek. Kies dit apparaat in ‘Speel af op’ om hem te horen spelen."
+          }
+        },
+        "pa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ਨੇੜੇ ਕੋਈ Mac ਨਹੀਂ? ਇੱਕ ਬਣਾਈ ਹੋਈ ਲਾਇਬ੍ਰੇਰੀ ਨਾਲ Vespertine ਅਜ਼ਮਾਓ। ਉਸ ਨੂੰ ਚੱਲਦੇ ਸੁਣਨ ਲਈ «ਇੱਥੇ ਚਲਾਓ» ਵਿੱਚ ਇਹ ਡਿਵਾਈਸ ਚੁਣੋ।"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nie ma Maca w pobliżu? Wypróbuj Vespertine ze zmyśloną biblioteką. Wybierz to urządzenie w „Odtwarzaj na”, aby ją usłyszeć."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nenhum Mac por perto? Experimente o Vespertine com uma biblioteca inventada. Escolha este dispositivo em “Tocar em” para ouvi-la tocar."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nenhum Mac por perto? Experimente o Vespertine com uma biblioteca inventada. Escolha este dispositivo em “Reproduzir em” para a ouvir tocar."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niciun Mac în apropiere? Încercați Vespertine cu o bibliotecă inventată. Alegeți acest dispozitiv în „Redă pe” ca s-o auziți."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingen Mac i närheten? Prova Vespertine med ett påhittat bibliotek. Välj den här enheten i ”Spela på” för att höra det spela."
+          }
+        },
+        "sw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hakuna Mac karibu? Jaribu Vespertine ukitumia maktaba ya kubuni. Chagua kifaa hiki kwenye “Cheza kwenye” ili uisikie ikicheza."
+          }
+        },
+        "ta": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "அருகில் Mac இல்லையா? ஒரு கற்பனை நூலகத்துடன் Vespertine-ஐ முயலுங்கள். அது இயங்குவதைக் கேட்க, «இதில் இயக்கு» என்பதில் இந்தச் சாதனத்தைத் தேர்ந்தெடுக்கவும்."
+          }
+        },
+        "te": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "దగ్గరలో Mac లేదా? ఒక కల్పిత లైబ్రరీతో Vespertine ప్రయత్నించండి. అది ప్లే అవుతుండగా వినడానికి «ఇక్కడ ప్లే చేయి»లో ఈ పరికరాన్ని ఎంచుకోండి."
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ไม่มี Mac อยู่ใกล้ๆ ใช่ไหม ลองใช้ Vespertine กับคลังที่สมมติขึ้น เลือกอุปกรณ์เครื่องนี้ใน “เล่นบน” เพื่อฟังเสียงเล่น"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yakında Mac yok mu? Vespertine’i uydurma bir arşivle deneyin. Çaldığını duymak için “Çalma Yeri”nde bu aygıtı seçin."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Поруч немає Mac? Спробуйте Vespertine з вигаданою медіатекою. Щоб почути, як вона грає, виберіть цей пристрій у «Відтворювати на»."
+          }
+        },
+        "ur": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "قریب کوئی Mac نہیں؟ ایک فرضی لائبریری کے ساتھ Vespertine آزمائیں۔ اسے چلتا سننے کے لیے «یہاں چلائیں» میں یہ ڈیوائس منتخب کریں۔"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Không có máy Mac gần đây? Hãy thử Vespertine với một thư viện giả lập. Chọn thiết bị này trong “Phát trên” để nghe phát."
+          }
+        },
+        "zh-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "附近沒有 Mac？用虛構的資料庫試試 Vespertine。在「播放位置」中選擇此裝置即可聽到播放。"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "附近没有 Mac？用虚构的资料库试试 Vespertine。在“播放位置”中选择此设备即可听到播放。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "附近沒有 Mac？用虛構的資料庫試試 Vespertine。在「播放位置」中選擇此裝置即可聽到播放。"
           }
         }
       }
@@ -21016,6 +21822,275 @@
           "stringUnit": {
             "state": "translated",
             "value": "或者只輸入伺服器，例如 smb://nas.local，再從它的共享中選擇。"
+          }
+        }
+      }
+    },
+    "Play On": {
+      "comment": "Title of the list where the user chooses where music plays: this iPhone (its speaker, headphones, AirPlay or a DAC) or one of the Mac’s outputs. Also the label of the button that opens it. Like AirPlay’s “Play On”: short, a title.",
+      "localizations": {
+        "am": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ማጫወቻ ቦታ"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "التشغيل على"
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "যেখানে চালাবেন"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Přehrávat na"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afspil på"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wiedergabe auf"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Αναπαραγωγή σε"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reproducir en"
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "پخش روی"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toista laitteessa"
+          }
+        },
+        "fil": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I-play sa"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lire sur"
+          }
+        },
+        "gu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "અહીં વગાડો"
+          }
+        },
+        "ha": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kunna a Kan"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ניגון ב־"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "यहाँ चलाएँ"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lejátszás itt"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Putar di"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Riproduci su"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "再生先"
+          }
+        },
+        "kn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ಇಲ್ಲಿ ಪ್ಲೇ ಮಾಡಿ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "재생 위치"
+          }
+        },
+        "ml": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ഇവിടെ പ്ലേ ചെയ്യുക"
+          }
+        },
+        "mr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "येथे वाजवा"
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Main pada"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spill på"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Speel af op"
+          }
+        },
+        "pa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ਇੱਥੇ ਚਲਾਓ"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Odtwarzaj na"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tocar em"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reproduzir em"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Redă pe"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spela på"
+          }
+        },
+        "sw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cheza kwenye"
+          }
+        },
+        "ta": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "இதில் இயக்கு"
+          }
+        },
+        "te": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ఇక్కడ ప్లే చేయి"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "เล่นบน"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Çalma Yeri"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Відтворювати на"
+          }
+        },
+        "ur": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "یہاں چلائیں"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Phát trên"
+          }
+        },
+        "zh-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "播放位置"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "播放位置"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "播放位置"
           }
         }
       }
@@ -21821,6 +22896,275 @@
           "stringUnit": {
             "state": "translated",
             "value": "部分歌曲連續兩次未能完整送達，因此沒有保留。下次打開 Vespertine 時會再次取得。"
+          }
+        }
+      }
+    },
+    "The Mac can’t play that: it isn’t in the Mac’s library. To play it, choose this device in Play On.": {
+      "comment": "Shown on the iPhone when the Mac is what plays and a song is chosen that is only on a network share or in a folder on the phone. “Play On” must match the name of the list where the Mac’s outputs and this device are chosen.",
+      "localizations": {
+        "am": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac ያንን መጫወት አይችልም፦ በMac ቤተ-መጻሕፍት ውስጥ የለም። እሱን ለመጫወት በ«ማጫወቻ ቦታ» ውስጥ ይህን መሣሪያ ይምረጡ።"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لا يستطيع الـ Mac تشغيل ذلك: فهو غير موجود في مكتبة الـ Mac. لتشغيله، اختر هذا الجهاز في «التشغيل على»."
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac সেটি বাজাতে পারে না: সেটি Mac-এর লাইব্রেরিতে নেই। সেটি বাজাতে «যেখানে চালাবেন»-এ এই ডিভাইসটি বেছে নিন।"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tohle Mac přehrát nemůže: není to v knihovně Macu. Chcete-li to přehrát, vyberte v „Přehrávat na“ toto zařízení."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac’en kan ikke afspille det: Det findes ikke i Mac’ens bibliotek. Hvis du vil afspille det, skal du vælge denne enhed i “Afspil på”."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das kann der Mac nicht spielen: Es ist nicht in der Mediathek des Mac. Um es zu spielen, wähle dieses Gerät unter „Wiedergabe auf“."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Το Mac δεν μπορεί να το παίξει: δεν υπάρχει στη βιβλιοθήκη του Mac. Για να το παίξετε, επιλέξτε αυτήν τη συσκευή στην «Αναπαραγωγή σε»."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El Mac no puede reproducir eso: no está en la biblioteca del Mac. Para reproducirlo, elige este dispositivo en «Reproducir en»."
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac نمی‌تواند آن را پخش کند: در کتابخانهٔ Mac نیست. برای پخش آن، این دستگاه را در «پخش روی» انتخاب کنید."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac ei voi toistaa sitä: sitä ei ole Macin kirjastossa. Jos haluat toistaa sen, valitse tämä laite kohdassa ”Toista laitteessa”."
+          }
+        },
+        "fil": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hindi iyon mapapatugtog ng Mac: wala iyon sa library ng Mac. Para patugtugin ito, piliin ang device na ito sa “I-play sa”."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le Mac ne peut pas lire cet élément : il n’est pas dans la bibliothèque du Mac. Pour le lire, choisissez cet appareil dans « Lire sur »."
+          }
+        },
+        "gu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac તે વગાડી શકતું નથી: તે Macની લાઇબ્રેરીમાં નથી. તેને વગાડવા માટે «અહીં વગાડો»માં આ ડિવાઇસ પસંદ કરો."
+          }
+        },
+        "ha": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac ba zai iya kunna wannan ba: ba ya cikin laburaren Mac. Don kunna shi, zaɓi wannan na’ura a “Kunna a Kan”."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ה־Mac לא יכול לנגן את זה: זה לא נמצא בספריה של ה־Mac. כדי לנגן את זה, יש לבחור את המכשיר הזה ב״ניגון ב־״."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac उसे नहीं चला सकता: वह Mac की लाइब्रेरी में नहीं है। उसे चलाने के लिए «यहाँ चलाएँ» में यह डिवाइस चुनें।"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A Mac ezt nem tudja lejátszani: nincs a Mac könyvtárában. A lejátszásához válaszd ezt az eszközt a „Lejátszás itt” listában."
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac tidak dapat memutarnya: itu tidak ada di perpustakaan Mac. Untuk memutarnya, pilih perangkat ini di “Putar di”."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il Mac non può riprodurlo: non è nella libreria del Mac. Per riprodurlo, scegli questo dispositivo in “Riproduci su”."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Macでは再生できません。その項目はMacのライブラリにありません。再生するには、「再生先」でこのデバイスを選択してください。"
+          }
+        },
+        "kn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac ಅದನ್ನು ಪ್ಲೇ ಮಾಡಲಾಗದು: ಅದು Mac ನ ಲೈಬ್ರರಿಯಲ್ಲಿ ಇಲ್ಲ. ಅದನ್ನು ಪ್ಲೇ ಮಾಡಲು «ಇಲ್ಲಿ ಪ್ಲೇ ಮಾಡಿ» ನಲ್ಲಿ ಈ ಸಾಧನವನ್ನು ಆಯ್ಕೆಮಾಡಿ."
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac에서 재생할 수 없습니다. 해당 항목이 Mac의 보관함에 없습니다. 재생하려면 ‘재생 위치’에서 이 기기를 선택하십시오."
+          }
+        },
+        "ml": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac-ന് അത് പ്ലേ ചെയ്യാനാവില്ല: അത് Mac-ന്റെ ലൈബ്രറിയിലില്ല. അത് പ്ലേ ചെയ്യാൻ «ഇവിടെ പ്ലേ ചെയ്യുക» എന്നതിൽ ഈ ഉപകരണം തിരഞ്ഞെടുക്കുക."
+          }
+        },
+        "mr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac ते वाजवू शकत नाही: ते Mac च्या लायब्ररीमध्ये नाही. ते वाजवण्यासाठी «येथे वाजवा» मध्ये हे डिव्हाइस निवडा."
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac tidak dapat memainkannya: ia tiada dalam pustaka Mac. Untuk memainkannya, pilih peranti ini dalam “Main pada”."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Macen kan ikke spille det: Det finnes ikke i Macens bibliotek. Hvis du vil spille det, velger du denne enheten i «Spill på»."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De Mac kan dat niet afspelen: het staat niet in de bibliotheek van de Mac. Kies dit apparaat in ‘Speel af op’ om het af te spelen."
+          }
+        },
+        "pa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac ਉਸ ਨੂੰ ਨਹੀਂ ਚਲਾ ਸਕਦਾ: ਉਹ Mac ਦੀ ਲਾਇਬ੍ਰੇਰੀ ਵਿੱਚ ਨਹੀਂ ਹੈ। ਉਸ ਨੂੰ ਚਲਾਉਣ ਲਈ «ਇੱਥੇ ਚਲਾਓ» ਵਿੱਚ ਇਹ ਡਿਵਾਈਸ ਚੁਣੋ।"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac nie może tego odtworzyć: nie ma tego w bibliotece Maca. Aby to odtworzyć, wybierz to urządzenie w „Odtwarzaj na”."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Mac não pode tocar isso: não está na biblioteca do Mac. Para tocar, escolha este dispositivo em “Tocar em”."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O Mac não consegue reproduzir isso: não está na biblioteca do Mac. Para o reproduzir, escolha este dispositivo em “Reproduzir em”."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac-ul nu poate reda aceasta: nu este în biblioteca Mac-ului. Pentru a o reda, alegeți acest dispozitiv în „Redă pe”."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Macen kan inte spela det: det finns inte i Macens bibliotek. Om du vill spela det väljer du den här enheten i ”Spela på”."
+          }
+        },
+        "sw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac haiwezi kucheza hiyo: haipo kwenye maktaba ya Mac. Ili kuicheza, chagua kifaa hiki kwenye “Cheza kwenye”."
+          }
+        },
+        "ta": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac அதை இயக்க முடியாது: அது Mac-இன் நூலகத்தில் இல்லை. அதை இயக்க, «இதில் இயக்கு» என்பதில் இந்தச் சாதனத்தைத் தேர்ந்தெடுக்கவும்."
+          }
+        },
+        "te": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac దాన్ని ప్లే చేయలేదు: అది Mac లైబ్రరీలో లేదు. దాన్ని ప్లే చేయడానికి «ఇక్కడ ప్లే చేయి»లో ఈ పరికరాన్ని ఎంచుకోండి."
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac เล่นรายการนั้นไม่ได้ เพราะไม่ได้อยู่ในคลังของ Mac หากต้องการเล่น ให้เลือกอุปกรณ์เครื่องนี้ใน “เล่นบน”"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac bunu çalamaz: Mac’in arşivinde yok. Çalmak için “Çalma Yeri”nde bu aygıtı seçin."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac не може це відтворити: цього немає в медіатеці Mac. Щоб відтворити, виберіть цей пристрій у «Відтворювати на»."
+          }
+        },
+        "ur": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac اسے نہیں چلا سکتا: وہ Mac کی لائبریری میں نہیں ہے۔ اسے چلانے کے لیے «یہاں چلائیں» میں یہ ڈیوائس منتخب کریں۔"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Máy Mac không thể phát mục đó: mục đó không có trong thư viện của máy Mac. Để phát, hãy chọn thiết bị này trong “Phát trên”."
+          }
+        },
+        "zh-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac 無法播放該項目：它不在 Mac 的資料庫中。如要播放，請在「播放位置」中選擇此裝置。"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac 无法播放该项目：它不在 Mac 的资料库中。要播放它，请在“播放位置”中选择此设备。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac 無法播放該項目：它不在 Mac 的資料庫中。若要播放，請在「播放位置」中選擇此裝置。"
           }
         }
       }
@@ -47380,275 +48724,6 @@
         }
       }
     },
-    "For music played on this device. Each of these is also on the Output screen.": {
-      "comment": "First-run setup on the iPhone and iPad. Under the heading “How it should sound”. Output is the app's screen of that name.",
-      "localizations": {
-        "am": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "በዚህ መሣሪያ ለሚጫወት ሙዚቃ። እያንዳንዳቸው በ«ውፅዓት» ማያ ገጽ ላይም አሉ።"
-          }
-        },
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "للموسيقى التي تُشغَّل على هذا الجهاز. كلٌّ من هذه موجود أيضًا في شاشة «المخرج»."
-          }
-        },
-        "bn": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "এই ডিভাইসে চালানো সংগীতের জন্য। এর প্রতিটিই আউটপুট স্ক্রিনেও আছে।"
-          }
-        },
-        "cs": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pro hudbu přehrávanou na tomto zařízení. Všechno z toho najdete také na obrazovce Výstup."
-          }
-        },
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "For musik afspillet på denne enhed. Hver af disse findes også på skærmen Output."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Für Musik, die dieses Gerät abspielt. Alles davon findest du auch in der Ansicht „Ausgabe“."
-          }
-        },
-        "el": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Για τη μουσική που παίζει αυτή η συσκευή. Όλα αυτά υπάρχουν και στην οθόνη «Έξοδος»."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Para la música que reproduce este dispositivo. Todo esto está también en la pantalla Salida."
-          }
-        },
-        "fa": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "برای موسیقی‌ای که این دستگاه پخش می‌کند. هر یک از این‌ها در صفحهٔ «خروجی» هم هست."
-          }
-        },
-        "fi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tällä laitteella toistettavalle musiikille. Kaikki nämä ovat myös Ulostulo-näkymässä."
-          }
-        },
-        "fil": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Para sa musikang pine-play sa device na ito. Nasa screen ng Output din ang bawat isa sa mga ito."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pour la musique lue sur cet appareil. Chacun de ces réglages se trouve aussi sur l’écran Sortie."
-          }
-        },
-        "gu": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "આ ડિવાઇસ પર વાગતા સંગીત માટે. આ દરેક આઉટપુટ સ્ક્રીન પર પણ છે."
-          }
-        },
-        "ha": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Don kiɗan da ake kunnawa a wannan na'ura. Kowanne daga cikin waɗannan yana kan allon Fitarwa ma."
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "למוזיקה שמתנגנת במכשיר הזה. כל אחד מאלה נמצא גם במסך ״פלט״."
-          }
-        },
-        "hi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "इस डिवाइस पर चलने वाले संगीत के लिए। इनमें से हर एक आउटपुट स्क्रीन पर भी है।"
-          }
-        },
-        "hu": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Az ezen az eszközön lejátszott zenéhez. Mindegyik megtalálható a Kimenet képernyőn is."
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Untuk musik yang diputar di perangkat ini. Semuanya juga ada di layar Output."
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Per la musica riprodotta su questo dispositivo. Ognuna di queste opzioni è anche nella schermata Uscita."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "このデバイスで再生する音楽のための設定です。どれも「出力」画面にもあります。"
-          }
-        },
-        "kn": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ಈ ಸಾಧನದಲ್ಲಿ ಪ್ಲೇ ಆಗುವ ಸಂಗೀತಕ್ಕಾಗಿ. ಇವೆಲ್ಲವೂ ಔಟ್‌ಪುಟ್ ಪರದೆಯಲ್ಲೂ ಇವೆ."
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "이 기기에서 재생하는 음악을 위한 설정입니다. 모두 출력 화면에도 있습니다."
-          }
-        },
-        "ml": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ഈ ഉപകരണത്തിൽ പ്ലേ ചെയ്യുന്ന സംഗീതത്തിന്. ഇവ ഓരോന്നും ഔട്ട്‌പുട്ട് സ്ക്രീനിലും ഉണ്ട്."
-          }
-        },
-        "mr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "या डिव्हाइसवर वाजणाऱ्या संगीतासाठी. यातील प्रत्येक गोष्ट आउटपुट स्क्रीनवरही आहे."
-          }
-        },
-        "ms": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Untuk muzik yang dimainkan pada peranti ini. Setiap satunya juga ada pada skrin Output."
-          }
-        },
-        "nb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "For musikk som spilles på denne enheten. Hver av disse finnes også på Utgang-skjermen."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Voor muziek die op dit apparaat wordt afgespeeld. Elk hiervan staat ook in het scherm Uitvoer."
-          }
-        },
-        "pa": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ਇਸ ਡਿਵਾਈਸ ’ਤੇ ਚੱਲਣ ਵਾਲੇ ਸੰਗੀਤ ਲਈ। ਇਨ੍ਹਾਂ ਵਿੱਚੋਂ ਹਰ ਇੱਕ ਆਉਟਪੁੱਟ ਸਕਰੀਨ ’ਤੇ ਵੀ ਹੈ।"
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dla muzyki odtwarzanej na tym urządzeniu. Każda z tych opcji jest też na ekranie Wyjście."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Para a música tocada neste dispositivo. Cada um destes também está na tela Saída."
-          }
-        },
-        "pt-PT": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Para a música reproduzida neste dispositivo. Cada um destes está também no ecrã Saída."
-          }
-        },
-        "ro": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pentru muzica redată pe acest dispozitiv. Fiecare dintre acestea se află și pe ecranul Ieșire."
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "För musik som spelas på den här enheten. Var och en av dessa finns också på skärmen Utgång."
-          }
-        },
-        "sw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kwa muziki unaochezwa kwenye kifaa hiki. Kila kimoja kati ya hivi kipo pia kwenye skrini ya Kutoa sauti."
-          }
-        },
-        "ta": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "இந்தச் சாதனத்தில் இயங்கும் இசைக்கானவை. இவை ஒவ்வொன்றும் வெளியீடு திரையிலும் உள்ளன."
-          }
-        },
-        "te": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ఈ పరికరంలో ప్లే అయ్యే సంగీతం కోసం. వీటిలో ప్రతిదీ అవుట్‌పుట్ స్క్రీన్‌లో కూడా ఉంది."
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "สำหรับเพลงที่เล่นบนอุปกรณ์นี้ ทุกรายการอยู่ในหน้าจอขาออกด้วย"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bu aygıtta çalınan müzik için. Bunların her biri Çıkış ekranında da bulunur."
-          }
-        },
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Для музики, яку відтворює цей пристрій. Усе це є також на екрані «Вихід»."
-          }
-        },
-        "ur": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "اس ڈیوائس پر چلنے والی موسیقی کے لیے۔ ان میں سے ہر ایک آؤٹ پٹ اسکرین پر بھی موجود ہے۔"
-          }
-        },
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dành cho nhạc phát trên thiết bị này. Mỗi mục này cũng có trên màn hình Đầu ra."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "适用于在这台设备上播放的音乐。每一项也都在“输出”屏幕上。"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "適用於在這部裝置上播放的音樂。每一項也都在「輸出」畫面上。"
-          }
-        },
-        "zh-HK": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "適用於在這部裝置上播放的音樂。每一項也都在「輸出」畫面上。"
-          }
-        }
-      }
-    },
     "Evens out loudness between songs or whole albums, using the ReplayGain values in your files. Off, no sample is changed.": {
       "comment": "First-run setup on the iPhone and iPad. Under “Volume leveling (ReplayGain)”. “Off, …” says what happens when the choice is Off.",
       "localizations": {
@@ -48456,275 +49531,6 @@
         }
       }
     },
-    "A DAC plugged into this device is asked for each song’s own sample rate. The Output screen shows what reaches it, and has the test for playing DSD natively.": {
-      "comment": "First-run setup on the iPhone and iPad. A note at the foot of the Sound step. DSD and DAC keep their names.",
-      "localizations": {
-        "am": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "በዚህ መሣሪያ ላይ የተሰካ ዳክ የእያንዳንዱን ዘፈን የራሱ የናሙና መጠን ይጠየቃል። የ«ውፅዓት» ማያ ገጽ ወደ እሱ የሚደርሰውን ያሳያል፣ DSDን በቀጥታ የማጫወት ሙከራም አለው።"
-          }
-        },
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "يُطلب من DAC الموصول بهذا الجهاز معدّل العيّنات الخاص بكل أغنية. شاشة «المخرج» تعرض ما يصل إليه، وفيها اختبار تشغيل DSD مباشرةً."
-          }
-        },
-        "bn": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "এই ডিভাইসে লাগানো DAC-কে প্রতিটি গানের নিজস্ব স্যাম্পল রেট চাওয়া হয়। আউটপুট স্ক্রিন দেখায় তাতে কী পৌঁছায়, আর সেখানেই DSD সরাসরি চালানোর পরীক্ষা আছে।"
-          }
-        },
-        "cs": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "DAC připojený k tomuto zařízení je požádán o vlastní vzorkovací frekvenci každé skladby. Obrazovka Výstup ukazuje, co k němu dorazí, a je na ní test nativního přehrávání DSD."
-          }
-        },
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "En DAC, der er sluttet til denne enhed, bliver bedt om hver sangs egen samplingfrekvens. Skærmen Output viser, hvad der når frem til den, og har testen til at afspille DSD direkte."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ein an dieses Gerät angeschlossener DAC wird um die eigene Abtastrate jedes Titels gebeten. Die Ansicht „Ausgabe“ zeigt, was bei ihm ankommt, und enthält den Test für die native DSD-Wiedergabe."
-          }
-        },
-        "el": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Από ένα DAC συνδεδεμένο σε αυτή τη συσκευή ζητείται ο ρυθμός δειγματοληψίας κάθε τραγουδιού. Η οθόνη «Έξοδος» δείχνει τι φτάνει σε αυτό και έχει τη δοκιμή για εγγενή αναπαραγωγή DSD."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "A un DAC conectado a este dispositivo se le pide la frecuencia de muestreo propia de cada canción. La pantalla Salida muestra lo que le llega y tiene la prueba para reproducir DSD de forma nativa."
-          }
-        },
-        "fa": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "از DAC متصل به این دستگاه، نرخ نمونه‌برداری خودِ هر آهنگ خواسته می‌شود. صفحهٔ «خروجی» نشان می‌دهد چه چیزی به آن می‌رسد و آزمون پخش مستقیم DSD هم آنجاست."
-          }
-        },
-        "fi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tähän laitteeseen liitetyltä DAC:lta pyydetään kunkin kappaleen omaa näytteenottotaajuutta. Ulostulo-näkymä näyttää, mitä sille päätyy, ja siellä on DSD:n natiivitoiston testi."
-          }
-        },
-        "fil": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ang DAC na nakasaksak sa device na ito ay hinihingan ng sariling sample rate ng bawat kanta. Ipinapakita ng screen ng Output kung ano ang umaabot dito, at naroon ang test para sa native na pag-play ng DSD."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Un DAC branché sur cet appareil reçoit la demande de la fréquence d’échantillonnage propre à chaque morceau. L’écran Sortie montre ce qui lui parvient et propose le test de lecture native du DSD."
-          }
-        },
-        "gu": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "આ ડિવાઇસમાં જોડેલા DAC પાસેથી દરેક ગીતનો પોતાનો સેમ્પલ રેટ માગવામાં આવે છે. આઉટપુટ સ્ક્રીન બતાવે છે કે તેના સુધી શું પહોંચે છે, અને DSD સીધું વગાડવાનો ટેસ્ટ પણ ત્યાં છે."
-          }
-        },
-        "ha": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ana tambayar DAC da aka haɗa da wannan na'ura ƙimar samfurin kowace waƙa. Allon Fitarwa yana nuna abin da ke isa gare ta, kuma yana da gwajin kunna DSD kai tsaye."
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "DAC שמחובר למכשיר הזה מתבקש לעבוד בקצב הדגימה של כל שיר. מסך ״פלט״ מציג מה מגיע אליו, ושם נמצאת גם הבדיקה לניגון DSD ישיר."
-          }
-        },
-        "hi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "इस डिवाइस में लगे DAC से हर गाने की अपनी सैंपल रेट माँगी जाती है। आउटपुट स्क्रीन दिखाती है कि उस तक क्या पहुँचता है, और DSD को सीधे चलाने का टेस्ट भी वहीं है।"
-          }
-        },
-        "hu": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Az eszközhöz csatlakoztatott DAC-tól minden dal saját mintavételi frekvenciáját kéri. A Kimenet képernyő megmutatja, mi jut el hozzá, és ott van a natív DSD-lejátszás tesztje is."
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "DAC yang dicolokkan ke perangkat ini diminta memakai laju sampel tiap lagu. Layar Output menunjukkan apa yang sampai ke DAC, dan memuat tes untuk memutar DSD secara native."
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "A un DAC collegato a questo dispositivo viene chiesta la frequenza di campionamento propria di ogni brano. La schermata Uscita mostra cosa gli arriva e contiene il test per riprodurre DSD in modo nativo."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "このデバイスに接続したDACには、曲ごとのサンプルレートが要求されます。「出力」画面にはDACに届く内容が表示され、DSDをネイティブ再生するテストもあります。"
-          }
-        },
-        "kn": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ಈ ಸಾಧನಕ್ಕೆ ಜೋಡಿಸಿದ DAC ಗೆ ಪ್ರತಿ ಹಾಡಿನ ಸ್ವಂತ ಸ್ಯಾಂಪಲ್ ರೇಟ್ ಕೇಳಲಾಗುತ್ತದೆ. ಔಟ್‌ಪುಟ್ ಪರದೆಯು ಅದಕ್ಕೆ ಏನು ತಲುಪುತ್ತದೆ ಎಂದು ತೋರಿಸುತ್ತದೆ, ಮತ್ತು DSD ಅನ್ನು ನೇರವಾಗಿ ಪ್ಲೇ ಮಾಡುವ ಪರೀಕ್ಷೆಯೂ ಅಲ್ಲಿದೆ."
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "이 기기에 연결한 DAC에는 노래마다 고유한 샘플률이 요청됩니다. 출력 화면에서 DAC에 무엇이 전달되는지 볼 수 있고, DSD 네이티브 재생 테스트도 거기에 있습니다."
-          }
-        },
-        "ml": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ഈ ഉപകരണത്തിൽ ഘടിപ്പിച്ച DAC-നോട് ഓരോ പാട്ടിന്റെയും സ്വന്തം സാമ്പിൾ റേറ്റ് ആവശ്യപ്പെടും. അതിലേക്ക് എന്താണ് എത്തുന്നതെന്ന് ഔട്ട്‌പുട്ട് സ്ക്രീൻ കാണിക്കും, DSD നേരിട്ട് പ്ലേ ചെയ്യാനുള്ള പരിശോധനയും അവിടെയുണ്ട്."
-          }
-        },
-        "mr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "या डिव्हाइसला जोडलेल्या DAC कडे प्रत्येक गाण्याचा स्वतःचा सॅम्पल रेट मागितला जातो. त्याच्यापर्यंत काय पोहोचते ते आउटपुट स्क्रीन दाखवते, आणि DSD थेट वाजवण्याची चाचणीही तेथे आहे."
-          }
-        },
-        "ms": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "DAC yang dipasang pada peranti ini diminta menggunakan kadar sampel setiap lagu. Skrin Output menunjukkan apa yang sampai kepadanya, dan mempunyai ujian untuk memainkan DSD secara natif."
-          }
-        },
-        "nb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "En DAC koblet til denne enheten blir bedt om hver sangs egen samplingsfrekvens. Utgang-skjermen viser hva som når fram til den, og har testen for å spille DSD direkte."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Een DAC die op dit apparaat is aangesloten, krijgt de vraag om de eigen samplefrequentie van elk nummer. Het scherm Uitvoer toont wat er aankomt en bevat de test om DSD native af te spelen."
-          }
-        },
-        "pa": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ਇਸ ਡਿਵਾਈਸ ਨਾਲ ਜੁੜੇ DAC ਤੋਂ ਹਰ ਗੀਤ ਦੀ ਆਪਣੀ ਸੈਂਪਲ ਰੇਟ ਮੰਗੀ ਜਾਂਦੀ ਹੈ। ਆਉਟਪੁੱਟ ਸਕਰੀਨ ਦਿਖਾਉਂਦੀ ਹੈ ਕਿ ਉਸ ਤੱਕ ਕੀ ਪਹੁੰਚਦਾ ਹੈ, ਅਤੇ DSD ਨੂੰ ਸਿੱਧਾ ਚਲਾਉਣ ਦਾ ਟੈਸਟ ਵੀ ਉੱਥੇ ਹੈ।"
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "DAC podłączony do tego urządzenia jest proszony o częstotliwość próbkowania każdego utworu. Ekran Wyjście pokazuje, co do niego dociera, i zawiera test natywnego odtwarzania DSD."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Um DAC conectado a este dispositivo recebe o pedido da taxa de amostragem própria de cada música. A tela Saída mostra o que chega a ele e tem o teste para tocar DSD nativamente."
-          }
-        },
-        "pt-PT": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "A um DAC ligado a este dispositivo é pedida a frequência de amostragem própria de cada música. O ecrã Saída mostra o que lhe chega e tem o teste para reproduzir DSD nativamente."
-          }
-        },
-        "ro": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Unui DAC conectat la acest dispozitiv i se cere rata de eșantionare proprie fiecărei melodii. Ecranul Ieșire arată ce ajunge la el și conține testul pentru redarea nativă a DSD."
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "En DAC som är ansluten till den här enheten ombeds använda varje låts egen samplingsfrekvens. Skärmen Utgång visar vad som når den och har testet för att spela DSD direkt."
-          }
-        },
-        "sw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "DAC iliyochomekwa kwenye kifaa hiki huombwa kiwango cha sampuli cha kila wimbo. Skrini ya Kutoa sauti huonyesha kinachoifikia, na ina jaribio la kucheza DSD moja kwa moja."
-          }
-        },
-        "ta": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "இந்தச் சாதனத்தில் இணைத்த DAC-இடம் ஒவ்வொரு பாடலின் சொந்த சாம்பிள் ரேட் கேட்கப்படும். அதைச் சென்றடைவது என்ன என்பதை வெளியீடு திரை காட்டும்; DSD-ஐ நேரடியாக இயக்கும் சோதனையும் அங்கே உள்ளது."
-          }
-        },
-        "te": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ఈ పరికరానికి కనెక్ట్ చేసిన DAC ను ప్రతి పాట యొక్క సొంత శాంపిల్ రేట్ కోసం అడుగుతారు. దానికి ఏమి చేరుతుందో అవుట్‌పుట్ స్క్రీన్ చూపుతుంది, DSD ను నేరుగా ప్లే చేసే పరీక్ష కూడా అక్కడే ఉంది."
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "DAC ที่เสียบกับอุปกรณ์นี้จะถูกขอให้ใช้อัตราสุ่มสัญญาณของแต่ละเพลง หน้าจอขาออกแสดงสิ่งที่ไปถึง DAC และมีการทดสอบเล่น DSD แบบเนทีฟ"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bu aygıta takılı bir DAC’ten her parçanın kendi örnekleme hızı istenir. Çıkış ekranı ona neyin ulaştığını gösterir ve DSD’yi doğal olarak çalma testini içerir."
-          }
-        },
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ЦАП, підключений до цього пристрою, отримує запит на власну частоту дискретизації кожної пісні. Екран «Вихід» показує, що до нього доходить, і містить тест прямого відтворення DSD."
-          }
-        },
-        "ur": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "اس ڈیوائس سے جڑے DAC سے ہر گانے کی اپنی سیمپل ریٹ مانگی جاتی ہے۔ آؤٹ پٹ اسکرین دکھاتی ہے کہ اس تک کیا پہنچتا ہے، اور DSD کو براہِ راست چلانے کا ٹیسٹ بھی وہیں ہے۔"
-          }
-        },
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "DAC cắm vào thiết bị này được yêu cầu dùng tần số lấy mẫu riêng của từng bài hát. Màn hình Đầu ra cho thấy những gì đến được DAC và có bài kiểm tra phát DSD nguyên bản."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "连接到这台设备的 DAC 会被要求使用每首歌曲自身的采样率。“输出”屏幕会显示送达 DAC 的内容，并提供原生播放 DSD 的测试。"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "連接到這部裝置的 DAC 會被要求使用每首歌曲本身的取樣頻率。「輸出」畫面會顯示送達 DAC 的內容，並提供原生播放 DSD 的測試。"
-          }
-        },
-        "zh-HK": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "連接到這部裝置的 DAC 會被要求使用每首歌曲本身的取樣頻率。「輸出」畫面會顯示送達 DAC 的內容，並提供原生播放 DSD 的測試。"
-          }
-        }
-      }
-    },
     "How Now Playing and your albums look. Both are in Settings too.": {
       "comment": "First-run setup on the iPhone and iPad. Under the heading “A few extras”.",
       "localizations": {
@@ -49528,544 +50334,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mac 上 Vespertine 的遙控器，本身也是一款播放器。"
-          }
-        }
-      }
-    },
-    "Remote: “%@” plays the music, and this device controls it.": {
-      "comment": "Under the Mac / This iPhone switch on the iPhone's Output screen, when the Mac is chosen. %@ is the Mac's name.",
-      "localizations": {
-        "am": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ሪሞት፦ «%@» ሙዚቃውን ያጫውታል፣ ይህ መሣሪያ ደግሞ ይቆጣጠረዋል።"
-          }
-        },
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ريموت: يشغّل “%@” الموسيقى، وهذا الجهاز يتحكم به."
-          }
-        },
-        "bn": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "রিমোট: “%@” সংগীত চালায়, আর এই ডিভাইস সেটি নিয়ন্ত্রণ করে।"
-          }
-        },
-        "cs": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ovladač: hudbu přehrává „%@“ a toto zařízení ho ovládá."
-          }
-        },
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fjernbetjening: “%@” afspiller musikken, og denne enhed styrer den."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fernbedienung: „%@“ spielt die Musik, und dieses Gerät steuert ihn."
-          }
-        },
-        "el": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Τηλεχειριστήριο: το «%@» παίζει τη μουσική και αυτή η συσκευή το ελέγχει."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mando: “%@” reproduce la música y este dispositivo lo controla."
-          }
-        },
-        "fa": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ریموت: «%@» موسیقی را پخش می‌کند و این دستگاه آن را کنترل می‌کند."
-          }
-        },
-        "fi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kaukosäädin: ”%@” toistaa musiikin, ja tämä laite ohjaa sitä."
-          }
-        },
-        "fil": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Remote: ang “%@” ang nagpe-play ng musika, at kinokontrol ito ng device na ito."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Télécommande : « %@ » lit la musique et cet appareil le contrôle."
-          }
-        },
-        "gu": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "રિમોટ: “%@” સંગીત વગાડે છે, અને આ ડિવાઇસ તેને નિયંત્રિત કરે છે."
-          }
-        },
-        "ha": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rimot: “%@” ce ke kunna kiɗan, wannan na'ura kuma tana sarrafa ta."
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "שלט: “%@” מנגן את המוזיקה, ומכשיר זה שולט בו."
-          }
-        },
-        "hi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "रिमोट: “%@” संगीत चलाता है, और यह डिवाइस उसे नियंत्रित करता है।"
-          }
-        },
-        "hu": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Távirányító: a zenét a(z) „%@” játssza, ez az eszköz pedig vezérli."
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Remote: “%@” memutar musik, dan perangkat ini mengendalikannya."
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Telecomando: “%@” riproduce la musica e questo dispositivo lo controlla."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "リモコン：「%@」が音楽を再生し、このデバイスで操作します。"
-          }
-        },
-        "kn": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ರಿಮೋಟ್: “%@” ಸಂಗೀತವನ್ನು ಪ್ಲೇ ಮಾಡುತ್ತದೆ, ಮತ್ತು ಈ ಸಾಧನ ಅದನ್ನು ನಿಯಂತ್ರಿಸುತ್ತದೆ."
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "리모컨: ‘%@’이(가) 음악을 재생하고 이 기기가 제어합니다."
-          }
-        },
-        "ml": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "റിമോട്ട്: “%@” സംഗീതം പ്ലേ ചെയ്യുന്നു, ഈ ഉപകരണം അതിനെ നിയന്ത്രിക്കുന്നു."
-          }
-        },
-        "mr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "रिमोट: “%@” संगीत वाजवतो, आणि हे डिव्हाइस त्याचे नियंत्रण करते."
-          }
-        },
-        "ms": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kawalan jauh: “%@” memainkan muzik, dan peranti ini mengawalnya."
-          }
-        },
-        "nb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fjernkontroll: «%@» spiller musikken, og denne enheten styrer den."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Afstandsbediening: ‘%@’ speelt de muziek af en dit apparaat bedient hem."
-          }
-        },
-        "pa": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ਰਿਮੋਟ: “%@” ਸੰਗੀਤ ਚਲਾਉਂਦਾ ਹੈ, ਅਤੇ ਇਹ ਡਿਵਾਈਸ ਉਸਨੂੰ ਕੰਟਰੋਲ ਕਰਦਾ ਹੈ।"
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pilot: muzykę odtwarza „%@”, a to urządzenie nim steruje."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Controle remoto: “%@” toca a música, e este dispositivo o controla."
-          }
-        },
-        "pt-PT": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Comando: “%@” reproduz a música e este dispositivo controla-o."
-          }
-        },
-        "ro": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Telecomandă: „%@” redă muzica, iar acest dispozitiv îl controlează."
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fjärrkontroll: ”%@” spelar musiken och den här enheten styr den."
-          }
-        },
-        "sw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rimoti: “%@” hucheza muziki, na kifaa hiki huidhibiti."
-          }
-        },
-        "ta": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ரிமோட்: “%@” இசையை இயக்கும்; இந்தச் சாதனம் அதைக் கட்டுப்படுத்தும்."
-          }
-        },
-        "te": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "రిమోట్: “%@” సంగీతాన్ని ప్లే చేస్తుంది, ఈ పరికరం దాన్ని నియంత్రిస్తుంది."
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "รีโมต: “%@” เป็นเครื่องเล่นเพลง และอุปกรณ์เครื่องนี้ใช้ควบคุม"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kumanda: Müziği “%@” çalar, bu aygıt da onu denetler."
-          }
-        },
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Пульт: музику відтворює «%@», а цей пристрій керує ним."
-          }
-        },
-        "ur": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ریموٹ: “%@” موسیقی چلاتا ہے، اور یہ ڈیوائس اسے کنٹرول کرتی ہے۔"
-          }
-        },
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Điều khiển từ xa: “%@” phát nhạc, còn thiết bị này điều khiển."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "遥控：由“%@”播放音乐，此设备负责控制。"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "遙控：由「%@」播放音樂，此裝置負責控制。"
-          }
-        },
-        "zh-HK": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "遙控：由「%@」播放音樂，此裝置負責控制。"
-          }
-        }
-      }
-    },
-    "This device plays the music, and “%@” sends it the songs.": {
-      "comment": "Under the Mac / This iPhone switch on the iPhone's Output screen, when this device is chosen. %@ is the Mac's name.",
-      "localizations": {
-        "am": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ይህ መሣሪያ ሙዚቃውን ያጫውታል፣ «%@» ደግሞ ዘፈኖቹን ይልክለታል።"
-          }
-        },
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "يشغّل هذا الجهاز الموسيقى، ويرسل “%@” الأغاني إليه."
-          }
-        },
-        "bn": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "এই ডিভাইস সংগীত চালায়, আর “%@” এতে গানগুলো পাঠায়।"
-          }
-        },
-        "cs": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hudbu přehrává toto zařízení a „%@“ mu posílá skladby."
-          }
-        },
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Denne enhed afspiller musikken, og “%@” sender sangene til den."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dieses Gerät spielt die Musik, und „%@“ sendet ihm die Titel."
-          }
-        },
-        "el": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Αυτή η συσκευή παίζει τη μουσική και το «%@» της στέλνει τα τραγούδια."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Este dispositivo reproduce la música y “%@” le envía las canciones."
-          }
-        },
-        "fa": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "این دستگاه موسیقی را پخش می‌کند و «%@» آهنگ‌ها را برایش می‌فرستد."
-          }
-        },
-        "fi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tämä laite toistaa musiikin, ja ”%@” lähettää sille kappaleet."
-          }
-        },
-        "fil": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ang device na ito ang nagpe-play ng musika, at ipinapadala rito ng “%@” ang mga kanta."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cet appareil lit la musique et « %@ » lui envoie les morceaux."
-          }
-        },
-        "gu": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "આ ડિવાઇસ સંગીત વગાડે છે, અને “%@” તેને ગીતો મોકલે છે."
-          }
-        },
-        "ha": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wannan na'ura ce ke kunna kiɗan, “%@” kuma tana aika mata waƙoƙin."
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "מכשיר זה מנגן את המוזיקה, ו־“%@” שולח אליו את השירים."
-          }
-        },
-        "hi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "यह डिवाइस संगीत चलाता है, और “%@” इसे गीत भेजता है।"
-          }
-        },
-        "hu": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "A zenét ez az eszköz játssza, a dalokat pedig a(z) „%@” küldi neki."
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Perangkat ini memutar musik, dan “%@” mengirimkan lagunya."
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Questo dispositivo riproduce la musica e “%@” gli invia i brani."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "このデバイスが音楽を再生し、「%@」が曲を送信します。"
-          }
-        },
-        "kn": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ಈ ಸಾಧನ ಸಂಗೀತವನ್ನು ಪ್ಲೇ ಮಾಡುತ್ತದೆ, ಮತ್ತು “%@” ಅದಕ್ಕೆ ಹಾಡುಗಳನ್ನು ಕಳುಹಿಸುತ್ತದೆ."
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "이 기기가 음악을 재생하고 ‘%@’이(가) 노래를 보냅니다."
-          }
-        },
-        "ml": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ഈ ഉപകരണം സംഗീതം പ്ലേ ചെയ്യുന്നു, “%@” അതിലേക്ക് പാട്ടുകൾ അയയ്ക്കുന്നു."
-          }
-        },
-        "mr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "हे डिव्हाइस संगीत वाजवते, आणि “%@” त्याला गाणी पाठवतो."
-          }
-        },
-        "ms": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Peranti ini memainkan muzik, dan “%@” menghantar lagu kepadanya."
-          }
-        },
-        "nb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Denne enheten spiller musikken, og «%@» sender sangene til den."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dit apparaat speelt de muziek af en ‘%@’ stuurt de nummers."
-          }
-        },
-        "pa": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ਇਹ ਡਿਵਾਈਸ ਸੰਗੀਤ ਚਲਾਉਂਦਾ ਹੈ, ਅਤੇ “%@” ਇਸਨੂੰ ਗੀਤ ਭੇਜਦਾ ਹੈ।"
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Muzykę odtwarza to urządzenie, a „%@” wysyła mu utwory."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Este dispositivo toca a música, e “%@” envia as músicas para ele."
-          }
-        },
-        "pt-PT": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Este dispositivo reproduz a música e “%@” envia-lhe as músicas."
-          }
-        },
-        "ro": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Acest dispozitiv redă muzica, iar „%@” îi trimite melodiile."
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Den här enheten spelar musiken och ”%@” skickar låtarna till den."
-          }
-        },
-        "sw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kifaa hiki hucheza muziki, na “%@” hukitumia nyimbo."
-          }
-        },
-        "ta": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "இந்தச் சாதனம் இசையை இயக்கும்; “%@” அதற்குப் பாடல்களை அனுப்பும்."
-          }
-        },
-        "te": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ఈ పరికరం సంగీతాన్ని ప్లే చేస్తుంది, “%@” దానికి పాటలను పంపుతుంది."
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "อุปกรณ์เครื่องนี้เป็นเครื่องเล่นเพลง และ “%@” เป็นผู้ส่งเพลงมาให้"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Müziği bu aygıt çalar, şarkıları da “%@” gönderir."
-          }
-        },
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Музику відтворює цей пристрій, а «%@» надсилає йому пісні."
-          }
-        },
-        "ur": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "یہ ڈیوائس موسیقی چلاتی ہے، اور “%@” اسے گانے بھیجتا ہے۔"
-          }
-        },
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Thiết bị này phát nhạc, còn “%@” gửi bài hát cho thiết bị."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "由此设备播放音乐，“%@”向其发送歌曲。"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "由此裝置播放音樂，「%@」向其傳送歌曲。"
-          }
-        },
-        "zh-HK": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "由此裝置播放音樂，「%@」向其傳送歌曲。"
           }
         }
       }
@@ -54635,274 +54903,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "無限制"
-          }
-        }
-      }
-    },
-    "No Mac nearby? Try Vespertine with a made-up library. Choose this device in Output to hear it play.": {
-      "localizations": {
-        "am": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "በአቅራቢያ Mac የለም? Vespertineን በፈጠራ ቤተ-መጻሕፍት ይሞክሩት። ሲጫወት ለመስማት በውፅዓት ውስጥ ይህን መሣሪያ ይምረጡ።"
-          }
-        },
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "لا يوجد Mac بالقرب منك؟ جرّب Vespertine بمكتبة وهمية. اختر هذا الجهاز في “المخرج” لتسمعها."
-          }
-        },
-        "bn": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "কাছাকাছি কোনো Mac নেই? একটি বানানো লাইব্রেরি দিয়ে Vespertine ব্যবহার করে দেখুন। এটি চলতে শুনতে আউটপুটে এই ডিভাইসটি বেছে নিন।"
-          }
-        },
-        "cs": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nemáte poblíž žádný Mac? Vyzkoušejte Vespertine se smyšlenou knihovnou. Chcete-li ji slyšet hrát, vyberte ve Výstupu toto zařízení."
-          }
-        },
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ingen Mac i nærheden? Prøv Vespertine med et opdigtet bibliotek. Vælg denne enhed i Output for at høre det spille."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kein Mac in der Nähe? Probiere Vespertine mit einer erfundenen Mediathek aus. Wähle dieses Gerät unter „Ausgabe“, um sie zu hören."
-          }
-        },
-        "el": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Δεν υπάρχει Mac κοντά σας; Δοκιμάστε το Vespertine με μια φανταστική βιβλιοθήκη. Επιλέξτε αυτήν τη συσκευή στην «Έξοδο» για να την ακούσετε να παίζει."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "¿No tienes un Mac cerca? Prueba Vespertine con una biblioteca inventada. Elige este dispositivo en Salida para oírla."
-          }
-        },
-        "fa": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mac در نزدیکی شما نیست؟ Vespertine را با یک کتابخانهٔ ساختگی امتحان کنید. برای شنیدن پخش آن، این دستگاه را در «خروجی» انتخاب کنید."
-          }
-        },
-        "fi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Eikö lähellä ole Macia? Kokeile Vespertineä keksityllä kirjastolla. Valitse Ulostulosta tämä laite, niin kuulet sen soivan."
-          }
-        },
-        "fil": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Walang Mac sa malapit? Subukan ang Vespertine gamit ang gawa-gawang library. Piliin ang device na ito sa Output para marinig itong mag-play."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pas de Mac à proximité ? Essayez Vespertine avec une bibliothèque fictive. Choisissez cet appareil dans Sortie pour l’entendre."
-          }
-        },
-        "gu": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "નજીકમાં કોઈ Mac નથી? કાલ્પનિક લાઇબ્રેરી સાથે Vespertine અજમાવો. તેને વાગતું સાંભળવા માટે આઉટપુટમાં આ ડિવાઇસ પસંદ કરો."
-          }
-        },
-        "ha": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Babu Mac a kusa? Gwada Vespertine da ƙirƙirarren laburare. Zaɓi wannan na'ura a cikin Fitarwa don jin yana kunnawa."
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "אין Mac בקרבת מקום? נסה את Vespertine עם ספריה בדויה. בחר במכשיר זה תחת ״פלט״ כדי לשמוע אותה מתנגנת."
-          }
-        },
-        "hi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "पास में कोई Mac नहीं है? काल्पनिक लाइब्रेरी के साथ Vespertine आज़माएँ। इसे चलते हुए सुनने के लिए आउटपुट में यह डिवाइस चुनें।"
-          }
-        },
-        "hu": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nincs Mac a közelben? Próbálja ki a Vespertine-t egy kitalált könyvtárral. Válassza ezt az eszközt a Kimenet alatt, hogy hallja is."
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tidak ada Mac di sekitar? Coba Vespertine dengan perpustakaan rekaan. Pilih perangkat ini di Output untuk mendengarnya."
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nessun Mac nelle vicinanze? Prova Vespertine con una libreria inventata. Scegli questo dispositivo in Uscita per ascoltarla."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "近くにMacがありませんか? 架空のライブラリでVespertineを試せます。「出力」でこのデバイスを選ぶと、再生音を聴けます。"
-          }
-        },
-        "kn": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ಹತ್ತಿರದಲ್ಲಿ Mac ಇಲ್ಲವೇ? ಕಾಲ್ಪನಿಕ ಲೈಬ್ರರಿಯೊಂದಿಗೆ Vespertine ಪ್ರಯತ್ನಿಸಿ. ಅದು ಪ್ಲೇ ಆಗುವುದನ್ನು ಕೇಳಲು ಔಟ್‌ಪುಟ್‌ನಲ್ಲಿ ಈ ಸಾಧನವನ್ನು ಆರಿಸಿ."
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "근처에 Mac이 없습니까? 가상의 보관함으로 Vespertine을 체험해 보십시오. 출력에서 이 기기를 선택하면 재생되는 소리를 들을 수 있습니다."
-          }
-        },
-        "ml": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "അടുത്ത് Mac ഇല്ലേ? ഒരു സാങ്കൽപ്പിക ലൈബ്രറി ഉപയോഗിച്ച് Vespertine പരീക്ഷിക്കുക. അത് പ്ലേ ചെയ്യുന്നത് കേൾക്കാൻ ഔട്ട്‌പുട്ടിൽ ഈ ഉപകരണം തിരഞ്ഞെടുക്കുക."
-          }
-        },
-        "mr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "जवळपास Mac नाही? काल्पनिक लायब्ररीसह Vespertine वापरून पहा. ते वाजताना ऐकण्यासाठी आउटपुटमध्ये हे डिव्हाइस निवडा."
-          }
-        },
-        "ms": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tiada Mac berdekatan? Cuba Vespertine dengan pustaka rekaan. Pilih peranti ini dalam Output untuk mendengarnya bermain."
-          }
-        },
-        "nb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ingen Mac i nærheten? Prøv Vespertine med et oppdiktet bibliotek. Velg denne enheten i Utgang for å høre det spille."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Geen Mac in de buurt? Probeer Vespertine met een verzonnen bibliotheek. Kies dit apparaat in ‘Uitvoer’ om het te horen."
-          }
-        },
-        "pa": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ਨੇੜੇ ਕੋਈ Mac ਨਹੀਂ? ਬਣਾਉਟੀ ਲਾਇਬ੍ਰੇਰੀ ਨਾਲ Vespertine ਅਜ਼ਮਾਓ। ਇਸਨੂੰ ਚੱਲਦਾ ਸੁਣਨ ਲਈ ਆਉਟਪੁੱਟ ਵਿੱਚ ਇਹ ਡਿਵਾਈਸ ਚੁਣੋ।"
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nie masz w pobliżu Maca? Wypróbuj Vespertine ze zmyśloną biblioteką. Wybierz to urządzenie w Wyjściu, aby usłyszeć, jak gra."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nenhum Mac por perto? Experimente o Vespertine com uma biblioteca fictícia. Escolha este dispositivo em Saída para ouvi-la tocar."
-          }
-        },
-        "pt-PT": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Não há nenhum Mac por perto? Experimente o Vespertine com uma biblioteca fictícia. Escolha este dispositivo em Saída para a ouvir."
-          }
-        },
-        "ro": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Niciun Mac în apropiere? Încercați Vespertine cu o bibliotecă inventată. Alegeți acest dispozitiv în Ieșire pentru a o auzi."
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ingen Mac i närheten? Prova Vespertine med ett påhittat bibliotek. Välj den här enheten i Utgång för att höra det spela."
-          }
-        },
-        "sw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hakuna Mac karibu? Jaribu Vespertine ukitumia maktaba ya kubuni. Chagua kifaa hiki kwenye Kutoa sauti ili kuisikia ikicheza."
-          }
-        },
-        "ta": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "அருகில் Mac இல்லையா? ஒரு கற்பனை லைப்ரரியுடன் Vespertine-ஐ முயன்று பாருங்கள். அது இயங்குவதைக் கேட்க வெளியீட்டில் இந்தச் சாதனத்தைத் தேர்வுசெய்யவும்."
-          }
-        },
-        "te": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "దగ్గరలో Mac లేదా? ఒక కల్పిత లైబ్రరీతో Vespertineను ప్రయత్నించండి. అది ప్లే కావడం వినడానికి అవుట్‌పుట్‌లో ఈ పరికరాన్ని ఎంచుకోండి."
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ไม่มี Mac อยู่ใกล้ๆ ใช่ไหม ลองใช้ Vespertine กับคลังสมมติ เลือกอุปกรณ์เครื่องนี้ในขาออกเพื่อฟังเสียง"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Yakında Mac yok mu? Vespertine’i uydurma bir arşivle deneyin. Çaldığını duymak için Çıkış’ta bu aygıtı seçin."
-          }
-        },
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Поблизу немає Mac? Спробуйте Vespertine з вигаданою медіатекою. Щоб почути, як вона звучить, виберіть цей пристрій у розділі «Вихід»."
-          }
-        },
-        "ur": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "قریب کوئی Mac نہیں؟ Vespertine کو ایک فرضی لائبریری کے ساتھ آزمائیں۔ اسے چلتا سننے کے لیے آؤٹ پٹ میں یہ ڈیوائس منتخب کریں۔"
-          }
-        },
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Không có máy Mac ở gần? Hãy dùng thử Vespertine với một thư viện giả lập. Chọn thiết bị này trong Đầu ra để nghe phát nhạc."
-          }
-        },
-        "zh-HK": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "附近沒有 Mac？你可以使用虛構的資料庫試用 Vespertine。在「輸出」中選擇此裝置，便可聽到播放的聲音。"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "附近没有 Mac？可以用虚构的资料库试用 Vespertine。在“输出”中选取此设备即可听到播放的声音。"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "附近沒有 Mac 嗎？你可以用虛構的資料庫試用 Vespertine。在「輸出」中選擇此裝置，即可聽到播放的聲音。"
           }
         }
       }
@@ -115919,275 +115919,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "該項目已不在你的資料庫中。"
-          }
-        }
-      }
-    },
-    "The Mac can’t play that: it isn’t in the Mac’s library. To play it, set Music Plays On to this device.": {
-      "comment": "Shown on the iPhone when the Mac is what plays and a song is chosen that is only on a network share or in a folder on the phone. “Music Plays On” must match the label of the switch between the Mac and this device.",
-      "localizations": {
-        "am": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mac ያንን መጫወት አይችልም፦ በMac ቤተ-መጻሕፍት ውስጥ የለም። እሱን ለመጫወት «ሙዚቃ የሚጫወትበት»ን ወደዚህ መሣሪያ ያዘጋጁ።"
-          }
-        },
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "لا يستطيع الـ Mac تشغيل ذلك: فهو غير موجود في مكتبة الـ Mac. لتشغيله، اضبط «تُشغَّل الموسيقى على» على هذا الجهاز."
-          }
-        },
-        "bn": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mac সেটি বাজাতে পারে না: সেটি Mac-এর লাইব্রেরিতে নেই। সেটি বাজাতে «সংগীত যেখানে চলে» এই ডিভাইসে সেট করুন।"
-          }
-        },
-        "cs": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tohle Mac přehrát nemůže: není to v knihovně Macu. Chcete-li to přehrát, nastavte „Hudba hraje na“ na toto zařízení."
-          }
-        },
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mac’en kan ikke afspille det: Det findes ikke i Mac’ens bibliotek. Hvis du vil afspille det, skal du indstille “Musikken afspilles på” til denne enhed."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Das kann der Mac nicht spielen: Es ist nicht in der Mediathek des Mac. Um es zu spielen, stelle „Musik spielt auf“ auf dieses Gerät."
-          }
-        },
-        "el": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Το Mac δεν μπορεί να το παίξει: δεν υπάρχει στη βιβλιοθήκη του Mac. Για να το παίξετε, ορίστε το «Η μουσική παίζει σε» σε αυτήν τη συσκευή."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "El Mac no puede reproducir eso: no está en la biblioteca del Mac. Para reproducirlo, pon «La música suena en» en este dispositivo."
-          }
-        },
-        "fa": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mac نمی‌تواند آن را پخش کند: در کتابخانهٔ Mac نیست. برای پخش آن، «محل پخش موسیقی» را روی این دستگاه بگذارید."
-          }
-        },
-        "fi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mac ei voi toistaa sitä: sitä ei ole Macin kirjastossa. Jos haluat toistaa sen, valitse kohdassa ”Musiikki soi laitteessa” tämä laite."
-          }
-        },
-        "fil": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hindi iyon mapapatugtog ng Mac: wala iyon sa library ng Mac. Para patugtugin ito, itakda ang “Tumutugtog ang Musika sa” sa device na ito."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Le Mac ne peut pas lire cet élément : il n’est pas dans la bibliothèque du Mac. Pour le lire, réglez « La musique est lue sur » sur cet appareil."
-          }
-        },
-        "gu": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mac તે વગાડી શકતું નથી: તે Macની લાઇબ્રેરીમાં નથી. તેને વગાડવા માટે «સંગીત અહીં વાગે છે»ને આ ડિવાઇસ પર સેટ કરો."
-          }
-        },
-        "ha": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mac ba zai iya kunna wannan ba: ba ya cikin laburaren Mac. Don kunna shi, saita “Inda Kiɗa Ke Kunnawa” zuwa wannan na’ura."
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ה־Mac לא יכול לנגן את זה: זה לא נמצא בספריה של ה־Mac. כדי לנגן את זה, יש להגדיר את ״המוזיקה מתנגנת ב־״ למכשיר הזה."
-          }
-        },
-        "hi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mac उसे नहीं चला सकता: वह Mac की लाइब्रेरी में नहीं है। उसे चलाने के लिए «संगीत यहाँ चलता है» को इस डिवाइस पर सेट करें।"
-          }
-        },
-        "hu": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "A Mac ezt nem tudja lejátszani: nincs a Mac könyvtárában. A lejátszásához állítsd „A zene itt szól” beállítást erre az eszközre."
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mac tidak dapat memutarnya: itu tidak ada di perpustakaan Mac. Untuk memutarnya, atur “Musik Diputar di” ke perangkat ini."
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Il Mac non può riprodurlo: non è nella libreria del Mac. Per riprodurlo, imposta “La musica suona su” su questo dispositivo."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Macでは再生できません。その項目はMacのライブラリにありません。再生するには、「音楽を再生する場所」をこのデバイスに設定してください。"
-          }
-        },
-        "kn": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mac ಅದನ್ನು ಪ್ಲೇ ಮಾಡಲಾಗದು: ಅದು Mac ನ ಲೈಬ್ರರಿಯಲ್ಲಿ ಇಲ್ಲ. ಅದನ್ನು ಪ್ಲೇ ಮಾಡಲು «ಸಂಗೀತ ಪ್ಲೇ ಆಗುವ ಸ್ಥಳ» ಅನ್ನು ಈ ಸಾಧನಕ್ಕೆ ಹೊಂದಿಸಿ."
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mac에서 재생할 수 없습니다. 해당 항목이 Mac의 보관함에 없습니다. 재생하려면 ‘음악 재생 위치’를 이 기기로 설정하십시오."
-          }
-        },
-        "ml": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mac-ന് അത് പ്ലേ ചെയ്യാനാവില്ല: അത് Mac-ന്റെ ലൈബ്രറിയിലില്ല. അത് പ്ലേ ചെയ്യാൻ «സംഗീതം പ്ലേ ചെയ്യുന്ന ഇടം» ഈ ഉപകരണത്തിലേക്ക് സജ്ജമാക്കുക."
-          }
-        },
-        "mr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mac ते वाजवू शकत नाही: ते Mac च्या लायब्ररीमध्ये नाही. ते वाजवण्यासाठी «संगीत येथे वाजते» या डिव्हाइसवर सेट करा."
-          }
-        },
-        "ms": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mac tidak dapat memainkannya: ia tiada dalam pustaka Mac. Untuk memainkannya, tetapkan “Muzik Dimainkan pada” kepada peranti ini."
-          }
-        },
-        "nb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Macen kan ikke spille det: Det finnes ikke i Macens bibliotek. Hvis du vil spille det, setter du «Musikken spilles på» til denne enheten."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "De Mac kan dat niet afspelen: het staat niet in de bibliotheek van de Mac. Stel ‘Muziek speelt af op’ in op dit apparaat om het af te spelen."
-          }
-        },
-        "pa": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mac ਉਸ ਨੂੰ ਨਹੀਂ ਚਲਾ ਸਕਦਾ: ਉਹ Mac ਦੀ ਲਾਇਬ੍ਰੇਰੀ ਵਿੱਚ ਨਹੀਂ ਹੈ। ਉਸ ਨੂੰ ਚਲਾਉਣ ਲਈ «ਸੰਗੀਤ ਇੱਥੇ ਚੱਲਦਾ ਹੈ» ਨੂੰ ਇਸ ਡਿਵਾਈਸ ’ਤੇ ਸੈੱਟ ਕਰੋ।"
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mac nie może tego odtworzyć: nie ma tego w bibliotece Maca. Aby to odtworzyć, ustaw „Muzyka gra na” na to urządzenie."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "O Mac não pode tocar isso: não está na biblioteca do Mac. Para tocar, defina “A música toca em” como este dispositivo."
-          }
-        },
-        "pt-PT": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "O Mac não consegue reproduzir isso: não está na biblioteca do Mac. Para o reproduzir, defina “A música toca em” para este dispositivo."
-          }
-        },
-        "ro": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mac-ul nu poate reda aceasta: nu este în biblioteca Mac-ului. Pentru a o reda, configurați „Muzica se redă pe” la acest dispozitiv."
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Macen kan inte spela det: det finns inte i Macens bibliotek. Om du vill spela det ställer du in ”Musiken spelas på” på den här enheten."
-          }
-        },
-        "sw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mac haiwezi kucheza hiyo: haipo kwenye maktaba ya Mac. Ili kuicheza, weka “Muziki Huchezwa kwenye” kuwa kifaa hiki."
-          }
-        },
-        "ta": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mac அதை இயக்க முடியாது: அது Mac-இன் நூலகத்தில் இல்லை. அதை இயக்க, «இசை இயங்கும் இடம்» என்பதை இந்தச் சாதனத்திற்கு அமைக்கவும்."
-          }
-        },
-        "te": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mac దాన్ని ప్లే చేయలేదు: అది Mac లైబ్రరీలో లేదు. దాన్ని ప్లే చేయడానికి «సంగీతం ప్లే అయ్యే చోటు»ను ఈ పరికరానికి సెట్ చేయండి."
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mac เล่นรายการนั้นไม่ได้ เพราะไม่ได้อยู่ในคลังของ Mac หากต้องการเล่น ให้ตั้งค่า “เล่นเพลงที่” เป็นอุปกรณ์เครื่องนี้"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mac bunu çalamaz: Mac’in arşivinde yok. Çalmak için “Müziğin Çaldığı Yer”i bu aygıt olarak ayarlayın."
-          }
-        },
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mac не може це відтворити: цього немає в медіатеці Mac. Щоб відтворити, виберіть цей пристрій у «Музика відтворюється на»."
-          }
-        },
-        "ur": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mac اسے نہیں چلا سکتا: وہ Mac کی لائبریری میں نہیں ہے۔ اسے چلانے کے لیے «موسیقی یہاں چلتی ہے» کو اس ڈیوائس پر سیٹ کریں۔"
-          }
-        },
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Máy Mac không thể phát mục đó: mục đó không có trong thư viện của máy Mac. Để phát, hãy đặt “Nhạc phát trên” thành thiết bị này."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mac 无法播放该项目：它不在 Mac 的资料库中。要播放它，请将“音乐播放位置”设为此设备。"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mac 無法播放該項目：它不在 Mac 的資料庫中。若要播放，請將「音樂播放位置」設為此裝置。"
-          }
-        },
-        "zh-HK": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mac 無法播放該項目：它不在 Mac 的資料庫中。如要播放，請將「音樂播放位置」設為此裝置。"
           }
         }
       }
