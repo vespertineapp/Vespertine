@@ -3,7 +3,7 @@
 
     python3 scripts/test-check-log-floods.py
 """
-import importlib.util, os, sys, tempfile, unittest
+import contextlib, importlib.util, io, os, sys, tempfile, unittest
 
 sys.dont_write_bytecode = True  # importing the script must not leave a __pycache__ beside it
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -23,7 +23,10 @@ class Floods(unittest.TestCase):
         with tempfile.NamedTemporaryFile("w", suffix=".log", delete=False) as log:
             log.write("\n".join(lines) + "\n")
         try:
-            return check.main(log.name)
+            # The check says what it found on stderr as ::error:: lines, which GitHub turns into annotations on the run: a
+            # flood these tests make up on purpose must not look like one in the log.
+            with contextlib.redirect_stderr(io.StringIO()):
+                return check.main(log.name)
         finally:
             os.unlink(log.name)
 

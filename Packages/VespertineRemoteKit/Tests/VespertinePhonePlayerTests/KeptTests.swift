@@ -37,6 +37,9 @@ private final class KeepingMac: @unchecked Sendable {
     var refused: Set<Int64> = []
     /// How long each read takes.
     var readDelay: Duration = .zero
+    /// Ranges (by where they start) the Mac answers last: the read is made, but only counted after the others of its song
+    /// that were asked for with it. The downloader asks for several at once, so a busy machine or a slow line orders them this way.
+    var answeredLast: Set<Int64> = []
     /// Songs sent as FLAC files (the rest as WAV).
     var flac: Set<Int64> = []
     /// Called (with the files) after the first song is opened: a Mac whose file changes between tries.
@@ -87,6 +90,7 @@ private final class KeepingMac: @unchecked Sendable {
                                                       reduced: rate == nil ? nil : bringsDown.contains(id)))
             }
         }, read: { [self] stream, offset, length in
+            if answeredLast.contains(offset) { try await Task.sleep(for: .milliseconds(30)) }
             let data: Data? = lock.withLock {
                 reads += 1
                 if let limit = _failAfter, reads > limit { _connected = false }
@@ -214,6 +218,9 @@ private func bytes(_ id: Int64, count: Int = 3500) -> Data { Data((0..<count).ma
 
     @Test func aMacThatGoesAwayMidSongLeavesNoBrokenSongAndCarriesOnFromWhereItStopped() async throws {
         let (keeper, mac, directory) = try made([1, 2, 3])
+        // The ranges of a song are asked for several at once, so which of song 2's the fifth read serves is up to the order they
+        // arrive in; here the first range arrives last, and the fifth read serves the second.
+        mac.answeredLast = [0]
         mac.drop(afterReads: 5)
         keeper.keep(album([1, 2, 3]))
         try await wait { keeper.isIdle }
@@ -229,9 +236,11 @@ private func bytes(_ id: Int64, count: Int = 3500) -> Data { Data((0..<count).ma
         try await wait { keeper.isIdle }
         #expect(keeper.progress(of: "album:a").done == 3)
         #expect(try Data(contentsOf: #require(keeper.store.kept(2)).file) == bytes(2))
-        // The second time, song 2's first range was not asked for again.
-        let after = mac.offsets.filter { $0.song == 2 }.map(\.offset).dropFirst(before.count)
-        #expect(before.contains(0) && !after.contains(0))
+        // The second time, the range of song 2 that had arrived was not asked for again, and every other one was (which range
+        // arrived first is the order the four asked at once were answered in, so it is not named here).
+        let after = Array(mac.offsets.filter { $0.song == 2 }.map(\.offset).dropFirst(before.count))
+        #expect(before.count == 1 && Set(before).isDisjoint(with: after))
+        #expect(Set(before + after) == [0, 1000, 2000, 3000])
         let left = try FileManager.default.contentsOfDirectory(atPath: directory.path)
         #expect(left.filter { $0.hasSuffix(".part") || $0.hasSuffix(".progress") }.isEmpty)
     }
