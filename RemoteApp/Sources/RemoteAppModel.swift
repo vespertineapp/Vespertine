@@ -142,17 +142,42 @@ final class RemoteAppModel {
 
     func isInUse(_ id: String) -> Bool { inUse.contains(id) }
 
-    /// Several libraries are open as one and the Mac among them is what plays: the lists hold the Mac's music only.
-    var showsTheMacsMusicOnly: Bool { macSession != nil && inUse.count > 1 && !PlayTarget.shared.onThisDevice }
+    /// The source Library is narrowed to (its id), or nil: all of them.
+    private(set) var shownSource: String?
+
+    /// Narrows Library to one source, or shows all of them again (nil).
+    func show(only id: String?) {
+        shownSource = id
+        joined?.only = id.flatMap { slots[$0] }
+    }
+
+    /// The sources Library's chips offer, in the order they were turned on: there only while there is more than one.
+    var sourceChips: [(id: String, name: String)] {
+        guard joined != nil, inUse.count > 1 else { return [] }
+        return inUse.compactMap { id in name(of: id).map { (id, $0) } }
+    }
+
+    /// While the Mac plays, an album (by its key in the library) or a song that isn't the Mac's: only this device can
+    /// play it. Marked in the lists, and offered to play here when chosen.
+    func onlyHere(key: String) -> Bool { onlyHere(slot: JoinedID.split(key)?.slot) }
+    func onlyHere(id: Int64?) -> Bool { onlyHere(slot: id.flatMap(JoinedID.split)?.slot) }
+
+    private func onlyHere(slot: Int?) -> Bool {
+        guard joined != nil, macSession != nil, !PlayTarget.shared.onThisDevice, let slot,
+              let mac = macInUse, let macSlot = slots[mac.serverID] else { return false }
+        return slot != macSlot
+    }
+
+    private func name(of id: String) -> String? {
+        pairing(serverID: id)?.name ?? shares.first { $0.id == id }?.name ?? folder(id)?.name
+    }
 
     /// The Mac, the share and the folder that are part of the library (the first of each), for setup's cards.
     var macInUse: SavedPairing? { pairings.first { isInUse($0.serverID) } }
     var shareInUse: SavedShare? { shares.first { isInUse($0.id) } }
     var folderInUse: SavedFolder? { shownFolders.first { isInUse($0.id) } }
     /// The names of everything the library is made of.
-    var namesInUse: [String] {
-        inUse.compactMap { id in pairing(serverID: id)?.name ?? shares.first { $0.id == id }?.name ?? folder(id)?.name }
-    }
+    var namesInUse: [String] { inUse.compactMap(name(of:)) }
 
     /// Setup's Music step was left with these kinds chosen: what is in use of the others is taken out of the library.
     /// Nothing is forgotten; it stays in the list of libraries.
@@ -209,6 +234,8 @@ final class RemoteAppModel {
         }
         inUse = wanted
         UserDefaults.standard.set(wanted, forKey: Self.inUseKey)
+        // Library was narrowed to a source that is no longer in it: all of it shows again.
+        if let shownSource, !wanted.contains(shownSource) || wanted.count < 2 { self.shownSource = nil }
         if wanted.count > 1, !joinedForGood {
             joinedForGood = true
             UserDefaults.standard.set(true, forKey: Self.joinedKey)
@@ -333,6 +360,7 @@ final class RemoteAppModel {
         }
         top.mix = RemoteSession.Mix(hasMac: members.contains { $0.kind == .mac }, onlyFolders: members.allSatisfy { $0.kind == .folder })
         library.members = members
+        library.only = shownSource.flatMap { slots[$0] }
         whoPlaysChanged()
         top.connect()
     }

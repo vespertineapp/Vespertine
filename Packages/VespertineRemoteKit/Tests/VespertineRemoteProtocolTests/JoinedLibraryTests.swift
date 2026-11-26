@@ -299,25 +299,45 @@ private final class FakeLibrary: LibraryMember {
 
     // MARK: Who plays
 
-    @Test func whileTheMacPlaysTheListsAreWhatItCanPlay() async throws {
+    @Test func whileTheMacPlaysTheListsStillHoldEveryLibrary() async throws {
+        // Music never disappears because of who plays: what only this device can play stays listed (and is offered
+        // to play here when it is chosen).
         let rig = try await rig(macPlays: true)
-        #expect(try await albums(rig.library).items.map(\.title) == ["Waltz for Debby", "Kind of Blue"])
+        #expect(try await albums(rig.library).total == 5)
         guard case .library(let overview) = try await ask(rig.library, .library) else { Issue.record("no overview"); return }
-        #expect(overview.albums == 2 && overview.sources.count == 1)
-        #expect(rig.share.asked.isEmpty && rig.folder.asked.isEmpty)
-        // This device takes over: every library is listed, and the screens are told to load again.
+        #expect(overview.albums == 5)
+        // Who plays changing doesn't change what is listed: the screens aren't told to load again.
         var changes = 0
         rig.library.onChange = { changes += 1 }
         rig.library.macPlays = false
+        #expect(changes == 0)
+        #expect(try await albums(rig.library).total == 5)
+    }
+
+    @Test func theListsCanBeNarrowedToOneLibrary() async throws {
+        let rig = try await rig()
+        var changes = 0
+        rig.library.onChange = { changes += 1 }
+        rig.library.only = 2
         #expect(changes == 1)
+        #expect(try await albums(rig.library).items.map(\.title).sorted() == ["Journey in Satchidananda", "Pastel Blues"])
+        guard case .library(let overview) = try await ask(rig.library, .library) else { Issue.record("no overview"); return }
+        #expect(overview.albums == 2)
+        #expect(rig.library.listedSlots == [2])
+        // A slot no longer in the mix narrows nothing away: the whole library shows rather than none of it.
+        rig.library.only = 9
+        #expect(try await albums(rig.library).total == 5)
+        rig.library.only = nil
         #expect(try await albums(rig.library).total == 5)
     }
 
     @Test func aMacTooOldToSendSongsIsNotListedForThisDevice() async throws {
         let rig = try await rig(macCanStream: false)
         #expect(try await albums(rig.library).items.map { JoinedID.split($0.key)?.slot }.contains(1) == false)
+        // While that Mac plays, its music is listed with everything else.
         rig.library.macPlays = true
-        #expect(try await albums(rig.library).items.map(\.title) == ["Waltz for Debby", "Kind of Blue"])
+        #expect(try await albums(rig.library).items.map { JoinedID.split($0.key)?.slot }.contains(1))
+        #expect(try await albums(rig.library).total == 5)
     }
 
     @Test func theMacIsAskedToPlayOnlyItsOwnSongs() async throws {

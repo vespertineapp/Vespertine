@@ -401,3 +401,48 @@ struct SongCopiesSheet: View {
         dismiss()
     }
 }
+
+/// Library's chips, with several sources: all of them, or one (each named as in Sources).
+struct SourceChips: View {
+    @Environment(RemoteAppModel.self) private var model
+
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                chip(nil, name: String(localized: "All"))
+                ForEach(model.sourceChips, id: \.id) { chip($0.id, name: $0.name) }
+            }
+            .padding(.horizontal, 4)
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("source-chips")
+    }
+
+    private func chip(_ id: String?, name: String) -> some View {
+        let on = model.shownSource == id
+        return Button { model.show(only: id) } label: {
+            Text(verbatim: name)
+                .font(.subheadline.weight(on ? .semibold : .regular))
+                .foregroundStyle(on ? Palette.onBrass : Palette.text2)
+                .lineLimit(1)
+                .padding(.horizontal, 14).padding(.vertical, 7)
+                .background(on ? AnyShapeStyle(Palette.brass) : AnyShapeStyle(Palette.text.opacity(0.07)), in: Capsule())
+                .overlay(Capsule().strokeBorder(Palette.hairlineStrong, lineWidth: on ? 0 : 0.5))
+                .contentShape(Capsule())
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(on ? .isSelected : [])
+        .accessibilityIdentifier("source-chip")
+    }
+}
+
+/// The mark on an album or a song that only this device can play while the Mac plays.
+struct OnlyHereMark: View {
+    var body: some View {
+        Image(systemName: UIDevice.current.userInterfaceIdiom == .pad ? "ipad" : "iphone")
+            .font(.caption)
+            .foregroundStyle(Palette.brass)
+            .accessibilityLabel(Text("Plays on this device only"))
+            .accessibilityIdentifier("only-here")
+    }
+}

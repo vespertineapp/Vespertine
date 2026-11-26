@@ -163,11 +163,18 @@ public final class JoinedLibrary: RemoteChannel {
 
     /// The libraries in the mix. At most one is a Mac.
     public var members: [Member] { didSet { changed() } }
-    /// The Mac in the mix is who plays. The lists then hold what it can play, its own library; with this device playing
-    /// they hold every library's.
+    /// The Mac in the mix is who plays. The lists hold every library's either way (what only this device can play is
+    /// offered to play here when chosen); this decides whether a Mac that can't send songs to this device is listed.
     public var macPlays: Bool {
-        didSet { if macPlays != oldValue { changed() } }
+        didSet { if macPlays != oldValue, mac?.canStream() == false { changed() } }
     }
+    /// The lists narrowed to one library (its slot), or every library's (nil). A slot no longer in the mix narrows
+    /// nothing away.
+    public var only: Int? {
+        didSet { if only != oldValue { changed() } }
+    }
+    /// The slots of the libraries the lists are made from now.
+    public var listedSlots: [Int] { listed.map(\.slot) }
     /// Goes up when what the lists hold changed.
     public private(set) var revision = 0
     /// How many albums or songs a library is asked for at a time while lists are put together.
@@ -458,10 +465,12 @@ public final class JoinedLibrary: RemoteChannel {
 
     private func member(_ slot: Int) -> Member? { members.first { $0.slot == slot } }
 
-    /// The libraries the lists are made from: the Mac's alone while it plays, else every library the phone can play from.
+    /// The libraries the lists are made from: every one, whoever plays, except a Mac that can't send songs here while
+    /// this device plays; or the one chosen with `only`.
     private var listed: [Member] {
-        if macPlays, let mac { return [mac] }
-        return members.filter { $0.kind != .mac || $0.canStream() }
+        let all = members.filter { $0.kind != .mac || macPlays || $0.canStream() }
+        if let only, let one = all.first(where: { $0.slot == only }) { return [one] }
+        return all
     }
 
     private func albums(sort: AlbumSort?, filter: AlbumFilter?) -> Merge<AlbumSummary> {
