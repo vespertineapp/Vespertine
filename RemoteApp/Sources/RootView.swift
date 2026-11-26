@@ -179,7 +179,7 @@ struct MacsView: View {
                 Section {
                     Button { model.tryDemo() } label: { Label("Try the Demo", systemImage: "play.rectangle") }
                 } footer: {
-                    Text("No Mac nearby? Try Vespertine with a made-up library. Choose this device in Output to hear it play.")
+                    Text("No Mac nearby? Try Vespertine with a made-up library. Choose this device in Play On to hear it play.")
                 }
                 if let problem = model.discovery.problem, !problem.isEmpty {
                     Section {

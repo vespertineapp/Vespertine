@@ -512,7 +512,7 @@ struct SetupFlow: View {
         let target = PlayTarget.shared
         return VStack(spacing: 22) {
             SetupHeading(title: Text("How it should sound"),
-                         detail: Text("For music played on this device. Each of these is also on the Output screen."),
+                         detail: Text("For music played on this device. Each of these is also in Play On, under ⓘ."),
                          shown: shown(.sound))
             VStack(spacing: 10) {
                 SetupOption(symbol: "dial.medium", title: Text("Volume leveling (ReplayGain)"),
@@ -556,7 +556,7 @@ struct SetupFlow: View {
                 .setupReveal(shown(.sound), delay: sources.contains(.mac) ? 0.3 : 0.24)
             }
             Label {
-                Text("A DAC plugged into this device is asked for each song’s own sample rate. The Output screen shows what reaches it, and has the test for playing DSD natively.")
+                Text("A DAC plugged into this device is asked for each song’s own sample rate. In Play On, this device’s ⓘ shows what reaches it and has the test for playing DSD natively.")
             } icon: {
                 Image(systemName: "cable.connector")
             }

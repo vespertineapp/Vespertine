@@ -117,6 +117,7 @@ struct SourcesView: View {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button { showingSettings = true } label: { Image(systemName: "gearshape") }
                             .accessibilityLabel(Text("Settings"))
+                            .accessibilityIdentifier("sources-gear")
                     }
                 }
             }

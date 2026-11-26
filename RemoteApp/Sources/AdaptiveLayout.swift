@@ -75,7 +75,8 @@ nonisolated enum RemoteDestination: Hashable, Sendable {
         default: true
         }
     }
-    var compactTab: RemoteDestination { isLibrary ? .library : self }
+    /// The tab a destination is on. Play On has no tab: on a phone it is a sheet over Now Playing.
+    var compactTab: RemoteDestination { isLibrary ? .library : self == .output ? .nowPlaying : self }
     /// The Mac's sidebar symbols for the pages it has too.
     var symbol: String {
         switch self {
@@ -105,7 +106,7 @@ nonisolated enum RemoteDestination: Hashable, Sendable {
         case .favorites: String(localized: "Favorites")
         case .playlists: String(localized: "Playlists")
         case .queue: String(localized: "Queue")
-        case .output: String(localized: "Output")
+        case .output: String(localized: "Play On")
         case .sources: String(localized: "Sources")
         case .kept: String(localized: "On This Device")
         case .source: String(localized: "Source")

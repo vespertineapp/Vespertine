@@ -27,6 +27,8 @@ final class RemoteAppModel {
     /// The list of libraries is showing over the open library, to choose what it is made of.
     /// Asks the open library's screens to show Sources (a banner's or Settings' button). Counted, so every ask is seen.
     private(set) var sourcesAsked = 0
+    /// Play On is showing: opened from Now Playing, the mini player, or a launch straight to it.
+    var showingPlayOn = false
     /// The SMB shares this device plays from by itself, without a Mac.
     private(set) var shares: [SavedShare]
     /// The folders of music on this device that were added from Files.

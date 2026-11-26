@@ -1,5 +1,5 @@
 //
-// Vespertine Remote: the Mac / This iPhone switch says who plays and can always be changed back; and the slider for this
+// Vespertine Remote: Play On ticks where the music plays and names it on its button; and the slider for this
 // device's volume stays under the finger, sets the system's volume, and lets go when iOS reports the level.
 // SPDX-License-Identifier: GPL-3.0-or-later WITH LicenseRef-Vespertine-App-Store-Exception
 //
@@ -9,18 +9,7 @@ import Testing
 @testable import VespertineRemote
 
 @MainActor
-@Suite struct PlayModeSwitching {
-    @Test func aShareHasNoSwitch() {
-        #expect(PlayMode.offersSwitch(share: false))
-        #expect(!PlayMode.offersSwitch(share: true))
-    }
-
-    @Test func nowPlayingHasTheSwitchOnlyWhileBothSidesCanPlay() {
-        #expect(PlayMode.offersSwitch(share: false, both: true))
-        #expect(!PlayMode.offersSwitch(share: false, both: false))
-        #expect(!PlayMode.offersSwitch(share: true, both: true))
-    }
-
+@Suite struct PlayOnChoosing {
     @Test func setupsTwoCardsTurnASideOnOrOffAndTheLastOneStaysOn() {
         #expect(PlaySides.both.toggling(mac: true) == .device)
         #expect(PlaySides.both.toggling(mac: false) == .mac)
@@ -40,45 +29,46 @@ import Testing
         #expect(!PlaySides.mac.hasDevice && !PlaySides.device.hasMac)
     }
 
-    @Test func theModeIsWhoThePlayerIs() {
-        #expect(PlayMode.current(playsHere: true) == .device)
-        #expect(PlayMode.current(playsHere: false) == .mac)
+    @Test func oneTickSaysWhereTheMusicPlays() {
+        // The Mac plays: its chosen output is ticked, this device isn't.
+        #expect(PlayOnRules.macChecked(selected: true, playsHere: false))
+        #expect(!PlayOnRules.deviceChecked(playsHere: false))
+        // This device plays: it is ticked, and the Mac's chosen output no longer is, though the Mac keeps the choice.
+        #expect(PlayOnRules.deviceChecked(playsHere: true))
+        #expect(!PlayOnRules.macChecked(selected: true, playsHere: true))
+        // An output the Mac didn't choose is never ticked.
+        #expect(!PlayOnRules.macChecked(selected: false, playsHere: false))
     }
 
-    @Test func theMacCanAlwaysBeChosenAndThisDeviceOnlyWhenTheMacCanSendSongs() {
-        #expect(PlayMode.canChoose(.mac, canPlayHere: false))
-        #expect(PlayMode.canChoose(.mac, canPlayHere: true))
-        #expect(PlayMode.canChoose(.device, canPlayHere: true))
-        #expect(!PlayMode.canChoose(.device, canPlayHere: false))
+    @Test func thisDeviceCanBeChosenWhenTheMacCanSendSongsOrTheSongsAreHere() {
+        #expect(PlayOnRules.canChooseDevice(canPlayHere: true, share: false))
+        #expect(!PlayOnRules.canChooseDevice(canPlayHere: false, share: false))
+        #expect(PlayOnRules.canChooseDevice(canPlayHere: false, share: true))
     }
 
-    @Test func eachModeHasItsOwnPictureAndWords() {
-        #expect(PlayMode.device.symbol(pad: true) == "ipad")
-        #expect(PlayMode.device.symbol(pad: false) == "iphone")
-        #expect(PlayMode.mac.symbol(pad: false) == PlayMode.mac.symbol(pad: true))
-        let remote = PlayModeSwitch.explanation(.mac, mac: "Studio Mac mini")
-        let here = PlayModeSwitch.explanation(.device, mac: "Studio Mac mini")
-        #expect(remote != here)
-        #expect(remote.contains("Studio Mac mini") && here.contains("Studio Mac mini"))
-    }
-}
-
-@MainActor
-@Suite struct OutputScreen {
-    @Test func eachSidesOutputsShowOnlyWhileThatSidePlays() {
-        // The Mac plays: its outputs, and nothing of this device's.
-        #expect(OutputLayout.showsMacOutputs(playsHere: false, share: false))
-        #expect(!OutputLayout.showsThisDevice(playsHere: false, share: false))
-        // This device plays a Mac's songs: its own output, and none of the Mac's.
-        #expect(OutputLayout.showsThisDevice(playsHere: true, share: false))
-        #expect(!OutputLayout.showsMacOutputs(playsHere: true, share: false))
+    @Test func aShareOrFolderListsNoMacOutputs() {
+        #expect(PlayOnRules.listsMac(share: false))
+        #expect(!PlayOnRules.listsMac(share: true))
     }
 
-    @Test func aShareOrFolderOnlyEverShowsThisDevice() {
-        for playsHere in [true, false] {
-            #expect(OutputLayout.showsThisDevice(playsHere: playsHere, share: true))
-            #expect(!OutputLayout.showsMacOutputs(playsHere: playsHere, share: true))
+    @Test func theButtonNamesTheOutputInUse() {
+        func name(_ playsHere: Bool, route: String? = nil, output: String? = nil) -> String {
+            PlayOnRules.shownName(playsHere: playsHere, route: route, macOutput: output, macName: "Studio Mac mini", device: "This iPhone")
         }
+        #expect(name(false, output: "Desk DAC") == "Desk DAC")
+        #expect(name(false) == "Studio Mac mini")
+        #expect(name(false, output: "") == "Studio Mac mini")
+        #expect(name(true, route: "AirPods Max", output: "Desk DAC") == "AirPods Max")
+        #expect(name(true) == "This iPhone")
+        #expect(PlayOnRules.symbol(playsHere: true, pad: true) == "ipad")
+        #expect(PlayOnRules.symbol(playsHere: true, pad: false) == "iphone")
+        #expect(PlayOnRules.symbol(playsHere: false, pad: false) == PlayOnRules.symbol(playsHere: false, pad: true))
+    }
+
+    @Test func playOnHasNoTabOfItsOwnOnAPhone() {
+        #expect(RemoteDestination.output.compactTab == .nowPlaying)
+        #expect(RemoteDestination.starting(at: "output") == .output)
+        #expect(RemoteDestination.output.title == String(localized: "Play On"))
     }
 }
 

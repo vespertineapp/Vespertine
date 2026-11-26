@@ -23,8 +23,8 @@ struct NowPlayingView: View {
             let wide = RemoteLayout.playerColumns(width: geometry.size.width, height: geometry.size.height, accessibilityText: typeSize.isAccessibilitySize)
             let tight = RemoteLayout.playerIsTight(height: geometry.size.height, columns: wide)
             let spacing = RemoteLayout.playerSpacing(tight: tight)
-            // Stacked, the switch above the cover takes its height from what the cover may have.
-            let switchHeight: CGFloat = !wide && PlayMode.offersSwitch(share: session.isShare, both: PlayTarget.shared.sides == .both) ? RemoteLayout.playModeSwitchHeight(tight: tight) : 0
+            // Stacked, Play On above the cover takes its height from what the cover may have.
+            let switchHeight: CGFloat = wide ? 0 : RemoteLayout.playModeSwitchHeight(tight: tight)
             let side = RemoteLayout.coverSide(width: geometry.size.width, height: geometry.size.height - switchHeight, columns: wide, tight: tight)
             ScrollView {
                 Group {
@@ -32,14 +32,15 @@ struct NowPlayingView: View {
                         HStack(alignment: .center, spacing: 32) {
                             cover.frame(width: side, height: side)
                             VStack(spacing: spacing.controls) {
-                                PlayModeSwitch(session: session, quick: true).frame(maxWidth: 560)
+                                PlayOnButton(session: session)
                                 controls(spacing: spacing.controls)
                             }
                         }
                     } else {
                         VStack(spacing: spacing.parts) {
-                            // Who plays, the Mac or this device: in sight before anything else, and one tap to change.
-                            PlayModeSwitch(session: session, quick: true).frame(maxWidth: RemoteLayout.controlsWidth(width: geometry.size.width))
+                            // Where the music plays, the Mac or this device and through what: in sight before anything else,
+                            // and one tap from changing it.
+                            PlayOnButton(session: session).frame(maxWidth: RemoteLayout.controlsWidth(width: geometry.size.width))
                             cover.frame(width: side, height: side)
                             controls(spacing: spacing.controls)
                         }

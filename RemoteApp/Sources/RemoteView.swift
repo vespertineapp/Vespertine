@@ -36,7 +36,17 @@ struct RemoteView: View {
         .sheet(isPresented: $showingSettings) { SettingsView() }
         .feedback(feedback)
         .handOff()
-        .onAppear { destination = .starting(at: model.startScreen) }
+        // Play On, from Now Playing or the mini player, over whatever is showing.
+        .sheet(isPresented: Binding(get: { model.showingPlayOn }, set: { model.showingPlayOn = $0 })) {
+            PlayOnView(session: session).withoutMiniPlayer()
+        }
+        .onAppear {
+            destination = .starting(at: model.startScreen)
+            // A launch straight to Play On, on a phone: it opens over Now Playing.
+            if destination == .output, sizeClass != .regular {
+                model.showingPlayOn = true
+            }
+        }
         // A banner's or Settings' "Sources" button.
         .onChange(of: model.sourcesAsked) { destination = .sources }
         // Again whenever a page is chosen: a heart or a scan since then shows in the counts.
@@ -127,7 +137,7 @@ struct RemoteView: View {
             QueueView(session: session).readablePane()
                 .miniPlayer(session: session) { destination = .nowPlaying }
         case .output:
-            OutputsView(session: session).readablePane()
+            PlayOnView(session: session, sheet: false).readablePane()
                 .miniPlayer(session: session) { destination = .nowPlaying }
         case .sources:
             SourcesView()
@@ -154,10 +164,6 @@ struct RemoteView: View {
                 .miniPlayer(session: session) { destination = .nowPlaying }
                 .tabItem { Label("Queue", systemImage: "list.bullet") }
                 .tag(RemoteDestination.queue)
-            OutputsView(session: session)
-                .miniPlayer(session: session) { destination = .nowPlaying }
-                .tabItem { Label("Output", systemImage: "hifispeaker") }
-                .tag(RemoteDestination.output)
             SourcesView()
                 .miniPlayer(session: session) { destination = .nowPlaying }
                 .tabItem { Label("Sources", systemImage: RemoteDestination.sources.symbol) }
@@ -170,7 +176,7 @@ struct RemoteView: View {
             Button("Now Playing") { destination = .nowPlaying }.keyboardShortcut("1")
             Button("Library") { destination = .library }.keyboardShortcut("2")
             Button("Queue") { destination = .queue }.keyboardShortcut("3")
-            Button("Output") { destination = .output }.keyboardShortcut("4")
+            Button("Play On") { destination = .output }.keyboardShortcut("4")
             Button("Sources") { destination = .sources }.keyboardShortcut("5")
             Divider()
             Button("Play / Pause") { feedback.run(session, .playPause) }.keyboardShortcut("p")
@@ -214,6 +220,8 @@ struct MiniPlayer: View {
                 .accessibilityLabel(Text("Now Playing: \(track.title), \(track.artist)"))
                 .accessibilityHint(Text("Opens Now Playing"))
                 HStack(spacing: 12) {
+                    // Where it plays, a tap from changing it.
+                    PlayOnButton(session: session, symbolOnly: true).foregroundStyle(Palette.text2)
                     Button { feedback.run(session, .playPause) } label: {
                         Image(systemName: session.shownPlayer?.playback == .playing ? "pause.fill" : "play.fill")
                             .font(.title3).frame(width: 44, height: 44).contentShape(Rectangle())
@@ -289,6 +297,8 @@ private struct MiniPlayerHost: ViewModifier {
             .environment(\.miniPlayerClearance, height)
             .overlay(alignment: .bottom) {
                 MiniPlayer(session: session, open: open)
+                    // One container named "mini-player", its buttons keeping their own names (Play On's among them).
+                    .accessibilityElement(children: .contain)
                     .accessibilityIdentifier("mini-player")
                     .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height = $0 }
             }
@@ -410,7 +420,7 @@ struct ConnectionBanner: View {
     /// half the screen. There the words get the full width and one line, opened and closed by a tap, and the button
     /// goes below them. VoiceOver reads all of the words either way.
     @ViewBuilder private var demoNotice: some View {
-        let words = Text(session.phone == nil ? "Demo: a made-up library. To hear it, choose this device in Output." : "Demo: a made-up library, with sound the app makes itself.").font(.footnote)
+        let words = Text(session.phone == nil ? "Demo: a made-up library. To hear it, choose this device in Play On." : "Demo: a made-up library, with sound the app makes itself.").font(.footnote)
         if typeSize.isAccessibilitySize {
             VStack(alignment: .leading, spacing: 6) {
                 Button {
