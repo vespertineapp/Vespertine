@@ -115654,275 +115654,6 @@
         }
       }
     },
-    "While the Mac plays, this is the Mac’s music. To see all of your libraries together, set Music Plays On to this device.": {
-      "comment": "Footer on the iPhone's Library screen when a Mac, network shares and folders are open together as one library and the Mac is what plays: the lists then show only the Mac's music. “Music Plays On” must match the label of the switch between the Mac and this device.",
-      "localizations": {
-        "am": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mac በሚጫወትበት ጊዜ ይህ የMac ሙዚቃ ነው። ሁሉንም ቤተ-መጻሕፍቶችዎን በአንድ ላይ ለማየት «ሙዚቃ የሚጫወትበት»ን ወደዚህ መሣሪያ ያዘጋጁ።"
-          }
-        },
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "أثناء تشغيل الـ Mac، هذه موسيقى الـ Mac. لرؤية كل مكتباتك معًا، اضبط «تُشغَّل الموسيقى على» على هذا الجهاز."
-          }
-        },
-        "bn": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mac যখন বাজায়, তখন এটি Mac-এর সংগীত। আপনার সব লাইব্রেরি একসাথে দেখতে «সংগীত যেখানে চলে» এই ডিভাইসে সেট করুন।"
-          }
-        },
-        "cs": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Když hraje Mac, je tu hudba z Macu. Chcete-li vidět všechny své knihovny pohromadě, nastavte „Hudba hraje na“ na toto zařízení."
-          }
-        },
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Når Mac’en afspiller, er dette Mac’ens musik. Hvis du vil se alle dine biblioteker samlet, skal du indstille “Musikken afspilles på” til denne enhed."
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Solange der Mac spielt, ist dies die Musik des Mac. Um alle deine Mediatheken zusammen zu sehen, stelle „Musik spielt auf“ auf dieses Gerät."
-          }
-        },
-        "el": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Όσο παίζει το Mac, εδώ εμφανίζεται η μουσική του Mac. Για να δείτε όλες τις βιβλιοθήκες σας μαζί, ορίστε το «Η μουσική παίζει σε» σε αυτήν τη συσκευή."
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mientras suena el Mac, esta es la música del Mac. Para ver todas tus bibliotecas juntas, pon «La música suena en» en este dispositivo."
-          }
-        },
-        "fa": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "وقتی Mac پخش می‌کند، این موسیقیِ Mac است. برای دیدن همهٔ کتابخانه‌هایتان در کنار هم، «محل پخش موسیقی» را روی این دستگاه بگذارید."
-          }
-        },
-        "fi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kun Mac soittaa, tässä näkyy Macin musiikki. Jos haluat nähdä kaikki kirjastosi yhdessä, valitse kohdassa ”Musiikki soi laitteessa” tämä laite."
-          }
-        },
-        "fil": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Habang ang Mac ang tumutugtog, musika ng Mac ang narito. Para makita nang magkakasama ang lahat ng library mo, itakda ang “Tumutugtog ang Musika sa” sa device na ito."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tant que le Mac joue, vous voyez ici la musique du Mac. Pour voir toutes vos bibliothèques ensemble, réglez « La musique est lue sur » sur cet appareil."
-          }
-        },
-        "gu": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mac વગાડે ત્યારે આ Macનું સંગીત છે. તમારી બધી લાઇબ્રેરી સાથે જોવા માટે «સંગીત અહીં વાગે છે»ને આ ડિવાઇસ પર સેટ કરો."
-          }
-        },
-        "ha": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Yayin da Mac ke kunnawa, wannan kiɗan Mac ne. Don ganin duk laburorinka tare, saita “Inda Kiɗa Ke Kunnawa” zuwa wannan na’ura."
-          }
-        },
-        "he": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "כשה־Mac מנגן, זו המוזיקה של ה־Mac. כדי לראות את כל הספריות שלך יחד, יש להגדיר את ״המוזיקה מתנגנת ב־״ למכשיר הזה."
-          }
-        },
-        "hi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "जब Mac चलाता है, तब यह Mac का संगीत है। अपनी सभी लाइब्रेरी एक साथ देखने के लिए «संगीत यहाँ चलता है» को इस डिवाइस पर सेट करें।"
-          }
-        },
-        "hu": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Amíg a Mac játszik, itt a Mac zenéje látható. Ha az összes könyvtáradat együtt szeretnéd látni, állítsd „A zene itt szól” beállítást erre az eszközre."
-          }
-        },
-        "id": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Saat Mac yang memutar, ini adalah musik Mac. Untuk melihat semua perpustakaan Anda sekaligus, atur “Musik Diputar di” ke perangkat ini."
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mentre suona il Mac, questa è la musica del Mac. Per vedere tutte le tue librerie insieme, imposta “La musica suona su” su questo dispositivo."
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Macが再生している間は、Macの音楽が表示されます。すべてのライブラリをまとめて表示するには、「音楽を再生する場所」をこのデバイスに設定してください。"
-          }
-        },
-        "kn": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mac ಪ್ಲೇ ಮಾಡುವಾಗ, ಇದು Mac ನ ಸಂಗೀತ. ನಿಮ್ಮ ಎಲ್ಲಾ ಲೈಬ್ರರಿಗಳನ್ನು ಒಟ್ಟಿಗೆ ನೋಡಲು «ಸಂಗೀತ ಪ್ಲೇ ಆಗುವ ಸ್ಥಳ» ಅನ್ನು ಈ ಸಾಧನಕ್ಕೆ ಹೊಂದಿಸಿ."
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mac이 재생하는 동안에는 Mac의 음악이 표시됩니다. 모든 보관함을 함께 보려면 ‘음악 재생 위치’를 이 기기로 설정하십시오."
-          }
-        },
-        "ml": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mac പ്ലേ ചെയ്യുമ്പോൾ ഇത് Mac-ന്റെ സംഗീതമാണ്. നിങ്ങളുടെ എല്ലാ ലൈബ്രറികളും ഒരുമിച്ച് കാണാൻ «സംഗീതം പ്ലേ ചെയ്യുന്ന ഇടം» ഈ ഉപകരണത്തിലേക്ക് സജ്ജമാക്കുക."
-          }
-        },
-        "mr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mac वाजवत असताना हे Mac चे संगीत असते. तुमच्या सर्व लायब्ररी एकत्र पाहण्यासाठी «संगीत येथे वाजते» या डिव्हाइसवर सेट करा."
-          }
-        },
-        "ms": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Semasa Mac memainkan, ini ialah muzik Mac. Untuk melihat semua pustaka anda bersama-sama, tetapkan “Muzik Dimainkan pada” kepada peranti ini."
-          }
-        },
-        "nb": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mens Macen spiller, er dette Macens musikk. Hvis du vil se alle bibliotekene dine samlet, setter du «Musikken spilles på» til denne enheten."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Terwijl de Mac afspeelt, zie je hier de muziek van de Mac. Stel ‘Muziek speelt af op’ in op dit apparaat om al je bibliotheken samen te zien."
-          }
-        },
-        "pa": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ਜਦੋਂ Mac ਚਲਾਉਂਦਾ ਹੈ, ਇਹ Mac ਦਾ ਸੰਗੀਤ ਹੈ। ਆਪਣੀਆਂ ਸਾਰੀਆਂ ਲਾਇਬ੍ਰੇਰੀਆਂ ਇਕੱਠੀਆਂ ਦੇਖਣ ਲਈ «ਸੰਗੀਤ ਇੱਥੇ ਚੱਲਦਾ ਹੈ» ਨੂੰ ਇਸ ਡਿਵਾਈਸ ’ਤੇ ਸੈੱਟ ਕਰੋ।"
-          }
-        },
-        "pl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gdy gra Mac, widać tu muzykę z Maca. Aby zobaczyć wszystkie swoje biblioteki razem, ustaw „Muzyka gra na” na to urządzenie."
-          }
-        },
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Enquanto o Mac toca, esta é a música do Mac. Para ver todas as suas bibliotecas juntas, defina “A música toca em” como este dispositivo."
-          }
-        },
-        "pt-PT": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Enquanto o Mac toca, esta é a música do Mac. Para ver todas as suas bibliotecas em conjunto, defina “A música toca em” para este dispositivo."
-          }
-        },
-        "ro": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cât timp redă Mac-ul, aceasta este muzica de pe Mac. Pentru a vedea toate bibliotecile împreună, configurați „Muzica se redă pe” la acest dispozitiv."
-          }
-        },
-        "sv": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "När Macen spelar är det här Macens musik. Om du vill se alla dina bibliotek tillsammans ställer du in ”Musiken spelas på” på den här enheten."
-          }
-        },
-        "sw": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mac inapocheza, huu ni muziki wa Mac. Ili kuona maktaba zako zote pamoja, weka “Muziki Huchezwa kwenye” kuwa kifaa hiki."
-          }
-        },
-        "ta": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mac இயக்கும்போது, இது Mac-இன் இசை. உங்கள் எல்லா நூலகங்களையும் ஒன்றாகப் பார்க்க, «இசை இயங்கும் இடம்» என்பதை இந்தச் சாதனத்திற்கு அமைக்கவும்."
-          }
-        },
-        "te": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mac ప్లే చేస్తున్నప్పుడు, ఇది Mac సంగీతం. మీ లైబ్రరీలన్నింటినీ కలిపి చూడటానికి «సంగీతం ప్లే అయ్యే చోటు»ను ఈ పరికరానికి సెట్ చేయండి."
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ขณะที่ Mac เล่นอยู่ ที่นี่จะเป็นเพลงของ Mac หากต้องการดูคลังทั้งหมดของคุณรวมกัน ให้ตั้งค่า “เล่นเพลงที่” เป็นอุปกรณ์เครื่องนี้"
-          }
-        },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mac çalarken burada Mac’in müziği görünür. Tüm arşivlerinizi birlikte görmek için “Müziğin Çaldığı Yer”i bu aygıt olarak ayarlayın."
-          }
-        },
-        "uk": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Поки відтворює Mac, тут показано музику з Mac. Щоб побачити всі свої медіатеки разом, виберіть цей пристрій у «Музика відтворюється на»."
-          }
-        },
-        "ur": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "جب Mac چلاتا ہے تو یہ Mac کی موسیقی ہے۔ اپنی تمام لائبریریاں ایک ساتھ دیکھنے کے لیے «موسیقی یہاں چلتی ہے» کو اس ڈیوائس پر سیٹ کریں۔"
-          }
-        },
-        "vi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Khi máy Mac đang phát, đây là nhạc của máy Mac. Để xem tất cả thư viện của bạn cùng nhau, hãy đặt “Nhạc phát trên” thành thiết bị này."
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mac 播放时，这里显示的是 Mac 的音乐。要同时查看所有资料库，请将“音乐播放位置”设为此设备。"
-          }
-        },
-        "zh-Hant": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mac 播放時，這裡顯示的是 Mac 的音樂。若要同時檢視所有資料庫，請將「音樂播放位置」設為此裝置。"
-          }
-        },
-        "zh-HK": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mac 播放時，這裡顯示的是 Mac 的音樂。如要同時檢視所有資料庫，請將「音樂播放位置」設為此裝置。"
-          }
-        }
-      }
-    },
     "That isn’t in your library any more.": {
       "comment": "Shown on the iPhone when a song is asked for whose Mac, network share or folder has been taken out of the library since.",
       "localizations": {
@@ -124620,6 +124351,1082 @@
           "stringUnit": {
             "state": "translated",
             "value": "這裡開啟的所有項目都在你的資料庫中。關閉其中一個即可將其音樂移出資料庫，而不會忘記它。"
+          }
+        }
+      }
+    },
+    "Play on This iPhone": {
+      "comment": "Button on the iPhone when the Mac is what plays and a song chosen is only on a network share or in a folder: plays it on the iPhone instead.",
+      "localizations": {
+        "am": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "በዚህ iPhone ላይ አጫውት"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تشغيل على هذا الـ iPhone"
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "এই iPhone-এ চালান"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Přehrát v tomto iPhonu"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afspil på denne iPhone"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auf diesem iPhone abspielen"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Αναπαραγωγή σε αυτό το iPhone"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reproducir en este iPhone"
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "پخش در این iPhone"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toista tässä iPhonessa"
+          }
+        },
+        "fil": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I-play sa iPhone na Ito"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lire sur cet iPhone"
+          }
+        },
+        "gu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "આ iPhone પર વગાડો"
+          }
+        },
+        "ha": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kunna a wannan iPhone"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "נגן ב‑iPhone זה"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "इस iPhone पर चलाएँ"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lejátszás ezen az iPhone-on"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Putar di iPhone Ini"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Riproduci su questo iPhone"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このiPhoneで再生"
+          }
+        },
+        "kn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ಈ iPhone ನಲ್ಲಿ ಪ್ಲೇ ಮಾಡಿ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 iPhone에서 재생"
+          }
+        },
+        "ml": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ഈ iPhone-ൽ പ്ലേ ചെയ്യുക"
+          }
+        },
+        "mr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "या iPhone वर वाजवा"
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Main pada iPhone Ini"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spill av på denne iPhonen"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Speel af op deze iPhone"
+          }
+        },
+        "pa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ਇਸ iPhone 'ਤੇ ਚਲਾਓ"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Odtwórz na tym iPhonie"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reproduzir neste iPhone"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reproduzir neste iPhone"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Redă pe acest iPhone"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spela upp på den här iPhonen"
+          }
+        },
+        "sw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cheza kwenye iPhone Hii"
+          }
+        },
+        "ta": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "இந்த iPhone-இல் இயக்கு"
+          }
+        },
+        "te": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ఈ iPhoneలో ప్లే చేయండి"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "เล่นบน iPhone เครื่องนี้"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu iPhone'da Çal"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Відтворити на цьому iPhone"
+          }
+        },
+        "ur": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اس iPhone پر چلائیں"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Phát trên iPhone này"
+          }
+        },
+        "zh-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在此 iPhone 上播放"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在此 iPhone 上播放"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在此 iPhone 上播放"
+          }
+        }
+      }
+    },
+    "Play on This iPad": {
+      "comment": "Button on the iPad when the Mac is what plays and a song chosen is only on a network share or in a folder: plays it on the iPad instead.",
+      "localizations": {
+        "am": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "በዚህ iPad ላይ አጫውት"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تشغيل على هذا الـ iPad"
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "এই iPad-এ চালান"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Přehrát v tomto iPadu"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afspil på denne iPad"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Auf diesem iPad abspielen"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Αναπαραγωγή σε αυτό το iPad"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reproducir en este iPad"
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "پخش در این iPad"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toista tässä iPadissa"
+          }
+        },
+        "fil": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I-play sa iPad na Ito"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lire sur cet iPad"
+          }
+        },
+        "gu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "આ iPad પર વગાડો"
+          }
+        },
+        "ha": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kunna a wannan iPad"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "נגן ב‑iPad זה"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "इस iPad पर चलाएँ"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lejátszás ezen az iPaden"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Putar di iPad Ini"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Riproduci su questo iPad"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このiPadで再生"
+          }
+        },
+        "kn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ಈ iPad ನಲ್ಲಿ ಪ್ಲೇ ಮಾಡಿ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 iPad에서 재생"
+          }
+        },
+        "ml": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ഈ iPad-ൽ പ്ലേ ചെയ്യുക"
+          }
+        },
+        "mr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "या iPad वर वाजवा"
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Main pada iPad Ini"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spill av på denne iPaden"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Speel af op deze iPad"
+          }
+        },
+        "pa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ਇਸ iPad 'ਤੇ ਚਲਾਓ"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Odtwórz na tym iPadzie"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reproduzir neste iPad"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reproduzir neste iPad"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Redă pe acest iPad"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spela upp på den här iPaden"
+          }
+        },
+        "sw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cheza kwenye iPad Hii"
+          }
+        },
+        "ta": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "இந்த iPad-இல் இயக்கு"
+          }
+        },
+        "te": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ఈ iPadలో ప్లే చేయండి"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "เล่นบน iPad เครื่องนี้"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu iPad'de Çal"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Відтворити на цьому iPad"
+          }
+        },
+        "ur": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اس iPad پر چلائیں"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Phát trên iPad này"
+          }
+        },
+        "zh-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在此 iPad 上播放"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在此 iPad 上播放"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在此 iPad 上播放"
+          }
+        }
+      }
+    },
+    "Plays on this device only": {
+      "comment": "VoiceOver label of a small iPhone mark beside albums and songs that only the phone can play (on a network share or in a folder) while the Mac is what plays.",
+      "localizations": {
+        "am": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "በዚህ መሣሪያ ላይ ብቻ ይጫወታል"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "يُشغَّل على هذا الجهاز فقط"
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "শুধু এই ডিভাইসে চলে"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hraje jen v tomto zařízení"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afspilles kun på denne enhed"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nur auf diesem Gerät abspielbar"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Αναπαράγεται μόνο σε αυτή τη συσκευή"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solo se reproduce en este dispositivo"
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "فقط روی این دستگاه پخش می‌شود"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toistuu vain tällä laitteella"
+          }
+        },
+        "fil": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sa device na ito lang nagpe-play"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se lit uniquement sur cet appareil"
+          }
+        },
+        "gu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ફક્ત આ ઉપકરણ પર વાગે છે"
+          }
+        },
+        "ha": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yana kunnawa a wannan na'ura kawai"
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "מתנגן רק במכשיר זה"
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "केवल इसी डिवाइस पर चलता है"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Csak ezen az eszközön játszható le"
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hanya diputar di perangkat ini"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Si riproduce solo su questo dispositivo"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このデバイスでのみ再生"
+          }
+        },
+        "kn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ಈ ಸಾಧನದಲ್ಲಿ ಮಾತ್ರ ಪ್ಲೇ ಆಗುತ್ತದೆ"
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 기기에서만 재생됨"
+          }
+        },
+        "ml": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ഈ ഉപകരണത്തിൽ മാത്രം പ്ലേ ചെയ്യുന്നു"
+          }
+        },
+        "mr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "फक्त या डिव्हाइसवर वाजते"
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dimainkan pada peranti ini sahaja"
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spilles bare av på denne enheten"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Speelt alleen af op dit apparaat"
+          }
+        },
+        "pa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ਸਿਰਫ਼ ਇਸ ਡਿਵਾਈਸ 'ਤੇ ਚੱਲਦਾ ਹੈ"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Odtwarzane tylko na tym urządzeniu"
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Só reproduz neste dispositivo"
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Só é reproduzido neste dispositivo"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se redă doar pe acest dispozitiv"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spelas bara upp på den här enheten"
+          }
+        },
+        "sw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hucheza kwenye kifaa hiki pekee"
+          }
+        },
+        "ta": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "இந்தச் சாதனத்தில் மட்டும் இயங்கும்"
+          }
+        },
+        "te": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ఈ పరికరంలో మాత్రమే ప్లే అవుతుంది"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "เล่นได้บนอุปกรณ์นี้เท่านั้น"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yalnızca bu aygıtta çalar"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Відтворюється лише на цьому пристрої"
+          }
+        },
+        "ur": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "صرف اس آلے پر چلتا ہے"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chỉ phát trên thiết bị này"
+          }
+        },
+        "zh-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "只可在此裝置上播放"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "仅可在此设备上播放"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "僅可在此裝置上播放"
+          }
+        }
+      }
+    },
+    "Only this device can play this. It isn’t in the Mac’s library.": {
+      "comment": "Question on the iPhone when the Mac is what plays and a song chosen is only on a network share or in a folder. Followed by a button to play it on the phone.",
+      "localizations": {
+        "am": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ይህን ሊያጫውት የሚችለው ይህ መሣሪያ ብቻ ነው። በMac ቤተ-መጻሕፍት ውስጥ የለም።"
+          }
+        },
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "هذا الجهاز وحده يمكنه تشغيل هذا. إنه ليس في مكتبة الـ Mac."
+          }
+        },
+        "bn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "শুধু এই ডিভাইসই এটি চালাতে পারে। এটি Mac-এর লাইব্রেরিতে নেই।"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tohle může přehrát jen toto zařízení. Není v knihovně Macu."
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kun denne enhed kan afspille dette. Det er ikke i Mac'ens bibliotek."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nur dieses Gerät kann das abspielen. Es ist nicht in der Mediathek des Mac."
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Μόνο αυτή η συσκευή μπορεί να το αναπαραγάγει. Δεν βρίσκεται στη βιβλιοθήκη του Mac."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solo este dispositivo puede reproducirlo. No está en la biblioteca del Mac."
+          }
+        },
+        "fa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "فقط این دستگاه می‌تواند این را پخش کند. در کتابخانهٔ Mac نیست."
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vain tämä laite voi toistaa tämän. Se ei ole Macin kirjastossa."
+          }
+        },
+        "fil": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ang device na ito lang ang makakapag-play nito. Wala ito sa library ng Mac."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seul cet appareil peut lire ceci. Ce n’est pas dans la bibliothèque du Mac."
+          }
+        },
+        "gu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ફક્ત આ ઉપકરણ જ આ વગાડી શકે છે. તે Macની લાઇબ્રેરીમાં નથી."
+          }
+        },
+        "ha": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wannan na'urar kaɗai ce za ta iya kunna wannan. Ba ya cikin Laburaren Mac."
+          }
+        },
+        "he": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "רק מכשיר זה יכול לנגן את זה. זה לא נמצא בספריה של ה‑Mac."
+          }
+        },
+        "hi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "इसे केवल यही डिवाइस चला सकता है। यह Mac की लाइब्रेरी में नहीं है।"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ezt csak ez az eszköz tudja lejátszani. Nincs benne a Mac könyvtárában."
+          }
+        },
+        "id": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hanya perangkat ini yang dapat memutarnya. Ini tidak ada di perpustakaan Mac."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solo questo dispositivo può riprodurlo. Non è nella libreria del Mac."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "これを再生できるのはこのデバイスだけです。Macのライブラリにはありません。"
+          }
+        },
+        "kn": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ಇದನ್ನು ಈ ಸಾಧನ ಮಾತ್ರ ಪ್ಲೇ ಮಾಡಬಲ್ಲದು. ಇದು Mac ಲೈಬ್ರರಿಯಲ್ಲಿಲ್ಲ."
+          }
+        },
+        "ko": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "이 기기에서만 재생할 수 있습니다. Mac 보관함에 없습니다."
+          }
+        },
+        "ml": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ഇത് ഈ ഉപകരണത്തിന് മാത്രമേ പ്ലേ ചെയ്യാനാകൂ. ഇത് Mac-ന്റെ ലൈബ്രറിയിൽ ഇല്ല."
+          }
+        },
+        "mr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "हे फक्त हेच डिव्हाइस वाजवू शकते. हे Mac च्या लायब्ररीत नाही."
+          }
+        },
+        "ms": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hanya peranti ini boleh memainkannya. Ia tiada dalam pustaka Mac."
+          }
+        },
+        "nb": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bare denne enheten kan spille av dette. Det er ikke i Macens bibliotek."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alleen dit apparaat kan dit afspelen. Het staat niet in de bibliotheek van de Mac."
+          }
+        },
+        "pa": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ਸਿਰਫ਼ ਇਹ ਡਿਵਾਈਸ ਇਸਨੂੰ ਚਲਾ ਸਕਦੀ ਹੈ। ਇਹ Mac ਦੀ ਲਾਇਬ੍ਰੇਰੀ ਵਿੱਚ ਨਹੀਂ ਹੈ।"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tylko to urządzenie może to odtworzyć. Nie ma tego w bibliotece Maca."
+          }
+        },
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Só este dispositivo pode reproduzir isto. Não está na biblioteca do Mac."
+          }
+        },
+        "pt-PT": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Só este dispositivo pode reproduzir isto. Não está na biblioteca do Mac."
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Doar acest dispozitiv poate reda asta. Nu se află în biblioteca Mac-ului."
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bara den här enheten kan spela upp det här. Det finns inte i Macens bibliotek."
+          }
+        },
+        "sw": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kifaa hiki pekee kinaweza kucheza hiki. Hakimo kwenye Maktaba ya Mac."
+          }
+        },
+        "ta": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "இதை இந்தச் சாதனத்தால் மட்டுமே இயக்க முடியும். இது Mac லைப்ரரியில் இல்லை."
+          }
+        },
+        "te": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "దీన్ని ఈ పరికరం మాత్రమే ప్లే చేయగలదు. ఇది Mac లైబ్రరీలో లేదు."
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "มีเพียงอุปกรณ์นี้ที่เล่นรายการนี้ได้ ไม่ได้อยู่ในคลังของ Mac"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bunu yalnızca bu aygıt çalabilir. Mac'in arşivinde değil."
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Відтворити це може лише цей пристрій. Цього немає в медіатеці Mac."
+          }
+        },
+        "ur": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اسے صرف یہی آلہ چلا سکتا ہے۔ یہ Mac کی لائبریری میں نہیں ہے۔"
+          }
+        },
+        "vi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chỉ thiết bị này mới phát được nội dung này. Nó không có trong thư viện của Mac."
+          }
+        },
+        "zh-HK": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "只有此裝置可以播放。它不在 Mac 的資料庫中。"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "只有此设备可以播放。它不在 Mac 的资料库中。"
+          }
+        },
+        "zh-Hant": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "只有此裝置可以播放。它不在 Mac 的資料庫中。"
           }
         }
       }

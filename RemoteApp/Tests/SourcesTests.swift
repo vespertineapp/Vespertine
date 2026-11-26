@@ -51,3 +51,15 @@ import VespertineShare
     /// The digits of a line, whatever the locale groups them with.
     private func digits(_ text: String) -> String { String(text.filter(\.isNumber)) }
 }
+
+@MainActor
+@Suite struct PlayingWhatOnlyThisDeviceHas {
+    @Test func theMacsRefusalOfASongItLacksBecomesAnOfferToPlayHere() {
+        let notOnTheMac = LibraryWording.sayings.notOnTheMac
+        #expect(HandOff.offers(reason: notOnTheMac, canPlayHere: true))
+        // A Mac too old to send songs: nothing to offer, the refusal says what to do.
+        #expect(!HandOff.offers(reason: notOnTheMac, canPlayHere: false))
+        // Any other refusal is shown as it is.
+        #expect(!HandOff.offers(reason: LibraryWording.sayings.gone, canPlayHere: true))
+    }
+}

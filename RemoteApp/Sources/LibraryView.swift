@@ -73,6 +73,12 @@ struct LibraryView: View {
     /// The Mac's sidebar as a list: its Library pages in its order, with its counts, then the playlists and the sources.
     private var root: some View {
         List {
+            // With several sources: all of them, or one.
+            if !model.sourceChips.isEmpty {
+                Section { SourceChips() }
+                    .listRowBackground(Color.clear)
+                    .listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 4, trailing: 0))
+            }
             Section {
                 rootLink("albums", .library, count: overview?.albums)
                 rootLink("artists", .artists, count: overview?.artists)
@@ -81,12 +87,6 @@ struct LibraryView: View {
                 rootLink("recentlyAdded", .recentlyAdded)
                 rootLink("favorites", .favorites, count: overview?.favorites)
                 if !session.isShare { rootLink("playlists", .playlists, count: overview?.playlists) }
-            } footer: {
-                // Several libraries open as one: the Mac can only play its own, so that is what is listed while it plays.
-                if model.showsTheMacsMusicOnly {
-                    Text("While the Mac plays, this is the Mac’s music. To see all of your libraries together, set Music Plays On to this device.")
-                        .accessibilityIdentifier("library-mac-only")
-                }
             }
             if !session.isDemo {
                 Section { rootLink("kept", .kept, count: KeptShelf.shared.keeper(for: session)?.store.lists.count) }
@@ -329,8 +329,11 @@ struct AlbumsGrid: View {
                                     .overlay(RoundedRectangle(cornerRadius: 6, style: .continuous).strokeBorder(Palette.hairlineStrong, lineWidth: 0.5))
                                 Text(album.title).font(.serif(.subheadline, weight: .medium)).foregroundStyle(Palette.text)
                                     .lineLimit(RemoteLayout.rowDetailLines(accessibilityText: typeSize.isAccessibilitySize))
-                                Text(album.artist).font(.caption).foregroundStyle(Palette.text2)
-                                    .lineLimit(RemoteLayout.rowDetailLines(accessibilityText: typeSize.isAccessibilitySize))
+                                HStack(alignment: .firstTextBaseline, spacing: 4) {
+                                    Text(album.artist).font(.caption).foregroundStyle(Palette.text2)
+                                        .lineLimit(RemoteLayout.rowDetailLines(accessibilityText: typeSize.isAccessibilitySize))
+                                    if model.onlyHere(key: album.key) { Spacer(minLength: 0); OnlyHereMark() }
+                                }
                             }
                             .accessibilityElement(children: .combine)
                         }
@@ -592,6 +595,7 @@ struct TrackListView: View {
 /// Song rows: tap plays from that song; the menu adds to the queue or favorites. A song the library has in several
 /// copies says how many, as on the Mac, and opens the list of them.
 struct TrackRows: View {
+    @Environment(RemoteAppModel.self) private var model
     let session: RemoteSession
     let tracks: [TrackSummary]
     let play: (Int) -> RemoteCommand
@@ -618,6 +622,7 @@ struct TrackRows: View {
                             ArtworkView(key: track.artworkKey, size: 120, cornerRadius: 4).frame(width: 44)
                         }
                     } trailing: {
+                        if model.onlyHere(id: track.id) { OnlyHereMark() }
                         if let detail, let words = detail(track) {
                             Text(words).font(.caption.monospacedDigit()).foregroundStyle(.secondary).lineLimit(1)
                         }

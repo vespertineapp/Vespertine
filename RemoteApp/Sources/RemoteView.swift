@@ -35,6 +35,7 @@ struct RemoteView: View {
         .background(Palette.base.ignoresSafeArea())
         .sheet(isPresented: $showingSettings) { SettingsView() }
         .feedback(feedback)
+        .handOff()
         .onAppear { destination = .starting(at: model.startScreen) }
         // A banner's or Settings' "Sources" button.
         .onChange(of: model.sourcesAsked) { destination = .sources }
@@ -53,6 +54,11 @@ struct RemoteView: View {
                 Section {
                     sidebarLink(.nowPlaying)
                     sidebarLink(.queue)
+                }
+                // With several sources: all of them, or one.
+                if !model.sourceChips.isEmpty {
+                    Section { SourceChips() }
+                        .listRowBackground(Color.clear)
                 }
                 // The Mac's sidebar: its Library pages in its order, then the playlists and the sources.
                 Section("Library") {
@@ -516,6 +522,11 @@ final class CommandFeedback {
     func run(_ session: RemoteSession, _ command: RemoteCommand) {
         Task {
             if case .failed(let reason) = await session.run(command), !reason.isEmpty {
+                // The Mac plays, and only this device has the song: playing it here is offered instead of a refusal.
+                if HandOff.offers(reason: reason, canPlayHere: PlayTarget.shared.canPlayHere(session)) {
+                    HandOff.shared.offer = .init(session: session, command: command)
+                    return
+                }
                 message = reason
                 try? await Task.sleep(for: .seconds(4))
                 if message == reason { message = nil }
@@ -524,7 +535,48 @@ final class CommandFeedback {
     }
 }
 
+/// Something chosen while the Mac plays that only this device can play (a song on a share or in a folder): offered to play
+/// here. One for the whole app, asked from the screen that holds the tabs, so only one question is ever showing.
+@Observable
+final class HandOff {
+    static let shared = HandOff()
+
+    struct Offer {
+        let session: RemoteSession
+        let command: RemoteCommand
+    }
+
+    var offer: Offer?
+
+    /// Whether a refusal is the Mac's "that isn't in my library", and this device could play it instead.
+    static func offers(reason: String, canPlayHere: Bool) -> Bool { canPlayHere && reason == LibraryWording.sayings.notOnTheMac }
+
+    /// Plays the offer here. The Mac is paused first: the music moves to this device, it doesn't play in two places.
+    func playHere() {
+        guard let offer else { return }
+        self.offer = nil
+        Task {
+            _ = await offer.session.send(.pause)
+            PlayTarget.shared.choose(thisDevice: true)
+            _ = await offer.session.run(offer.command)
+        }
+    }
+}
+
 extension View {
+    /// Asks, once for the whole app, whether to play here what only this device can play.
+    func handOff() -> some View {
+        confirmationDialog(Text("Only this device can play this. It isn’t in the Mac’s library."),
+                           isPresented: Binding(get: { HandOff.shared.offer != nil }, set: { if !$0 { HandOff.shared.offer = nil } }),
+                           titleVisibility: .visible) {
+            Button(UIDevice.current.userInterfaceIdiom == .pad ? String(localized: "Play on This iPad") : String(localized: "Play on This iPhone")) {
+                HandOff.shared.playHere()
+            }
+                .accessibilityIdentifier("play-here")
+            Button("Cancel", role: .cancel) { HandOff.shared.offer = nil }
+        }
+    }
+
     func feedback(_ feedback: CommandFeedback) -> some View {
         overlay(alignment: .bottom) {
             if let message = feedback.message {
