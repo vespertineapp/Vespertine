@@ -297,6 +297,8 @@ private struct MiniPlayerHost: ViewModifier {
             .environment(\.miniPlayerClearance, height)
             .overlay(alignment: .bottom) {
                 MiniPlayer(session: session, open: open)
+                    // One container named "mini-player", its buttons keeping their own names (Play On's among them).
+                    .accessibilityElement(children: .contain)
                     .accessibilityIdentifier("mini-player")
                     .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height = $0 }
             }
