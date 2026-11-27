@@ -221,3 +221,17 @@ import Testing
         #expect(SetupChoice.spoken(title: "Just looking", detail: "") == "Just looking")
     }
 }
+
+@Suite struct SetupWording {
+    @Test func aHyphenatedWordIsNeverBrokenAtItsHyphen() {
+        let kept = SetupChoice.keepsHyphens("Try Vespertine with a made-up library.")
+        #expect(!kept.contains("-"))
+        #expect(kept.contains("made\u{2011}up"))
+        #expect(SetupChoice.keepsHyphens("No hyphen here") == "No hyphen here")
+    }
+
+    @Test func thePageFadesOnlyWithinItsOwnPadding() {
+        #expect(SetupFlow.margin == 16)
+        #expect(SetupFlow.fade <= 14)
+    }
+}

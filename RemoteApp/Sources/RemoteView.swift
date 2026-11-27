@@ -292,9 +292,28 @@ private struct MiniPlayerHost: ViewModifier {
     let open: () -> Void
     @State private var height: CGFloat = 0
 
+    /// How far above the mini player (or the tab bar, with none) the ground fades in.
+    static let fade: CGFloat = 16
+
     func body(content: Content) -> some View {
         content
-            .environment(\.miniPlayerClearance, height)
+            // The last row stops above the fade, not in it.
+            .environment(\.miniPlayerClearance, height + Self.fade)
+            // The tab bar floats, and the mini player above it: the rows that scrolled under them showed in the gap
+            // between the two and below the tab bar, and read as clutter. The ground fades in behind both instead.
+            .overlay {
+                GeometryReader { geometry in
+                    LinearGradient(stops: [.init(color: Palette.base.opacity(0), location: 0),
+                                           .init(color: Palette.base.opacity(0.94), location: min(0.5, Self.fade * 2 / max(1, height + Self.fade))),
+                                           .init(color: Palette.base, location: 1)],
+                                   startPoint: .top, endPoint: .bottom)
+                        .frame(height: height + Self.fade + geometry.safeAreaInsets.bottom)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                        .ignoresSafeArea(edges: .bottom)
+                }
+                .allowsHitTesting(false)
+                .accessibilityHidden(true)
+            }
             .overlay(alignment: .bottom) {
                 MiniPlayer(session: session, open: open)
                     // One container named "mini-player", its buttons keeping their own names (Play On's among them).

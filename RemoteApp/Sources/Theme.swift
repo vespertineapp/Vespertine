@@ -89,6 +89,24 @@ extension View {
     func obsidianList() -> some View {
         scrollContentBackground(.hidden).background(Palette.base.ignoresSafeArea()).clearsMiniPlayer()
     }
+
+    /// For a sheet of settings and explanations: where it scrolls under its bar, the bar has a hard edge. The glass
+    /// bar's soft edge left a section heading cut in half under it, with blurred text beside the title.
+    @ViewBuilder func solidTopEdge() -> some View {
+        if #available(iOS 26, *) {
+            scrollEdgeEffectStyle(.hard, for: .top)
+        } else {
+            self
+        }
+    }
+}
+
+enum SignalWording {
+    /// A line of facts joined by " · " ("USB DAC · 44.1–768 kHz · DSD512"): when it wraps, each dot stays at the end of a
+    /// line rather than starting the next one.
+    nonisolated static func wrapsAfterDots(_ line: String) -> String {
+        line.replacingOccurrences(of: " · ", with: "\u{00A0}· ")
+    }
 }
 
 extension View {
@@ -237,6 +255,12 @@ func formatTime(_ seconds: Double) -> String {
     let total = Int(seconds.rounded(.down))
     let h = total / 3600, m = (total % 3600) / 60, s = total % 60
     return h > 0 ? String(format: "%d:%02d:%02d", h, m, s) : String(format: "%d:%02d", m, s)
+}
+
+extension View {
+    @ViewBuilder func albumsTitleStyle(coverFlow: Bool) -> some View {
+        if coverFlow { navigationBarTitleDisplayMode(.inline) } else { screenTitleStyle() }
+    }
 }
 
 private struct ScreenTitleStyle: ViewModifier {

@@ -101,17 +101,26 @@ private struct SetupPrimaryButton: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
+        // Not yet possible, it is a quiet capsule with its words in the third text colour: brass faded to 40% sank into
+        // the dark ground, its ink words with it.
         label
             .font(.body.weight(.semibold))
             .multilineTextAlignment(.center)
-            .foregroundStyle(Color(hex: 0x1A140A))
+            .foregroundStyle(isEnabled ? Color(hex: 0x1A140A) : Palette.text3)
             .padding(.horizontal, 26).padding(.vertical, 12)
             .frame(minHeight: 48)
-            .background(Palette.brassGradient, in: Capsule())
-            .overlay(Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 0.5).blendMode(.overlay))
-            .shadow(color: Palette.brass.opacity(0.3), radius: 10, y: 3)
+            .background {
+                if isEnabled { Capsule().fill(Palette.brassGradient) } else { Capsule().fill(Palette.text.opacity(0.07)) }
+            }
+            .overlay {
+                if isEnabled {
+                    Capsule().strokeBorder(.white.opacity(0.3), lineWidth: 0.5).blendMode(.overlay)
+                } else {
+                    Capsule().strokeBorder(Palette.hairlineStrong, lineWidth: 0.5)
+                }
+            }
+            .shadow(color: Palette.brass.opacity(isEnabled ? 0.3 : 0), radius: 10, y: 3)
             .scaleEffect(reduceMotion ? 1 : pressed ? 0.96 : 1)
-            .opacity(isEnabled ? 1 : 0.4)
             .animation(reduceMotion ? nil : .spring(response: 0.2, dampingFraction: 0.7), value: pressed)
             .contentShape(Capsule())
     }
@@ -229,6 +238,8 @@ struct SetupSymbol: View {
 struct SetupChoice: View {
     /// A choice as VoiceOver says it: its name, then what it means.
     nonisolated static func spoken(title: String, detail: String) -> String { detail.isEmpty ? title : "\(title). \(detail)" }
+    /// A word with a hyphen in it ("made-up") is never broken at the hyphen: the line breaks before the word instead.
+    nonisolated static func keepsHyphens(_ text: String) -> String { text.replacingOccurrences(of: "-", with: "\u{2011}") }
 
     let symbol: String
     let title: String
@@ -244,7 +255,7 @@ struct SetupChoice: View {
                     SetupSymbol(name: symbol, selected: selected)
                     VStack(alignment: .leading, spacing: 3) {
                         Text(verbatim: title).font(.body.weight(.semibold)).foregroundStyle(Palette.text)
-                        Text(verbatim: detail).font(.footnote).foregroundStyle(Palette.text2)
+                        Text(verbatim: SetupChoice.keepsHyphens(detail)).font(.footnote).foregroundStyle(Palette.text2)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                     .multilineTextAlignment(.leading)
@@ -284,17 +295,21 @@ struct SetupOption<Control: View>: View {
     var body: some View {
         SetupCard(selected: on) {
             VStack(alignment: .leading, spacing: 12) {
-                HStack(alignment: .center, spacing: 14) {
+                HStack(alignment: .top, spacing: 14) {
                     SetupSymbol(name: symbol, selected: on)
                     VStack(alignment: .leading, spacing: 3) {
+                        // The name has the card's whole width beside the symbol: beside a switch as well it broke onto
+                        // two lines ("Show a Record in / Now Playing"). The switch sits beside the explanation instead.
                         title.font(.body.weight(.semibold)).foregroundStyle(Palette.text)
-                            // A long name wraps: beside a switch it was cut short with an ellipsis.
+                            .frame(maxWidth: .infinity, alignment: .leading)
                             .fixedSize(horizontal: false, vertical: true)
-                        detail.font(.footnote).foregroundStyle(Palette.text2)
-                            .fixedSize(horizontal: false, vertical: true)
+                        HStack(alignment: .center, spacing: 8) {
+                            detail.font(.footnote).foregroundStyle(Palette.text2)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .fixedSize(horizontal: false, vertical: true)
+                            if !stacks { control }
+                        }
                     }
-                    Spacer(minLength: 8)
-                    if !stacks { control }
                 }
                 if stacks { control }
             }

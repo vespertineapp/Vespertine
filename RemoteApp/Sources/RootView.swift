@@ -292,6 +292,7 @@ struct CodeEntryView: View {
             .obsidianList()
             .navigationTitle("Pair")
             .navigationBarTitleDisplayMode(.inline)
+            .solidTopEdge()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {

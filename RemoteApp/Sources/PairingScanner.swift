@@ -17,8 +17,19 @@ struct PairingScannerSheet: View {
                 if DataScannerViewController.isSupported, DataScannerViewController.isAvailable {
                     QRScanner(found: found).ignoresSafeArea()
                 } else {
-                    ContentUnavailableView("Can’t Scan Here", systemImage: "camera",
-                                           description: Text("Scan the code with the Camera app instead, or choose the Mac in the list and type the code under it."))
+                    // On the app's own ground and type, as every other sheet: the system's plain white looked borrowed.
+                    ContentUnavailableView {
+                        Label {
+                            Text("Can’t Scan Here").font(.serif(.title2, weight: .semibold)).foregroundStyle(Palette.text)
+                        } icon: {
+                            Image(systemName: "camera").foregroundStyle(Palette.brass)
+                        }
+                    } description: {
+                        Text("Scan the code with the Camera app instead, or choose the Mac in the list and type the code under it.")
+                            .foregroundStyle(Palette.text2)
+                    }
+                    .obsidianBackground()
+                    .accessibilityIdentifier("scan-unavailable")
                 }
             }
             .navigationTitle("Scan the Pairing Code")

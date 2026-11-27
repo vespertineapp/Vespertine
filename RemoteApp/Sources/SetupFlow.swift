@@ -74,6 +74,11 @@ struct SetupFlow: View {
         min(max(system, pad ? .xxLarge : .xSmall), .accessibility2)
     }
 
+    /// The page's side margins, the system's own: at 22 the cards' words had too narrow a column on a phone.
+    nonisolated static let margin: CGFloat = 16
+    /// How far a page fades at its top and bottom edges. No more than the page's own top padding, so nothing fades at rest.
+    nonisolated static let fade: CGFloat = 14
+
     var body: some View {
         VStack(spacing: 0) {
             header
@@ -82,13 +87,21 @@ struct SetupFlow: View {
                     ScrollView {
                         page(step)
                             .frame(maxWidth: pad ? 640 : 560)
-                            .padding(.horizontal, 22).padding(.vertical, 14)
+                            .padding(.horizontal, SetupFlow.margin).padding(.vertical, 14)
                             .frame(maxWidth: .infinity, minHeight: geometry.size.height)
                     }
                     .scrollBounceBehavior(.basedOnSize)
                     // The connect step is a page for each thing it pairs or adds.
                     .id(step == .connect ? "connect-\(current?.rawValue ?? "")" : "\(step)")
                     .transition(transition)
+                }
+                // What scrolls fades out under the step strip and above the buttons, rather than being cut there.
+                .mask {
+                    VStack(spacing: 0) {
+                        LinearGradient(colors: [.clear, .black], startPoint: .top, endPoint: .bottom).frame(height: SetupFlow.fade)
+                        Color.black
+                        LinearGradient(colors: [.black, .clear], startPoint: .top, endPoint: .bottom).frame(height: SetupFlow.fade)
+                    }
                 }
             }
             footer
@@ -259,7 +272,7 @@ struct SetupFlow: View {
             }
         }
         .accessibilityElement(children: .contain)
-        .padding(.horizontal, 22).padding(.top, 14).padding(.bottom, 6)
+        .padding(.horizontal, SetupFlow.margin).padding(.top, 14).padding(.bottom, 6)
         .opacity(step == .welcome || step == .done ? 0 : 1)
         .accessibilityHidden(step == .welcome || step == .done)
         .animation(reduceMotion ? nil : .spring(response: 0.55, dampingFraction: 0.8), value: step)
@@ -303,7 +316,7 @@ struct SetupFlow: View {
             }
         }
         .frame(maxWidth: pad ? 640 : 560)
-        .padding(.horizontal, 22).padding(.top, 8).padding(.bottom, 10)
+        .padding(.horizontal, SetupFlow.margin).padding(.top, 8).padding(.bottom, 10)
         .frame(maxWidth: .infinity)
         .dynamicTypeSize(...DynamicTypeSize.xxxLarge)
         .animation(.easeInOut(duration: 0.3), value: step)

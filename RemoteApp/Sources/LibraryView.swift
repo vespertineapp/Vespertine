@@ -261,7 +261,8 @@ struct AlbumsGrid: View {
         }
         .obsidianBackground()
         .navigationTitle(listing.title)
-        .navigationBarTitleDisplayMode(.inline)
+        // A large title, as every other page of the library has; Cover Flow fills the screen and keeps a small one.
+        .albumsTitleStyle(coverFlow: coverFlow)
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
                 // A page of chosen albums plays as the Mac's Play and Shuffle buttons on that page do.

@@ -115,6 +115,7 @@ struct MacConnectionView: View {
             .obsidianList()
             .navigationTitle("Connection")
             .navigationBarTitleDisplayMode(.inline)
+            .solidTopEdge()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
