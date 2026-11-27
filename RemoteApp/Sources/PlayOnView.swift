@@ -180,6 +180,7 @@ struct PlayOnView: View {
                     VStack(alignment: .leading, spacing: 2) {
                         Text(output.name)
                         Text(verbatim: SignalWording.wrapsAfterDots(output.detail)).font(.caption.monospaced()).foregroundStyle(output.ready ? Color.secondary : Palette.copper)
+                            .accessibilityLabel(Text(verbatim: output.detail))
                     }
                     Spacer()
                     if checked { Image(systemName: "checkmark").foregroundStyle(Color.accentColor) }
