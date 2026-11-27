@@ -19,9 +19,11 @@ public struct DemoWords: Sendable, Equatable {
     public var bitPerfect: String
     public var sourceOnline: String
     public var sourceOffline: String
+    /// Why the demo's speaker group can't be chosen, after its description: a real Mac's list always says why.
+    public var notConnected: String
 
     public init(systemDefault: String, builtInSpeakers: String, dac: String, receiver: String, speakerGroup: String, bitPerfect: String,
-                sourceOnline: String, sourceOffline: String) {
+                sourceOnline: String, sourceOffline: String, notConnected: String = "Not connected") {
         self.systemDefault = systemDefault
         self.builtInSpeakers = builtInSpeakers
         self.dac = dac
@@ -30,6 +32,7 @@ public struct DemoWords: Sendable, Equatable {
         self.bitPerfect = bitPerfect
         self.sourceOnline = sourceOnline
         self.sourceOffline = sourceOffline
+        self.notConnected = notConnected
     }
 
     /// In the language the app shows.
@@ -42,7 +45,8 @@ public struct DemoWords: Sendable, Equatable {
                   speakerGroup: String(localized: "Speaker group · 2 outputs", comment: "Demo: a group of two outputs playing as one, in the outputs list."),
                   bitPerfect: String(localized: "BIT-PERFECT", comment: "Demo: the Mac's badge when the output gets the song's samples unchanged. Keep it short, in capitals where the script has them."),
                   sourceOnline: String(localized: "REFERENCED IN PLACE · ONLINE · SCANNED 2 HOURS AGO", comment: "Demo: a music folder's state on the Mac. Capitals where the script has them."),
-                  sourceOffline: String(localized: "REFERENCED IN PLACE · OFFLINE · SCANNED LAST WEEK", comment: "Demo: a disconnected music folder's state on the Mac. Capitals where the script has them."))
+                  sourceOffline: String(localized: "REFERENCED IN PLACE · OFFLINE · SCANNED LAST WEEK", comment: "Demo: a disconnected music folder's state on the Mac. Capitals where the script has them."),
+                  notConnected: String(localized: "Not connected"))
         #else
         english
         #endif
@@ -124,7 +128,8 @@ public final class DemoMac: RemoteChannel {
             OutputSummary(uid: nil, name: words.systemDefault, detail: words.builtInSpeakers, kind: .systemDefault, selected: false, ready: true),
             OutputSummary(uid: "demo-dac", name: "Desk DAC", detail: words.dac, kind: .device, selected: true, ready: true),
             OutputSummary(uid: "demo-receiver", name: "Living Room Receiver", detail: words.receiver, kind: .device, selected: false, ready: true),
-            OutputSummary(uid: "demo-group", name: "Bar", detail: words.speakerGroup, kind: .speakerGroup, selected: false, ready: false),
+            OutputSummary(uid: "demo-group", name: "Bar", detail: "\(words.speakerGroup) · \(words.notConnected)", kind: .speakerGroup,
+                          selected: false, ready: false),
         ]
         if let first = albums.first {
             load(first.tracks, startAt: 0)

@@ -112,6 +112,7 @@ struct PlayOnView: View {
             }
             .obsidianList()
             .navigationTitle("Play On").navigationBarTitleDisplayMode(.inline)
+            .solidTopEdge()
             .toolbar {
                 if sheet {
                     ToolbarItem(placement: .confirmationAction) {
@@ -178,7 +179,8 @@ struct PlayOnView: View {
                         .rowIconColumn()
                     VStack(alignment: .leading, spacing: 2) {
                         Text(output.name)
-                        Text(output.detail).font(.caption.monospaced()).foregroundStyle(output.ready ? Color.secondary : Color.orange)
+                        Text(verbatim: SignalWording.wrapsAfterDots(output.detail)).font(.caption.monospaced()).foregroundStyle(output.ready ? Color.secondary : Palette.copper)
+                            .accessibilityLabel(Text(verbatim: output.detail))
                     }
                     Spacer()
                     if checked { Image(systemName: "checkmark").foregroundStyle(Color.accentColor) }

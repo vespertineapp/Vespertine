@@ -89,6 +89,28 @@ extension View {
     func obsidianList() -> some View {
         scrollContentBackground(.hidden).background(Palette.base.ignoresSafeArea()).clearsMiniPlayer()
     }
+
+    /// For a sheet of settings and explanations: its bar is the page's own ground, with a hard edge, and what scrolls
+    /// goes out of sight under it. The glass bar left a section heading cut in half under it, and blurred text beside
+    /// the title.
+    @ViewBuilder func solidTopEdge() -> some View {
+        let bar = toolbarBackground(Palette.base, for: .navigationBar).toolbarBackground(.visible, for: .navigationBar)
+        if #available(iOS 26, *) {
+            bar.scrollEdgeEffectStyle(.hard, for: .top)
+        } else {
+            bar
+        }
+    }
+}
+
+enum SignalWording {
+    /// A line of facts joined by " · " ("USB DAC · 44.1–768 kHz · DSD512"): when it wraps, it wraps between two facts,
+    /// each dot staying at the end of a line, and never inside one ("44.1–768 / kHz").
+    nonisolated static func wrapsAfterDots(_ line: String) -> String {
+        line.components(separatedBy: " · ")
+            .map { $0.replacingOccurrences(of: " ", with: "\u{00A0}").replacingOccurrences(of: "–", with: "–\u{2060}") }
+            .joined(separator: "\u{00A0}· ")
+    }
 }
 
 extension View {
@@ -237,6 +259,12 @@ func formatTime(_ seconds: Double) -> String {
     let total = Int(seconds.rounded(.down))
     let h = total / 3600, m = (total % 3600) / 60, s = total % 60
     return h > 0 ? String(format: "%d:%02d:%02d", h, m, s) : String(format: "%d:%02d", m, s)
+}
+
+extension View {
+    @ViewBuilder func albumsTitleStyle(coverFlow: Bool) -> some View {
+        if coverFlow { navigationBarTitleDisplayMode(.inline) } else { screenTitleStyle() }
+    }
 }
 
 private struct ScreenTitleStyle: ViewModifier {

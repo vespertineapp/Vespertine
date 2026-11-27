@@ -105,6 +105,7 @@ struct SettingsView: View {
             .obsidianList()
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
+            .solidTopEdge()
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } }
             }
@@ -150,5 +151,6 @@ struct LicensesView: View {
         .obsidianList()
         .navigationTitle("Licenses")
         .navigationBarTitleDisplayMode(.inline)
+        .solidTopEdge()
     }
 }

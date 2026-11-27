@@ -108,6 +108,10 @@ struct DemoMacTests {
         #expect(try await ask(mac, .selectOutput(uid: "demo-receiver")) == .ok)
         #expect(pushes.lastPlayer?.volume.route == .fixed)
         #expect(try await ask(mac, .selectOutput(uid: "demo-group")) != .ok)
+        // The group that can't be chosen says why, as a real Mac's list does.
+        var group: OutputSummary?
+        for case .outputs(let state) in pushes.messages { group = state.outputs.first { $0.uid == "demo-group" } }
+        #expect(group?.ready == false && group?.detail.hasSuffix(DemoWords.english.notConnected) == true)
         #expect(try await ask(mac, .selectOutput(uid: "gone")) != .ok)
 
         guard case .tracks(let before) = try await ask(mac, .favorites) else { return }
@@ -303,7 +307,8 @@ struct DemoMacTests {
 
     @Test func theDemoSpeaksTheWordsItIsGiven() async throws {
         let words = DemoWords(systemDefault: "Systemstandard", builtInSpeakers: "MacBook Pro-Lautsprecher", dac: "USB-DAC", receiver: "HDMI · 8 Kanäle",
-                              speakerGroup: "Lautsprechergruppe · 2 Ausgänge", bitPerfect: "BITGENAU", sourceOnline: "ONLINE", sourceOffline: "OFFLINE")
+                              speakerGroup: "Lautsprechergruppe · 2 Ausgänge", bitPerfect: "BITGENAU", sourceOnline: "ONLINE", sourceOffline: "OFFLINE",
+                              notConnected: "Nicht verbunden")
         let mac = DemoMac(name: "Demo", appVersion: "9.8.7", words: words) { _, _ in nil }
         let pushes = Pushes()
         mac.onPush = { pushes.messages.append($0) }
@@ -313,12 +318,12 @@ struct DemoMacTests {
         var outputs: [OutputSummary] = []
         for case .outputs(let state) in pushes.messages { outputs = state.outputs }
         #expect(outputs.first?.name == "Systemstandard" && outputs.first?.detail == "MacBook Pro-Lautsprecher")
-        #expect(outputs.map(\.detail).suffix(3) == ["USB-DAC", "HDMI · 8 Kanäle", "Lautsprechergruppe · 2 Ausgänge"])
+        #expect(outputs.map(\.detail).suffix(3) == ["USB-DAC", "HDMI · 8 Kanäle", "Lautsprechergruppe · 2 Ausgänge · Nicht verbunden"])
         #expect(pushes.lastPlayer?.signal?.badge == "BITGENAU")
         guard case .library(let overview) = try await ask(mac, .library) else { Issue.record("no library"); return }
         #expect(Set(overview.sources.map(\.detail)).isSubset(of: ["ONLINE", "OFFLINE"]) && !overview.sources.isEmpty)
         // Nothing of the demo's own English is left in what it says about itself.
-        #expect(!outputs.contains { $0.detail.contains("channels") || $0.detail.contains("Speaker") })
+        #expect(!outputs.contains { $0.detail.contains("channels") || $0.detail.contains("Speaker") || $0.detail.contains("connected") })
         mac.close()
     }
 

@@ -52,6 +52,12 @@ import VespertineRemoteProtocol
         let parked = VinylGeometry.needle(angleFromRest: 0)
         #expect((parked.x * parked.x + parked.y * parked.y).squareRoot() > 1)
     }
+
+    @Test @MainActor func theRecordStandsOffTheDarkGround() {
+        let dark = VinylView.lift(dark: true), light = VinylView.lift(dark: false)
+        #expect(dark.glowsBrass && !light.glowsBrass)
+        #expect(dark.rimOpacity > light.rimOpacity)
+    }
 }
 
 @Suite struct AddressField {
@@ -181,5 +187,13 @@ import VespertineRemoteProtocol
 
     @Test func thisDeviceBeingOfflineIsSaidAtOnce() {
         #expect(!ConnectionBanner.waitsQuietly(.offline, patient: true))
+    }
+
+    @Test func aConnectionThatNeverOpensSaysWhyOncePatienceIsUp() {
+        #expect(ConnectionBanner.reachingLine(connecting: true, trouble: .notOnThisNetwork, patient: true) == .connecting)
+        #expect(ConnectionBanner.reachingLine(connecting: true, trouble: .notOnThisNetwork, patient: false) == .trouble)
+        #expect(ConnectionBanner.reachingLine(connecting: false, trouble: .notAnswering, patient: true) == .waiting)
+        #expect(ConnectionBanner.reachingLine(connecting: false, trouble: .notAnswering, patient: false) == .trouble)
+        #expect(ConnectionBanner.reachingLine(connecting: true, trouble: .offline, patient: true) == .trouble)
     }
 }

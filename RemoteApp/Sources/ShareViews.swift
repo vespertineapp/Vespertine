@@ -137,6 +137,7 @@ struct ShareEditView: View {
             .obsidianList()
             .navigationTitle(editing == nil ? Text("Add a Share") : Text(verbatim: editing?.name ?? ""))
             .navigationBarTitleDisplayMode(.inline)
+            .solidTopEdge()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {

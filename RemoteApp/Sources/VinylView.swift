@@ -11,6 +11,7 @@ import VespertineRemoteProtocol
 struct VinylView: View {
     let session: RemoteSession
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.colorScheme) private var colorScheme
 
     private var player: PlayerState? { session.shownPlayer }
     private var spinning: Bool { Self.isTurning(player, reduceMotion: reduceMotion) }
@@ -21,6 +22,16 @@ struct VinylView: View {
     }
 
     static func turningValue(turning: Bool) -> Text { turning ? Text("Turning") : Text("Still") }
+
+    /// How the black disc stands off the ground. On ivory a dark drop shadow does it. On obsidian a shadow can't be
+    /// seen and the record sank into the page: there it has a brighter rim and the brass glow the app's other objects on
+    /// obsidian have (the crescent, the play button).
+    struct Lift: Equatable {
+        var rimOpacity: Double
+        var glowsBrass: Bool
+    }
+
+    static func lift(dark: Bool) -> Lift { dark ? Lift(rimOpacity: 0.22, glowsBrass: true) : Lift(rimOpacity: 0.1, glowsBrass: false) }
 
     var body: some View {
         GeometryReader { geometry in
@@ -49,7 +60,8 @@ struct VinylView: View {
     }
 
     private func record(diameter: CGFloat, angle: Double) -> some View {
-        ZStack {
+        let lift = Self.lift(dark: colorScheme == .dark)
+        return ZStack {
             // The disc and its grooves: the same from every angle, so they needn't turn.
             Canvas { context, size in
                 let center = CGPoint(x: size.width / 2, y: size.height / 2)
@@ -67,7 +79,7 @@ struct VinylView: View {
                     r += gap ? 5 : max(2.2, radius * 0.012)
                     index += 1
                 }
-                context.stroke(whole.strokedPath(StrokeStyle(lineWidth: 1)), with: .color(Color(hex: 0xECE6DA, opacity: 0.1)))
+                context.stroke(whole.strokedPath(StrokeStyle(lineWidth: 1)), with: .color(Color(hex: 0xECE6DA, opacity: lift.rimOpacity)))
             }
             // The light on the vinyl: two soft wedges that stay put while the record turns.
             Circle()
@@ -90,7 +102,7 @@ struct VinylView: View {
             .rotationEffect(.degrees(angle))
         }
         .compositingGroup()
-        .shadow(color: .black.opacity(0.6), radius: 18, y: 10)
+        .shadow(color: lift.glowsBrass ? Palette.brass.opacity(0.3) : .black.opacity(0.6), radius: lift.glowsBrass ? 26 : 18, y: lift.glowsBrass ? 4 : 10)
     }
 }
 

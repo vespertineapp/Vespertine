@@ -231,8 +231,7 @@ struct GenresGrid: View {
             .accessibilityIdentifier("genres-grid")
         }
         .obsidianBackground()
-        .navigationTitle("Genres")
-        .navigationBarTitleDisplayMode(.inline)
+        .navigationTitle("Genres").screenTitleStyle()
         .task(id: session.isConnected) {
             switch await session.send(.genres) {
             case .genres(let items): genres = items; problem = nil; loaded = true
