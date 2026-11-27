@@ -182,12 +182,21 @@ struct KeptListsView: View {
     let session: RemoteSession
 
     var body: some View {
+        let keeper = KeptShelf.shared.keeper(for: session)
         List {
-            if let keeper = KeptShelf.shared.keeper(for: session) {
-                if keeper.store.lists.isEmpty {
-                    Text("Nothing is kept yet. Open an album or a playlist and choose Keep on This Device; it then plays here without the Mac.")
-                        .font(.callout).foregroundStyle(Palette.text2)
-                }
+            // Nothing kept (or nothing can be: the demo keeps nothing): the page says so, as an empty grid does, rather
+            // than showing a blank page under its search field.
+            if keeper?.store.lists.isEmpty ?? true {
+                Text("Nothing is kept yet. Open an album or a playlist and choose Keep on This Device; it then plays here without the Mac.")
+                    .font(.callout).foregroundStyle(Palette.text2)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 60).padding(.horizontal, 16)
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                    .accessibilityIdentifier("kept-empty")
+            }
+            if let keeper {
                 ForEach(keeper.store.lists) { list in
                     NavigationLink { KeptListPage(session: session, id: list.id) } label: {
                         HStack(spacing: 12) {

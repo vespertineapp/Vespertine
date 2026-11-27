@@ -396,10 +396,8 @@ struct ConnectionBanner: View {
                 demoNotice
             case .connected, .closed:
                 EmptyView()
-            case .connecting:
-                banner(Text("Connecting to “\(mac.pairing.name)”…"), busy: true)
-            case .unreachable:
-                unreachable
+            case .connecting, .unreachable:
+                reaching
             case .unpaired:
                 VStack(spacing: 8) {
                     Text("“\(mac.pairing.name)” no longer knows this device. Pair it again from the Mac’s Settings › Remote.")
@@ -413,7 +411,13 @@ struct ConnectionBanner: View {
             }
         }
         .sheet(isPresented: $editing) { MacConnectionView(serverID: mac.pairing.serverID) }
-        .onChange(of: mac.isConnected) { _, connected in if connected { patient = true } }
+        // One clock for connecting and waiting: a Mac whose every address stays silent (a first connection, too) is
+        // named as such once `patience` is up, however the time was split between the two.
+        .task(id: mac.isConnected) {
+            guard !mac.isConnected else { patient = true; return }
+            try? await Task.sleep(for: Self.patience)
+            if !Task.isCancelled { patient = false }
+        }
     }
 
     /// The demo's bar. At the accessibility text sizes its words, squeezed beside the button, ran to ten lines and took
@@ -455,18 +459,27 @@ struct ConnectionBanner: View {
         }
     }
 
-    @ViewBuilder private var unreachable: some View {
+    /// Connecting, or the Mac stopped answering: a calm line for the first seconds, then what may be wrong.
+    @ViewBuilder private var reaching: some View {
         let name = mac.pairing.name
         let trouble = model.trouble(reaching: mac.pairing.serverID)
-        if Self.waitsQuietly(trouble, patient: patient) {
+        switch Self.reachingLine(connecting: mac.phase == .connecting, trouble: trouble, patient: patient) {
+        case .connecting:
+            banner(Text("Connecting to “\(name)”…"), busy: true)
+        case .waiting:
             banner(Text("Waiting for “\(name)”…", comment: "Connection banner on the iPhone for the first seconds after the Mac stops answering (it may just be restarting). %@ is the Mac's name."), busy: true)
-                .task {
-                    try? await Task.sleep(for: Self.patience)
-                    patient = false
-                }
-        } else {
+        case .trouble:
             troubled(trouble, name: name)
         }
+    }
+
+    enum ReachingLine: Equatable { case connecting, waiting, trouble }
+
+    /// What the banner says while the Mac isn't connected. A connection that never opens (a paired Mac whose addresses
+    /// don't answer) said "Connecting…" for good; past `patience` it says why, as a Mac that stopped answering does.
+    static func reachingLine(connecting: Bool, trouble: ReachTrouble, patient: Bool) -> ReachingLine {
+        guard waitsQuietly(trouble, patient: patient) else { return .trouble }
+        return connecting ? .connecting : .waiting
     }
 
     /// How long a Mac that stopped answering is simply waited for before the banner says what may be wrong.

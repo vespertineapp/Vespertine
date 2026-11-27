@@ -178,7 +178,7 @@ struct PlayOnView: View {
                         .rowIconColumn()
                     VStack(alignment: .leading, spacing: 2) {
                         Text(output.name)
-                        Text(output.detail).font(.caption.monospaced()).foregroundStyle(output.ready ? Color.secondary : Color.orange)
+                        Text(output.detail).font(.caption.monospaced()).foregroundStyle(output.ready ? Color.secondary : Palette.copper)
                     }
                     Spacer()
                     if checked { Image(systemName: "checkmark").foregroundStyle(Color.accentColor) }
