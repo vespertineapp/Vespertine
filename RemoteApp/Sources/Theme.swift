@@ -90,22 +90,26 @@ extension View {
         scrollContentBackground(.hidden).background(Palette.base.ignoresSafeArea()).clearsMiniPlayer()
     }
 
-    /// For a sheet of settings and explanations: where it scrolls under its bar, the bar has a hard edge. The glass
-    /// bar's soft edge left a section heading cut in half under it, with blurred text beside the title.
+    /// For a sheet of settings and explanations: its bar is the page's own ground, with a hard edge, and what scrolls
+    /// goes out of sight under it. The glass bar left a section heading cut in half under it, and blurred text beside
+    /// the title.
     @ViewBuilder func solidTopEdge() -> some View {
+        let bar = toolbarBackground(Palette.base, for: .navigationBar).toolbarBackground(.visible, for: .navigationBar)
         if #available(iOS 26, *) {
-            scrollEdgeEffectStyle(.hard, for: .top)
+            bar.scrollEdgeEffectStyle(.hard, for: .top)
         } else {
-            self
+            bar
         }
     }
 }
 
 enum SignalWording {
-    /// A line of facts joined by " · " ("USB DAC · 44.1–768 kHz · DSD512"): when it wraps, each dot stays at the end of a
-    /// line rather than starting the next one.
+    /// A line of facts joined by " · " ("USB DAC · 44.1–768 kHz · DSD512"): when it wraps, it wraps between two facts,
+    /// each dot staying at the end of a line, and never inside one ("44.1–768 / kHz").
     nonisolated static func wrapsAfterDots(_ line: String) -> String {
-        line.replacingOccurrences(of: " · ", with: "\u{00A0}· ")
+        line.components(separatedBy: " · ")
+            .map { $0.replacingOccurrences(of: " ", with: "\u{00A0}").replacingOccurrences(of: "–", with: "–\u{2060}") }
+            .joined(separator: "\u{00A0}· ")
     }
 }
 

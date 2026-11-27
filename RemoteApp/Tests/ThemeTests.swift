@@ -71,9 +71,9 @@ import UIKit
 @Suite struct SignalLines {
     @Test func aWrappedLineNeverStartsWithADot() {
         let line = SignalWording.wrapsAfterDots("USB DAC · 44.1–768 kHz · DSD512")
-        #expect(line == "USB DAC\u{00A0}· 44.1–768 kHz\u{00A0}· DSD512")
-        // Every break left is after a dot, never before one.
-        #expect(!line.contains(" ·"))
+        #expect(line == "USB\u{00A0}DAC\u{00A0}· 44.1–\u{2060}768\u{00A0}kHz\u{00A0}· DSD512")
+        // The only breaks left are after the dots.
+        #expect(line.components(separatedBy: " ").count == 3)
         #expect(SignalWording.wrapsAfterDots("HDMI") == "HDMI")
     }
 }

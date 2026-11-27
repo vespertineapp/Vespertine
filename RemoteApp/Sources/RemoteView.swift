@@ -293,7 +293,7 @@ private struct MiniPlayerHost: ViewModifier {
     @State private var height: CGFloat = 0
 
     /// How far above the mini player (or the tab bar, with none) the ground fades in.
-    static let fade: CGFloat = 16
+    static let fade: CGFloat = 24
 
     func body(content: Content) -> some View {
         content
